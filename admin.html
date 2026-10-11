@@ -33,28 +33,19 @@
   button:disabled { background:var(--full); color:#fff; cursor:default; }
   .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; }
   .newline-form { display:grid; gap:10px; }
-  .card { background:var(--card); border:1px solid var(--line); border-left:6px solid var(--etc-ink); border-radius:14px;
-          padding:14px; margin-bottom:10px; }
-  .card.cat-FC { border-left-color:var(--fc-ink); }
-  .card.cat-OP { border-left-color:var(--op-ink); }
-  .card.cat-デリバリー { border-left-color:var(--deli-ink); }
-  .card .row1 { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-  .time { font-size:17px; font-weight:700; }
-  .what { font-size:13px; color:var(--sub); margin-top:2px; }
-  .cat-badge { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:8px; }
-  .cat-badge.FC { background:var(--fc-bg); color:var(--fc-ink); }
-  .cat-badge.OP { background:var(--op-bg); color:var(--op-ink); }
-  .cat-badge.デリバリー { background:var(--deli-bg); color:var(--deli-ink); }
-  .cat-badge.その他 { background:var(--etc-bg); color:var(--etc-ink); }
-  .pub-off { font-size:11px; color:var(--warn); font-weight:700; }
-  .applicants { margin-top:8px; font-size:13px; }
-  .ap-row { display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px dashed var(--line); }
-  .ap-row:last-child { border-bottom:0; }
-  .ap-name { font-weight:600; }
-  .ap-time { color:var(--sub); font-size:12px; }
-  .ap-empty { color:var(--sub); font-size:12px; }
-  .day { margin-top:18px; }
-  .day h3 { font-size:14px; color:var(--sub); margin:0 0 8px; }
+  .tablewrap { overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--card); }
+  table.lines { border-collapse:collapse; width:100%; font-size:13px; white-space:nowrap; }
+  table.lines th, table.lines td { padding:8px 10px; text-align:left; border-bottom:1px solid var(--line); }
+  table.lines th { background:#f5ecc9; color:var(--ink); font-weight:700; position:sticky; top:0; }
+  table.lines tr:last-child td { border-bottom:0; }
+  table.lines tr.cat-FC td:first-child { border-left:4px solid var(--fc-ink); }
+  table.lines tr.cat-OP td:first-child { border-left:4px solid var(--op-ink); }
+  table.lines tr.cat-デリバリー td:first-child { border-left:4px solid var(--deli-ink); }
+  table.lines tr.cat-その他 td:first-child { border-left:4px solid var(--etc-ink); }
+  table.lines .need-ok { color:#1f6f5c; font-weight:700; }
+  table.lines .need-ng { color:var(--warn); font-weight:700; }
+  table.lines .ap-list { white-space:normal; font-size:12px; color:var(--sub); max-width:220px; }
+  table.lines .ap-list .p { color:var(--op-ink); }
   .msg { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:#2a2410; color:#fff;
          padding:10px 16px; border-radius:10px; font-size:14px; opacity:0; transition:opacity .2s; pointer-events:none;
          max-width:calc(100% - 32px); z-index:5; }
@@ -75,7 +66,10 @@
 <div id="app" hidden>
   <div class="topbar">
     <span>シフト募集ボード 管理者画面</span>
-    <button class="ghost" id="logoutBtn" style="color:#fff;border-color:#574f32;">ログアウト</button>
+    <span>
+      <button class="ghost" id="refreshBtn" style="color:#fff;border-color:#574f32;">更新</button>
+      <button class="ghost" id="logoutBtn" style="color:#fff;border-color:#574f32;">ログアウト</button>
+    </span>
   </div>
   <div class="wrap">
     <details class="panel" id="newlinePanel">
@@ -163,64 +157,71 @@
     var list = $('list');
     list.innerHTML = '';
     if (!DATA || !DATA.lines.length) { list.appendChild(el('p', 'empty', '募集ラインがありません')); return; }
-    var groups = {}, order = [];
+
+    var wrap = el('div', 'tablewrap');
+    var table = document.createElement('table');
+    table.className = 'lines';
+    var thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>日付</th><th>時間</th><th>種別</th><th>内容</th><th>人数</th><th>公開</th><th>応募者</th><th>備考</th><th>操作</th></tr>';
+    table.appendChild(thead);
+    var tbody = document.createElement('tbody');
+
     DATA.lines.forEach(function (l) {
-      if (!groups[l.date]) { groups[l.date] = { label: l.label, items: [] }; order.push(l.date); }
-      groups[l.date].items.push(l);
+      var cat = l.category || 'その他';
+      var tr = document.createElement('tr');
+      tr.className = 'cat-' + cat;
+
+      var full = l.applicants.filter(function (a) { return a.full; });
+      var partial = l.applicants.filter(function (a) { return !a.full; });
+
+      tr.appendChild(td_(l.label));
+      tr.appendChild(td_(l.start + '〜' + l.end));
+      tr.appendChild(td_(cat));
+      tr.appendChild(td_(l.what));
+      var needTd = td_(full.length + ' / ' + l.need);
+      needTd.className = full.length >= l.need ? 'need-ok' : 'need-ng';
+      tr.appendChild(needTd);
+      tr.appendChild(td_(l.published ? '公開' : '非公開'));
+
+      var apTd = document.createElement('td');
+      apTd.className = 'ap-list';
+      if (!full.length && !partial.length) {
+        apTd.textContent = '-';
+      } else {
+        var parts = [];
+        full.forEach(function (a) { parts.push(a.name); });
+        partial.forEach(function (a) { parts.push(a.name + '(' + a.start + '〜' + a.end + ')'); });
+        apTd.textContent = parts.join('、');
+      }
+      tr.appendChild(apTd);
+      tr.appendChild(td_(l.note || ''));
+
+      var opTd = document.createElement('td');
+      var del = el('button', 'ghost', '削除');
+      del.onclick = function () {
+        if (!confirm('削除しますか？\n' + l.date + ' ' + l.start + '〜' + l.end + ' ' + l.what)) return;
+        call('adminDeleteLine', { id: l.id }, function (data) { DATA = data; render(); toast('削除しました'); });
+      };
+      opTd.appendChild(del);
+      tr.appendChild(opTd);
+
+      tbody.appendChild(tr);
     });
-    order.forEach(function (d) {
-      var g = groups[d], sec = el('section', 'day');
-      sec.appendChild(el('h3', null, g.label));
-      g.items.forEach(function (l) { sec.appendChild(renderCard(l)); });
-      list.appendChild(sec);
-    });
+
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    list.appendChild(wrap);
   }
 
-  function renderCard(l) {
-    var cat = l.category || 'その他';
-    var c = el('div', 'card cat-' + cat);
-    var row1 = el('div', 'row1');
-    var left = el('div');
-    var t = el('div', 'time', l.start + '〜' + l.end + '（' + l.need + '人）');
-    t.appendChild(el('span', 'cat-badge ' + cat, cat));
-    left.appendChild(t);
-    if (l.what) left.appendChild(el('div', 'what', l.what));
-    if (l.note) left.appendChild(el('div', 'what', '備考: ' + l.note));
-    if (!l.published) left.appendChild(el('div', 'pub-off', '非公開'));
-    row1.appendChild(left);
-    var del = el('button', 'ghost', '削除');
-    del.onclick = function () {
-      if (!confirm('この募集ラインを削除しますか？\n' + l.date + ' ' + l.start + '〜' + l.end + ' ' + l.what)) return;
-      call('adminDeleteLine', { id: l.id }, function (data) { DATA = data; render(); toast('削除しました'); });
-    };
-    row1.appendChild(del);
-    c.appendChild(row1);
-
-    var apBox = el('div', 'applicants');
-    var full = l.applicants.filter(function (a) { return a.full; });
-    var partial = l.applicants.filter(function (a) { return !a.full; });
-    if (!full.length && !partial.length) {
-      apBox.appendChild(el('div', 'ap-empty', '応募なし'));
-    } else {
-      full.forEach(function (a) {
-        var r = el('div', 'ap-row');
-        r.appendChild(el('span', 'ap-name', a.name));
-        r.appendChild(el('span', 'ap-time', '全部'));
-        apBox.appendChild(r);
-      });
-      partial.forEach(function (a) {
-        var r = el('div', 'ap-row');
-        r.appendChild(el('span', 'ap-name', a.name));
-        r.appendChild(el('span', 'ap-time', '一部: ' + a.start + '〜' + a.end));
-        apBox.appendChild(r);
-      });
-    }
-    c.appendChild(apBox);
-    return c;
+  function td_(text) {
+    var td = document.createElement('td');
+    td.textContent = text;
+    return td;
   }
 
   $('loginBtn').onclick = login;
   $('adminPass').onkeydown = function (e) { if (e.key === 'Enter') login(); };
+  $('refreshBtn').onclick = loadAll;
   $('logoutBtn').onclick = function () {
     store('sb_admin_id', ''); store('sb_admin_pass', '');
     ADMIN_ID = ''; ADMIN_PASS = ''; DATA = null;
