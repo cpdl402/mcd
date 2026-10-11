@@ -243,7 +243,9 @@
 
     var mine = l.mine && l.mine[0];
     if (mine) {
-      var noteText = mine.full ? 'あなたは参加予定です' : ('あなたは一部対応で参加予定です（' + mine.start + '〜' + mine.end + '）');
+      var noteText = mine.full ? 'あなたは参加予定です'
+        : mine.approved ? ('あなたは一部対応（承認済み）で参加予定です（' + mine.start + '〜' + mine.end + '）')
+        : ('あなたは一部対応で参加予定です（' + mine.start + '〜' + mine.end + '）');
       c.appendChild(el('div', 'mine-note', noteText));
       return c;
     }
