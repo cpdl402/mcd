@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>シフト募集ボード（管理者）</title>
+<style>
+  :root {
+    --bg:#fffaf0; --card:#fffdf6; --ink:#2a2410; --sub:#8a7f5a; --line:#f0e4b8;
+    --accent:#f5a623; --accent-ink:#2a2410; --warn:#c0392b; --full:#b9b093;
+    --fc-bg:#ffe1ec; --fc-ink:#9c2a54; --op-bg:#dbe8ff; --op-ink:#27508c;
+    --deli-bg:#fff3cf; --deli-ink:#8a6a12; --etc-bg:#eee7d6; --etc-ink:#6b6248;
+  }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif; }
+  .topbar { background:#2a2410; color:#fff; padding:10px 16px; font-size:14px; font-weight:700;
+            display:flex; justify-content:space-between; align-items:center; }
+  .topbar button { font-size:12px; padding:6px 10px; }
+  .wrap { max-width:720px; margin:0 auto; padding:16px 16px 60px; }
+  h1 { font-size:20px; margin:8px 0 4px; }
+  h2 { font-size:15px; margin:24px 0 10px; }
+  .notice { color:var(--sub); font-size:14px; margin:0 0 16px; }
+  input, select { font-size:15px; padding:9px 11px; border:1px solid var(--line); border-radius:8px; background:#fff; width:100%; }
+  label.fld { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--sub); font-weight:600; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .gate { max-width:340px; margin:15vh auto 0; display:grid; gap:12px; }
+  button { font-size:15px; padding:10px 14px; border-radius:10px; border:0; cursor:pointer;
+           background:var(--accent); color:var(--accent-ink); font-weight:700; }
+  button.ghost { background:transparent; color:var(--warn); border:1px solid var(--line); font-weight:500; font-size:13px; padding:7px 10px; }
+  button:disabled { background:var(--full); color:#fff; cursor:default; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; }
+  .newline-form { display:grid; gap:10px; }
+  .card { background:var(--card); border:1px solid var(--line); border-left:6px solid var(--etc-ink); border-radius:14px;
+          padding:14px; margin-bottom:10px; }
+  .card.cat-FC { border-left-color:var(--fc-ink); }
+  .card.cat-OP { border-left-color:var(--op-ink); }
+  .card.cat-デリバリー { border-left-color:var(--deli-ink); }
+  .card .row1 { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .time { font-size:17px; font-weight:700; }
+  .what { font-size:13px; color:var(--sub); margin-top:2px; }
+  .cat-badge { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:8px; }
+  .cat-badge.FC { background:var(--fc-bg); color:var(--fc-ink); }
+  .cat-badge.OP { background:var(--op-bg); color:var(--op-ink); }
+  .cat-badge.デリバリー { background:var(--deli-bg); color:var(--deli-ink); }
+  .cat-badge.その他 { background:var(--etc-bg); color:var(--etc-ink); }
+  .pub-off { font-size:11px; color:var(--warn); font-weight:700; }
+  .applicants { margin-top:8px; font-size:13px; }
+  .ap-row { display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px dashed var(--line); }
+  .ap-row:last-child { border-bottom:0; }
+  .ap-name { font-weight:600; }
+  .ap-time { color:var(--sub); font-size:12px; }
+  .ap-empty { color:var(--sub); font-size:12px; }
+  .day { margin-top:18px; }
+  .day h3 { font-size:14px; color:var(--sub); margin:0 0 8px; }
+  .msg { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:#2a2410; color:#fff;
+         padding:10px 16px; border-radius:10px; font-size:14px; opacity:0; transition:opacity .2s; pointer-events:none;
+         max-width:calc(100% - 32px); z-index:5; }
+  .msg.show { opacity:1; }
+  .empty { color:var(--sub); text-align:center; padding:30px 0; }
+  details.panel summary { cursor:pointer; font-weight:700; font-size:14px; }
+</style>
+</head>
+<body>
+<div id="gate" class="gate">
+  <h1>シフト募集ボード（管理者）</h1>
+  <p class="notice">管理者IDとパスワードを入力してください。</p>
+  <label class="fld">管理者ID<input type="text" id="adminId" autocomplete="username"></label>
+  <label class="fld">パスワード<input type="password" id="adminPass" autocomplete="current-password"></label>
+  <button id="loginBtn">ログイン</button>
+</div>
+
+<div id="app" hidden>
+  <div class="topbar">
+    <span>シフト募集ボード 管理者画面</span>
+    <button class="ghost" id="logoutBtn" style="color:#fff;border-color:#574f32;">ログアウト</button>
+  </div>
+  <div class="wrap">
+    <details class="panel" id="newlinePanel">
+      <summary>＋ 募集ラインを追加</summary>
+      <div class="newline-form" style="margin-top:12px;">
+        <div class="grid2">
+          <label class="fld">日付<input type="date" id="nDate"></label>
+          <label class="fld">区分
+            <select id="nCat">
+              <option value="FC">FC</option>
+              <option value="OP">OP</option>
+              <option value="デリバリー">デリバリー</option>
+              <option value="その他">その他</option>
+            </select>
+          </label>
+        </div>
+        <div class="grid2">
+          <label class="fld">開始<input type="time" id="nStart"></label>
+          <label class="fld">終了<input type="time" id="nEnd"></label>
+        </div>
+        <label class="fld">内容<input type="text" id="nWhat" placeholder="例: OTCSS:OTキャッシャー/SOK"></label>
+        <div class="grid2">
+          <label class="fld">募集人数<input type="number" id="nNeed" value="1" min="1"></label>
+          <label class="fld">備考<input type="text" id="nNote"></label>
+        </div>
+        <button id="addLineBtn">追加する</button>
+      </div>
+    </details>
+
+    <details class="panel" id="adminPanel">
+      <summary>＋ 管理者を追加</summary>
+      <div class="newline-form" style="margin-top:12px;">
+        <label class="fld">新しい管理者ID<input type="text" id="aNewId"></label>
+        <label class="fld">新しいパスワード<input type="text" id="aNewPass"></label>
+        <button id="addAdminBtn">管理者を追加する</button>
+      </div>
+    </details>
+
+    <h2>募集ライン一覧</h2>
+    <div id="list"></div>
+  </div>
+</div>
+<div class="msg" id="msg"></div>
+
+<script>
+  // ▼ GASのウェブアプリURL（/exec で終わる。index.htmlと同じ値を貼る）
+  var API_URL = 'https://script.google.com/macros/s/AKfycbznL5E_kKaEBiU8CNkYh4ZBXsIMClbd-t72euVqpzIcv5vbU3x31FIXvSoQiKpKj9Ygng/exec';
+
+  var ADMIN_ID = '', ADMIN_PASS = '', DATA = null;
+  function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function toast(t) { var m = $('msg'); m.textContent = t; m.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { m.classList.remove('show'); }, 2600); }
+
+  function call(action, payload, ok) {
+    var body = Object.assign({ action: action, adminId: ADMIN_ID, adminPass: ADMIN_PASS }, payload || {});
+    fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.error);
+        ok && ok(res.data);
+      })
+      .catch(function (e) {
+        var t = (e && e.message) || 'エラーが発生しました';
+        toast(t);
+      });
+  }
+
+  function login() {
+    ADMIN_ID = $('adminId').value.trim();
+    ADMIN_PASS = $('adminPass').value;
+    if (!ADMIN_ID || !ADMIN_PASS) { toast('IDとパスワードを入力してください'); return; }
+    call('adminLogin', null, function () {
+      store('sb_admin_id', ADMIN_ID); store('sb_admin_pass', ADMIN_PASS);
+      $('gate').hidden = true; $('app').hidden = false;
+      loadAll();
+    });
+  }
+
+  function loadAll() {
+    call('adminLoad', null, function (data) { DATA = data; render(); });
+  }
+
+  function render() {
+    var list = $('list');
+    list.innerHTML = '';
+    if (!DATA || !DATA.lines.length) { list.appendChild(el('p', 'empty', '募集ラインがありません')); return; }
+    var groups = {}, order = [];
+    DATA.lines.forEach(function (l) {
+      if (!groups[l.date]) { groups[l.date] = { label: l.label, items: [] }; order.push(l.date); }
+      groups[l.date].items.push(l);
+    });
+    order.forEach(function (d) {
+      var g = groups[d], sec = el('section', 'day');
+      sec.appendChild(el('h3', null, g.label));
+      g.items.forEach(function (l) { sec.appendChild(renderCard(l)); });
+      list.appendChild(sec);
+    });
+  }
+
+  function renderCard(l) {
+    var cat = l.category || 'その他';
+    var c = el('div', 'card cat-' + cat);
+    var row1 = el('div', 'row1');
+    var left = el('div');
+    var t = el('div', 'time', l.start + '〜' + l.end + '（' + l.need + '人）');
+    t.appendChild(el('span', 'cat-badge ' + cat, cat));
+    left.appendChild(t);
+    if (l.what) left.appendChild(el('div', 'what', l.what));
+    if (l.note) left.appendChild(el('div', 'what', '備考: ' + l.note));
+    if (!l.published) left.appendChild(el('div', 'pub-off', '非公開'));
+    row1.appendChild(left);
+    var del = el('button', 'ghost', '削除');
+    del.onclick = function () {
+      if (!confirm('この募集ラインを削除しますか？\n' + l.date + ' ' + l.start + '〜' + l.end + ' ' + l.what)) return;
+      call('adminDeleteLine', { id: l.id }, function (data) { DATA = data; render(); toast('削除しました'); });
+    };
+    row1.appendChild(del);
+    c.appendChild(row1);
+
+    var apBox = el('div', 'applicants');
+    var full = l.applicants.filter(function (a) { return a.full; });
+    var partial = l.applicants.filter(function (a) { return !a.full; });
+    if (!full.length && !partial.length) {
+      apBox.appendChild(el('div', 'ap-empty', '応募なし'));
+    } else {
+      full.forEach(function (a) {
+        var r = el('div', 'ap-row');
+        r.appendChild(el('span', 'ap-name', a.name));
+        r.appendChild(el('span', 'ap-time', '全部'));
+        apBox.appendChild(r);
+      });
+      partial.forEach(function (a) {
+        var r = el('div', 'ap-row');
+        r.appendChild(el('span', 'ap-name', a.name));
+        r.appendChild(el('span', 'ap-time', '一部: ' + a.start + '〜' + a.end));
+        apBox.appendChild(r);
+      });
+    }
+    c.appendChild(apBox);
+    return c;
+  }
+
+  $('loginBtn').onclick = login;
+  $('adminPass').onkeydown = function (e) { if (e.key === 'Enter') login(); };
+  $('logoutBtn').onclick = function () {
+    store('sb_admin_id', ''); store('sb_admin_pass', '');
+    ADMIN_ID = ''; ADMIN_PASS = ''; DATA = null;
+    $('app').hidden = true; $('gate').hidden = false;
+  };
+
+  $('addLineBtn').onclick = function () {
+    var line = {
+      date: $('nDate').value, start: $('nStart').value, end: $('nEnd').value,
+      what: $('nWhat').value.trim(), need: Number($('nNeed').value) || 1,
+      note: $('nNote').value.trim(), category: $('nCat').value
+    };
+    if (!line.date || !line.start || !line.end || !line.what) { toast('日付・時間・内容は必須です'); return; }
+    call('adminAddLine', { line: line }, function (data) {
+      DATA = data; render(); toast('追加しました');
+      $('nWhat').value = ''; $('nNote').value = '';
+    });
+  };
+
+  $('addAdminBtn').onclick = function () {
+    var newId = $('aNewId').value.trim(), newPass = $('aNewPass').value.trim();
+    if (!newId || !newPass) { toast('新しいIDとパスワードを入力してください'); return; }
+    call('adminAddAdmin', { newId: newId, newPass: newPass }, function () {
+      toast('管理者を追加しました');
+      $('aNewId').value = ''; $('aNewPass').value = '';
+    });
+  };
+
+  var sId = store('sb_admin_id'), sPass = store('sb_admin_pass');
+  if (sId && sPass) {
+    $('adminId').value = sId; $('adminPass').value = sPass;
+    ADMIN_ID = sId; ADMIN_PASS = sPass;
+    call('adminLogin', null, function () {
+      $('gate').hidden = true; $('app').hidden = false;
+      loadAll();
+    });
+  }
+</script>
+</body>
+</html>

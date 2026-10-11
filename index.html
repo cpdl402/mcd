@@ -6,45 +6,76 @@
 <meta name="robots" content="noindex, nofollow">
 <title>シフト募集ボード</title>
 <style>
-  :root { --bg:#f6f5f2; --card:#fff; --ink:#1f2328; --sub:#6b6f76; --line:#e3e1dc;
-          --accent:#1f6f5c; --accent-ink:#fff; --warn:#a33a2c; --full:#9aa0a6; }
+  :root {
+    --bg:#fffaf0; --card:#fffdf6; --ink:#2a2410; --sub:#8a7f5a; --line:#f0e4b8;
+    --accent:#f5a623; --accent-ink:#2a2410; --warn:#c0392b; --full:#b9b093;
+    --fc-bg:#ffe1ec; --fc-ink:#9c2a54; --op-bg:#dbe8ff; --op-ink:#27508c;
+    --deli-bg:#fff3cf; --deli-ink:#8a6a12; --etc-bg:#eee7d6; --etc-ink:#6b6248;
+  }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
   body { margin:0; background:var(--bg); color:var(--ink);
          font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif; }
-  .wrap { max-width:640px; margin:0 auto; padding:16px 16px 48px; }
+  .wrap { max-width:640px; margin:0 auto; padding:16px 16px 100px; }
   h1 { font-size:20px; margin:8px 0 4px; }
   .notice { color:var(--sub); font-size:14px; margin:0 0 16px; white-space:pre-wrap; }
-  .bar { position:sticky; top:0; background:var(--bg); padding:8px 0 12px; z-index:2;
-         display:flex; gap:8px; align-items:center; flex-wrap:wrap; border-bottom:1px solid var(--line); }
+  .bar { position:sticky; top:0; background:var(--bg); padding:8px 0 10px; z-index:2;
+         display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   input[type=text], input[type=password] { font-size:16px; padding:10px 12px; border:1px solid var(--line);
          border-radius:10px; background:#fff; width:100%; }
-  .bar input { flex:1 1 200px; }
+  input[type=time] { font-size:15px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  .bar input[type=text] { flex:1 1 200px; }
   label.chk { font-size:14px; color:var(--sub); white-space:nowrap; display:flex; gap:6px; align-items:center; }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; padding-bottom:10px; border-bottom:1px solid var(--line); margin-bottom:4px; }
+  .chip { font-size:13px; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:#fff;
+          color:var(--sub); cursor:pointer; font-weight:600; }
+  .chip.on { background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
   button { font-size:15px; padding:10px 14px; border-radius:10px; border:0; cursor:pointer;
-           background:var(--accent); color:var(--accent-ink); font-weight:600; }
+           background:var(--accent); color:var(--accent-ink); font-weight:700; }
   button.ghost { background:transparent; color:var(--warn); border:1px solid var(--line); font-weight:500; }
-  button:disabled { background:var(--full); cursor:default; }
+  button.sub { background:#fff; color:var(--ink); border:1px solid var(--line); font-weight:600; font-size:13px; padding:7px 10px; }
+  button:disabled { background:var(--full); color:#fff; cursor:default; }
   .day { margin-top:20px; }
-  .day h2 { font-size:15px; color:var(--sub); margin:0 0 8px; font-weight:600; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:10px;
+  .day h2 { font-size:15px; color:var(--sub); margin:0 0 8px; font-weight:700; }
+  .card { background:var(--card); border:1px solid var(--line); border-left:6px solid var(--etc-ink);
+          border-radius:14px; padding:14px; margin-bottom:10px;
           display:grid; grid-template-columns:1fr auto; gap:6px 12px; align-items:center; }
+  .card.cat-FC { border-left-color:var(--fc-ink); }
+  .card.cat-OP { border-left-color:var(--op-ink); }
+  .card.cat-デリバリー { border-left-color:var(--deli-ink); }
+  .cat-badge { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:8px; vertical-align:middle; }
+  .cat-badge.FC { background:var(--fc-bg); color:var(--fc-ink); }
+  .cat-badge.OP { background:var(--op-bg); color:var(--op-ink); }
+  .cat-badge.デリバリー { background:var(--deli-bg); color:var(--deli-ink); }
+  .cat-badge.その他 { background:var(--etc-bg); color:var(--etc-ink); }
   .time { font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; }
   .what { font-size:14px; color:var(--sub); }
   .note { grid-column:1/-1; font-size:13px; color:var(--sub); }
-  .left { font-size:13px; font-weight:600; text-align:right; }
-  .left.open { color:var(--accent); } .left.full { color:var(--full); }
+  .partial-note { grid-column:1/-1; font-size:12px; color:var(--op-ink); background:var(--op-bg);
+                  border-radius:8px; padding:6px 9px; }
+  .left { font-size:13px; font-weight:700; text-align:right; }
+  .left.open { color:#1f6f5c; } .left.full { color:var(--full); }
   .names { grid-column:1/-1; display:flex; flex-wrap:wrap; gap:6px; }
-  .tag { font-size:13px; padding:3px 9px; border-radius:999px; background:#eef3f1; }
-  .tag.me { background:var(--accent); color:#fff; }
-  .act { grid-column:1/-1; display:flex; justify-content:flex-end; }
-  .msg { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:#1f2328; color:#fff;
+  .tag { font-size:13px; padding:3px 9px; border-radius:999px; background:var(--etc-bg); color:var(--etc-ink); }
+  .tag.me { background:var(--accent); color:var(--accent-ink); font-weight:700; }
+  .mine-note { grid-column:1/-1; font-size:12px; font-weight:700; color:#1f6f5c; }
+  .act { grid-column:1/-1; display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+  .apply-form { grid-column:1/-1; display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+                background:#fffef9; border:1px dashed var(--line); border-radius:10px; padding:10px; }
+  .apply-form .fld { display:flex; flex-direction:column; gap:3px; font-size:11px; color:var(--sub); }
+  .msg { position:fixed; left:50%; bottom:76px; transform:translateX(-50%); background:#2a2410; color:#fff;
          padding:10px 16px; border-radius:10px; font-size:14px; opacity:0; transition:opacity .2s; pointer-events:none;
-         max-width:calc(100% - 32px); }
+         max-width:calc(100% - 32px); z-index:5; }
   .msg.show { opacity:1; }
   #list.busy { opacity:.6; pointer-events:none; }
   .empty { color:var(--sub); text-align:center; padding:40px 0; }
   .gate { max-width:360px; margin:15vh auto 0; display:grid; gap:12px; }
+  .weekbar { position:fixed; left:0; right:0; bottom:0; background:#fffdf6; border-top:1px solid var(--line);
+             display:flex; gap:6px; padding:8px 10px; overflow-x:auto; z-index:4;
+             box-shadow:0 -2px 8px rgba(0,0,0,.05); }
+  .weekbtn { flex:0 0 auto; font-size:13px; padding:8px 14px; border-radius:999px; border:1px solid var(--line);
+             background:#fff; color:var(--sub); font-weight:700; white-space:nowrap; }
+  .weekbtn.on { background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
 </style>
 </head>
 <body>
@@ -63,16 +94,23 @@
       <datalist id="roster"></datalist>
       <label class="chk"><input type="checkbox" id="onlyOpen"> 空きのみ</label>
     </div>
+    <div class="chips" id="chips">
+      <span class="chip on" data-cat="">全部</span>
+      <span class="chip" data-cat="FC">FC</span>
+      <span class="chip" data-cat="OP">OP</span>
+      <span class="chip" data-cat="デリバリー">デリバリー</span>
+    </div>
     <div id="list"></div>
   </div>
 </div>
 <div class="msg" id="msg"></div>
+<div class="weekbar" id="weekbar" hidden></div>
 
 <script>
   // ▼ GASのウェブアプリURL（/exec で終わる）
   var API_URL = 'https://script.google.com/macros/s/AKfycbznL5E_kKaEBiU8CNkYh4ZBXsIMClbd-t72euVqpzIcv5vbU3x31FIXvSoQiKpKj9Ygng/exec';
 
-  var PASS = '', DATA = null;
+  var PASS = '', DATA = null, CAT = '', WEEK_KEY = '', openApply = null;
   function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -80,7 +118,7 @@
   function toast(t) { var m = $('msg'); m.textContent = t; m.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { m.classList.remove('show'); }, 2600); }
 
   function call(action, payload, ok) {
-    var body = Object.assign({ action: action, pass: PASS }, payload || {});
+    var body = Object.assign({ action: action, pass: PASS, me: $('me') ? $('me').value : '' }, payload || {});
     $('list').classList.add('busy');
     fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
@@ -107,17 +145,64 @@
     });
   }
 
+  // ---- 週（月曜始まり）の算出 ----
+  function mondayOf(dateStr) {
+    var d = new Date(dateStr.replace(/\//g, '-') + 'T00:00:00');
+    var day = (d.getDay() + 6) % 7; // 0=月
+    d.setDate(d.getDate() - day);
+    return d;
+  }
+  function ymd(d) { return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0'); }
+
+  function buildWeeks(lines) {
+    var map = {};
+    lines.forEach(function (l) {
+      var mon = mondayOf(l.date);
+      var key = ymd(mon);
+      if (!map[key]) map[key] = mon;
+    });
+    var keys = Object.keys(map).sort();
+    var counters = {};
+    var weeks = keys.map(function (key) {
+      var mon = map[key];
+      var m = mon.getMonth() + 1;
+      counters[m] = (counters[m] || 0) + 1;
+      return { key: key, label: m + '月' + counters[m] + 'W', start: mon };
+    });
+    return weeks;
+  }
+
+  function renderWeekbar(weeks) {
+    var bar = $('weekbar');
+    bar.innerHTML = '';
+    if (weeks.length <= 1) { bar.hidden = true; return; }
+    bar.hidden = false;
+    weeks.forEach(function (w) {
+      var b = el('span', 'weekbtn' + (w.key === WEEK_KEY ? ' on' : ''), w.label);
+      b.onclick = function () { WEEK_KEY = w.key; render(); };
+      bar.appendChild(b);
+    });
+  }
+
   function render() {
     if (!DATA) return;
     $('notice').textContent = DATA.notice;
     var dl = $('roster'); dl.innerHTML = '';
     DATA.roster.forEach(function (n) { var o = document.createElement('option'); o.value = n; dl.appendChild(o); });
 
+    var weeks = buildWeeks(DATA.lines);
+    if (!WEEK_KEY || !weeks.some(function (w) { return w.key === WEEK_KEY; })) {
+      WEEK_KEY = weeks.length ? weeks[0].key : '';
+    }
+    renderWeekbar(weeks);
+
     var me = norm($('me').value), only = $('onlyOpen').checked;
     var list = $('list'); list.innerHTML = '';
     var groups = {}, order = [];
     DATA.lines.forEach(function (l) {
-      if (only && l.filled >= l.need && l.names.indexOf(me) < 0) return;
+      if (CAT && l.category !== CAT) return;
+      if (WEEK_KEY && ymd(mondayOf(l.date)) !== WEEK_KEY) return;
+      if (only && l.filled >= l.need && !(l.mine && l.mine.length)) return;
       if (!groups[l.date]) { groups[l.date] = { label: l.label, items: [] }; order.push(l.date); }
       groups[l.date].items.push(l);
     });
@@ -126,49 +211,102 @@
     order.forEach(function (d) {
       var g = groups[d], sec = el('section', 'day');
       sec.appendChild(el('h2', null, g.label));
-      g.items.forEach(function (l) {
-        var c = el('div', 'card');
-        var info = el('div');
-        info.appendChild(el('div', 'time', l.start + '〜' + l.end));
-        if (l.what) info.appendChild(el('div', 'what', l.what));
-        c.appendChild(info);
-        var left = l.need - l.filled, full = left <= 0;
-        c.appendChild(el('div', 'left ' + (full ? 'full' : 'open'), full ? '満員' : 'あと' + left + '人'));
-        if (l.note) c.appendChild(el('div', 'note', l.note));
-        if (l.names.length) {
-          var ns = el('div', 'names');
-          l.names.forEach(function (n) { ns.appendChild(el('span', 'tag' + (n === me ? ' me' : ''), n)); });
-          c.appendChild(ns);
-        }
-        var act = el('div', 'act'), mine = me && l.names.indexOf(me) >= 0;
-        var b;
-        if (mine) {
-          b = el('button', 'ghost', '取り消す');
-          b.onclick = function () {
-            b.disabled = true;
-            call('cancel', { id: l.id, name: me }, function () { toast('取り消しました'); });
-          };
-        } else {
-          b = el('button', null, full ? '満員' : 'このラインに入る');
-          b.disabled = full;
-          b.onclick = function () {
-            var n = norm($('me').value);
-            if (!n) { toast('先に名前を入力してください'); $('me').focus(); return; }
-            b.disabled = true;
-            call('apply', { id: l.id, name: n }, function () { toast('応募しました'); });
-          };
-        }
-        act.appendChild(b); c.appendChild(act);
-        sec.appendChild(c);
-      });
+      g.items.forEach(function (l) { sec.appendChild(renderCard(l, me)); });
       list.appendChild(sec);
     });
+  }
+
+  function renderCard(l, me) {
+    var cat = l.category || 'その他';
+    var c = el('div', 'card cat-' + cat);
+    var info = el('div');
+    var timeLine = el('div', 'time', l.start + '〜' + l.end);
+    var badge = el('span', 'cat-badge ' + cat, cat);
+    timeLine.appendChild(badge);
+    info.appendChild(timeLine);
+    if (l.what) info.appendChild(el('div', 'what', l.what));
+    c.appendChild(info);
+    var left = l.need - l.filled, full = left <= 0;
+    c.appendChild(el('div', 'left ' + (full ? 'full' : 'open'), full ? '満員' : 'あと' + left + '人'));
+    if (l.note) c.appendChild(el('div', 'note', l.note));
+    if (l.partial && l.partial.length) {
+      var p = el('div', 'partial-note', '一部対応可能な人あり: ' + l.partial.map(function (x) { return x.start + '〜' + x.end; }).join('、'));
+      c.appendChild(p);
+    }
+    if (l.names && l.names.length) {
+      var ns = el('div', 'names');
+      l.names.forEach(function (n) { ns.appendChild(el('span', 'tag' + (n === me ? ' me' : ''), n)); });
+      c.appendChild(ns);
+    }
+
+    var mine = l.mine && l.mine[0];
+    if (mine) {
+      var noteText = mine.full ? 'あなたは参加予定です' : ('あなたは一部対応で参加予定です（' + mine.start + '〜' + mine.end + '）');
+      c.appendChild(el('div', 'mine-note', noteText));
+      var act = el('div', 'act');
+      var b = el('button', 'ghost', '取り消す');
+      b.onclick = function () {
+        b.disabled = true;
+        call('cancel', { id: l.id, name: me }, function () { toast('取り消しました'); });
+      };
+      act.appendChild(b);
+      c.appendChild(act);
+      return c;
+    }
+
+    var act = el('div', 'act');
+    var bFull = el('button', null, full ? '満員' : 'このラインに入る');
+    bFull.disabled = full;
+    bFull.onclick = function () {
+      var n = norm($('me').value);
+      if (!n) { toast('先に名前を入力してください'); $('me').focus(); return; }
+      bFull.disabled = true;
+      call('apply', { id: l.id, name: n, start: l.start, end: l.end }, function () { toast('応募しました'); });
+    };
+    act.appendChild(bFull);
+
+    var bPartial = el('button', 'sub', '一部の時間で応募');
+    bPartial.onclick = function () {
+      if (openApply === l.id) { openApply = null; render(); return; }
+      openApply = l.id; render();
+    };
+    act.appendChild(bPartial);
+    c.appendChild(act);
+
+    if (openApply === l.id) {
+      var form = el('div', 'apply-form');
+      var f1 = el('div', 'fld'); f1.appendChild(el('span', null, '開始'));
+      var i1 = document.createElement('input'); i1.type = 'time'; i1.value = l.start; i1.min = l.start; i1.max = l.end;
+      f1.appendChild(i1);
+      var f2 = el('div', 'fld'); f2.appendChild(el('span', null, '終了'));
+      var i2 = document.createElement('input'); i2.type = 'time'; i2.value = l.end; i2.min = l.start; i2.max = l.end;
+      f2.appendChild(i2);
+      form.appendChild(f1); form.appendChild(f2);
+      var bGo = el('button', null, '応募する');
+      bGo.onclick = function () {
+        var n = norm($('me').value);
+        if (!n) { toast('先に名前を入力してください'); $('me').focus(); return; }
+        if (!i1.value || !i2.value || i1.value >= i2.value) { toast('時間を正しく入力してください'); return; }
+        bGo.disabled = true;
+        call('apply', { id: l.id, name: n, start: i1.value, end: i2.value }, function () { openApply = null; toast('応募しました'); });
+      };
+      form.appendChild(bGo);
+      c.appendChild(form);
+    }
+    return c;
   }
 
   $('enter').onclick = enter;
   $('pass').onkeydown = function (e) { if (e.key === 'Enter') enter(); };
   $('me').oninput = function () { store('sb_me', $('me').value); render(); };
   $('onlyOpen').onchange = render;
+  $('chips').addEventListener('click', function (e) {
+    var chip = e.target.closest('.chip');
+    if (!chip) return;
+    CAT = chip.dataset.cat || '';
+    Array.prototype.forEach.call($('chips').children, function (c) { c.classList.toggle('on', c === chip); });
+    render();
+  });
   $('me').value = store('sb_me') || '';
   var saved = store('sb_pass');
   if (saved) { $('pass').value = saved; enter(); }
