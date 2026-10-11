@@ -245,8 +245,7 @@
   $('refreshBtn').onclick = loadAll;
   $('logoutBtn').onclick = function () {
     store('sb_admin_id', ''); store('sb_admin_pass', '');
-    ADMIN_ID = ''; ADMIN_PASS = ''; DATA = null;
-    $('app').hidden = true; $('gate').hidden = false;
+    location.href = 'index.html';
   };
 
   $('addLineBtn').onclick = function () {
