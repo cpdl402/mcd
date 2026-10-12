@@ -307,7 +307,7 @@
 
   <div class="wrap" id="negoView" hidden>
     <h2>交渉集計</h2>
-    <p class="nego-view-head">「あと◯本」は募集ラインの空き状況から自動で計算されます（全曜日が対象）。残り3本以下になると、空いている時間帯も表示されます。</p>
+    <p class="nego-view-head">「あと◯本」は募集ラインの募集状況から自動で計算されます（全曜日が対象）。残り3本以下になると、まだ埋まっていない時間帯も表示されます。</p>
     <div class="nego-cat-chips" id="negoCatChips"></div>
     <div id="negoList"></div>
   </div>
@@ -655,12 +655,12 @@
 
       var apTd = document.createElement('td');
       apTd.className = 'ap-list';
-      // 定員欄は廃止し、必要人数の分だけスロットを並べて表示する（埋まっていれば氏名、空きなら「○ 空き」）
+      // 定員欄は廃止し、必要人数の分だけスロットを並べて表示する（埋まっていれば氏名、未充足なら「○ 募集中」）
       for (var si = 0; si < l.need; si++) {
         if (si < full.length) {
           apTd.appendChild(apRow_(l, full[si], '● ' + full[si].name, 'ap-full'));
         } else {
-          apTd.appendChild(el('div', 'ap-open', '○ 空き'));
+          apTd.appendChild(el('div', 'ap-open', '○ 募集中'));
         }
       }
       partial.forEach(function (a) {
