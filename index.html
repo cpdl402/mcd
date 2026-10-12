@@ -62,7 +62,8 @@
   .partial-note { grid-column:1/-1; font-size:12px; color:var(--op-ink); background:var(--op-bg);
                   border-radius:8px; padding:6px 9px; }
   .left { font-size:13px; font-weight:700; text-align:right; }
-  .left.open { color:#1f6f5c; } .left.full { color:var(--full); }
+  .left.open { color:#1f6f5c; } .left.full { color:var(--full); } .left.past { color:var(--sub); }
+  .card.past { opacity:.7; }
   .names { grid-column:1/-1; display:flex; flex-wrap:wrap; gap:6px; }
   .tag { font-size:13px; padding:3px 9px; border-radius:999px; background:var(--etc-bg); color:var(--etc-ink); }
   .tag.me { background:var(--accent); color:var(--accent-ink); font-weight:700; }
@@ -185,6 +186,7 @@
   var API_URL = 'https://script.google.com/macros/s/AKfycbznL5E_kKaEBiU8CNkYh4ZBXsIMClbd-t72euVqpzIcv5vbU3x31FIXvSoQiKpKj9Ygng/exec';
 
   var PASS = '', DATA = null, CAT_SEL = {}, WEEK_KEY = '', openApply = null;
+  var TODAY_STR = '';
   function catSelActive_() { return Object.keys(CAT_SEL).some(function (k) { return CAT_SEL[k]; }); }
   var TIME_BANDS = [
     { key: 'bf', start: '05:00', end: '10:00' },
@@ -241,13 +243,21 @@
 
   function buildWeeks(lines) {
     var map = {};
+    // 前1週間・今週・翌2週間（計4週間）は、募集ラインが無くても常にタブを表示する
+    var todayMon = mondayOf(ymd(new Date()));
+    for (var i = -1; i <= 2; i++) {
+      var mon0 = new Date(todayMon);
+      mon0.setDate(mon0.getDate() + i * 7);
+      map[ymd(mon0)] = mon0;
+    }
+    // それ以外の週に募集ラインがあれば、そのタブも追加する
     lines.forEach(function (l) {
       var mon = mondayOf(l.date);
       var key = ymd(mon);
       if (!map[key]) map[key] = mon;
     });
     var keys = Object.keys(map).sort();
-    // 「データがある週」の出現順ではなく、月内で実際に何週目の月曜かを日付から直接計算する
+    // 月内で実際に何週目の月曜かを日付から直接計算する
     // （月初の週に募集ラインが無いと番号がずれてしまう不具合の修正）
     var weeks = keys.map(function (key) {
       var mon = map[key];
@@ -272,6 +282,7 @@
 
   function render() {
     if (!DATA) return;
+    TODAY_STR = ymd(new Date());
     $('notice').textContent = DATA.notice;
     var dl = $('roster'); dl.innerHTML = '';
     DATA.roster.forEach(function (n) { var o = document.createElement('option'); o.value = n; dl.appendChild(o); });
@@ -304,7 +315,8 @@
 
   function renderCard(l, me) {
     var cat = l.category || 'その他';
-    var c = el('div', 'card cat-' + cat);
+    var isPast = l.date < TODAY_STR;
+    var c = el('div', 'card cat-' + cat + (isPast ? ' past' : ''));
     var info = el('div');
     var timeLine = el('div', 'time', l.start + '〜' + l.end);
     var badge = el('span', 'cat-badge ' + cat, cat);
@@ -313,7 +325,8 @@
     if (l.what && l.what.indexOf('搬入') >= 0) info.appendChild(el('div', 'what', l.what));
     c.appendChild(info);
     var left = l.need - l.filled, full = left <= 0;
-    c.appendChild(el('div', 'left ' + (full ? 'full' : 'open'), full ? '満員' : 'あと' + left + '人'));
+    var leftText = isPast ? (full ? '終了（充足）' : '終了（未充足）') : (full ? '満員' : 'あと' + left + '人');
+    c.appendChild(el('div', 'left ' + (isPast ? 'past' : (full ? 'full' : 'open')), leftText));
     if (l.note) c.appendChild(el('div', 'note', l.note));
     if (l.partial && l.partial.length) {
       var p = el('div', 'partial-note', '一部対応可能な人あり: ' + l.partial.map(function (x) { return x.start + '〜' + x.end; }).join('、'));
@@ -327,12 +340,16 @@
 
     var mine = l.mine && l.mine[0];
     if (mine) {
-      var noteText = mine.full ? 'あなたは参加予定です'
-        : mine.approved ? ('あなたは一部対応（承認済み）で参加予定です（' + mine.start + '〜' + mine.end + '）')
-        : ('あなたは一部対応で参加予定です（' + mine.start + '〜' + mine.end + '）');
+      var noteText = isPast
+        ? (mine.full ? 'あなたは参加しました'
+          : 'あなたは一部対応（' + mine.start + '〜' + mine.end + '）で参加しました')
+        : (mine.full ? 'あなたは参加予定です'
+          : mine.approved ? ('あなたは一部対応（承認済み）で参加予定です（' + mine.start + '〜' + mine.end + '）')
+          : ('あなたは一部対応で参加予定です（' + mine.start + '〜' + mine.end + '）'));
       c.appendChild(el('div', 'mine-note', noteText));
       return c;
     }
+    if (isPast) return c; // 過去の枠は応募ボタンを出さない（読み取り専用）
 
     var act = el('div', 'act');
     var bFull = el('button', null, full ? '満員' : 'フルで入る');
