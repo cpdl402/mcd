@@ -579,14 +579,16 @@
       });
   }
 
+  // adminLoad自体がID/PWを検証するため、ログイン確認用にadminLoginを別途呼ぶと
+  // 往復が1回無駄になる。adminLoadの成功＝ログイン成功として直接呼ぶ（2026-10-12、体感速度改善）
   function login() {
     ADMIN_ID = $('adminId').value.trim();
     ADMIN_PASS = $('adminPass').value;
     if (!ADMIN_ID || !ADMIN_PASS) { toast('IDとパスワードを入力してください'); return; }
-    call('adminLogin', null, function () {
+    call('adminLoad', null, function (data) {
       store('sb_admin_id', ADMIN_ID); store('sb_admin_pass', ADMIN_PASS);
       $('gate').hidden = true; $('app').hidden = false;
-      loadAll();
+      DATA = data; render();
     });
   }
 
@@ -838,9 +840,9 @@
   if (sId && sPass) {
     $('adminId').value = sId; $('adminPass').value = sPass;
     ADMIN_ID = sId; ADMIN_PASS = sPass;
-    call('adminLogin', null, function () {
+    call('adminLoad', null, function (data) {
       $('gate').hidden = true; $('app').hidden = false;
-      loadAll();
+      DATA = data; render();
     });
   }
 </script>
