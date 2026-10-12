@@ -423,7 +423,7 @@
         openBox.appendChild(document.createTextNode('残り枠: '));
         info.openLines.forEach(function (ol, idx) {
           if (idx > 0) openBox.appendChild(document.createTextNode('、'));
-          openBox.appendChild(el('span', 'nego-open-line', ol.start + '〜' + ol.end + (ol.what ? '(' + ol.what + ')' : '') + ' あと' + ol.remain + '人'));
+          openBox.appendChild(el('span', 'nego-open-line', ol.start + '〜' + ol.end + '[' + ol.category + ']' + ' あと' + ol.remain + '人'));
         });
         card.appendChild(openBox);
       }
