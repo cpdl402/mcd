@@ -65,9 +65,25 @@
   .nego-reply.r-未定 { background:#fff0d6; color:#e07f00; }
   .nego-note { font-size:12px; padding:3px 7px; border:1px solid var(--line); border-radius:7px; width:120px; }
   .nego-row-remove { background:transparent; color:#aaa; border:none; font-size:16px; cursor:pointer; padding:0 4px; }
+  .nego-note-view { font-size:12px; color:var(--sub); }
   .nego-add-row { display:flex; align-items:center; gap:8px; margin-top:4px; }
   .nego-add-row select { padding:5px 8px; }
   .nego-add-row button { font-size:12px; padding:5px 10px; }
+  .nego-edit-btn { border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink);
+                    font-size:12px; padding:4px 10px; cursor:pointer; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:40;
+                    display:flex; align-items:center; justify-content:center; padding:16px; }
+  .modal-box { background:var(--card); border-radius:16px; padding:20px; width:100%; max-width:340px;
+               box-shadow:0 8px 30px rgba(0,0,0,.25); }
+  .modal-box h3 { margin:0 0 14px; font-size:16px; color:var(--ink); }
+  .modal-box .fld { display:block; font-size:13px; color:var(--sub); margin-bottom:12px; }
+  .modal-box .fld select, .modal-box .fld input[type="text"] { display:block; width:100%; margin-top:5px; padding:7px 9px; }
+  .nego-toggle-btn { display:block; margin-top:5px; width:100%; padding:9px; border:none; border-radius:10px;
+                      font-size:14px; font-weight:700; cursor:pointer; background:#eee; color:#777; }
+  .nego-toggle-btn[data-on="true"] { background:#2e7d32; color:#fff; }
+  .nego-time-range { display:flex; align-items:center; gap:8px; margin-top:5px; }
+  .nego-time-range input[type="time"] { flex:1; padding:7px 9px; }
+  .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
   .weekbar { position:fixed; left:0; right:0; bottom:0; background:#fffdf6; border-top:1px solid var(--line);
              display:flex; gap:6px; padding:8px 10px; overflow-x:auto; z-index:4;
              box-shadow:0 -2px 8px rgba(0,0,0,.05); }
@@ -261,6 +277,38 @@
 </div>
 <div class="msg" id="msg"></div>
 <div class="weekbar" id="weekbar" hidden></div>
+<div class="modal-overlay" id="negoEditOverlay" hidden>
+  <div class="modal-box">
+    <h3 id="negoEditName"></h3>
+    <div class="fld">
+      <span>連絡状況</span>
+      <button type="button" class="nego-toggle-btn" id="negoEditContactedBtn" data-on="false">未連絡</button>
+    </div>
+    <label class="fld">返信
+      <select id="negoEditReply">
+        <option value="">未回答</option>
+        <option value="無理">無理</option>
+        <option value="IN">IN可能</option>
+        <option value="未定">未定</option>
+      </select>
+    </label>
+    <div class="fld" id="negoEditTimeWrap" hidden>
+      <span>IN可能な時間帯</span>
+      <div class="nego-time-range">
+        <input type="time" id="negoEditTimeStart" inputmode="numeric">
+        <span>〜</span>
+        <input type="time" id="negoEditTimeEnd" inputmode="numeric">
+      </div>
+    </div>
+    <label class="fld" id="negoEditNoteWrap" hidden><span>メモ</span>
+      <input type="text" id="negoEditNote">
+    </label>
+    <div class="modal-actions">
+      <button type="button" class="ghost" id="negoEditCancel">キャンセル</button>
+      <button type="button" id="negoEditSave">保存</button>
+    </div>
+  </div>
+</div>
 
 <script>
   // ▼ GASのウェブアプリURL（/exec で終わる。index.htmlと同じ値を貼る）
@@ -270,7 +318,6 @@
   var VIEW = 'lines', NEGO = null, NEGO_WEEK_KEY = '', NEGO_WEEK_DATES = null, NEGO_WEEK_DATES_KEY = '';
   var WEEK_JA = ['日', '月', '火', '水', '木', '金', '土'];
   var NEGO_SECTIONS = ['新規', '延ばし'];
-  var NEGO_REPLY_ORDER = ['', '無理', 'IN', '未定'];
   function negoReplyLabel(r) { return r === '無理' ? '無理' : r === 'IN' ? 'IN可能' : r === '未定' ? '未定' : '未回答'; }
   function switchView(v) {
     VIEW = v;
@@ -324,7 +371,9 @@
       var needInput = document.createElement('input');
       needInput.type = 'number'; needInput.min = '0'; needInput.value = need ? need.need : 0;
       needInput.onchange = function () {
-        call('adminNegoSetNeed', { date: date, need: Number(needInput.value) || 0 }, function (data) { NEGO = data; renderNego(); });
+        var n = Number(needInput.value) || 0;
+        if (need) { need.need = n; } else { need = { date: date, need: n }; NEGO.needs.push(need); }
+        call('adminNegoSetNeed', { date: date, need: n }, function (data) { NEGO = data; renderNego(); });
       };
       needBadge.appendChild(needInput);
       needBadge.appendChild(document.createTextNode('本'));
@@ -352,45 +401,59 @@
   }
   function negoRow_(r) {
     var row = el('div', 'nego-row');
+
+    var editBtn = el('button', 'nego-edit-btn', '編集');
+    editBtn.type = 'button';
+    editBtn.onclick = function () { openNegoEdit_(r); };
+    row.appendChild(editBtn);
+
     row.appendChild(el('span', 'nego-row-name', r.name));
-
-    var contactBtn = el('button', 'nego-chip' + (r.contacted ? ' on' : ''), r.contacted ? '連絡済み' : '未連絡');
-    contactBtn.type = 'button';
-    contactBtn.onclick = function () {
-      call('adminNegoUpdateStatus', { id: r.id, contacted: !r.contacted, reply: r.reply, note: r.note },
-        function (data) { NEGO = data; renderNego(); });
-    };
-    row.appendChild(contactBtn);
-
-    var replyBtn = el('button', 'nego-reply' + (r.reply ? ' r-' + r.reply : ''), negoReplyLabel(r.reply));
-    replyBtn.type = 'button';
-    replyBtn.onclick = function () {
-      var next = NEGO_REPLY_ORDER[(NEGO_REPLY_ORDER.indexOf(r.reply) + 1) % NEGO_REPLY_ORDER.length];
-      call('adminNegoUpdateStatus', { id: r.id, contacted: r.contacted, reply: next, note: next ? r.note : '' },
-        function (data) { NEGO = data; renderNego(); });
-    };
-    row.appendChild(replyBtn);
-
-    if (r.reply === 'IN' || r.reply === '未定') {
-      var noteInput = document.createElement('input');
-      noteInput.type = 'text'; noteInput.className = 'nego-note'; noteInput.value = r.note;
-      noteInput.placeholder = r.reply === 'IN' ? '例: 10-14' : 'メモ';
-      noteInput.onchange = function () {
-        call('adminNegoUpdateStatus', { id: r.id, contacted: r.contacted, reply: r.reply, note: noteInput.value.trim() },
-          function (data) { NEGO = data; renderNego(); });
-      };
-      row.appendChild(noteInput);
-    }
+    row.appendChild(el('span', 'nego-chip' + (r.contacted ? ' on' : ''), r.contacted ? '連絡済み' : '未連絡'));
+    row.appendChild(el('span', 'nego-reply' + (r.reply ? ' r-' + r.reply : ''), negoReplyLabel(r.reply)));
+    if (r.note) row.appendChild(el('span', 'nego-note-view', r.note));
 
     var rmBtn = el('button', 'nego-row-remove', '×');
     rmBtn.type = 'button';
     rmBtn.setAttribute('aria-label', '削除');
     rmBtn.onclick = function () {
+      var idx = NEGO.rows.indexOf(r);
+      if (idx >= 0) NEGO.rows.splice(idx, 1);
+      if (r.reply === 'IN') negoAdjustNeedLocal_(r.date, 1);
+      renderNego();
       call('adminNegoRemoveStaff', { id: r.id }, function (data) { NEGO = data; renderNego(); });
     };
     row.appendChild(rmBtn);
 
     return row;
+  }
+  function negoAdjustNeedLocal_(date, delta) {
+    var need = NEGO.needs.filter(function (n) { return n.date === date; })[0];
+    if (need) { need.need = Math.max(0, need.need + delta); }
+    else if (delta < 0) { NEGO.needs.push({ date: date, need: 0 }); }
+  }
+  var NEGO_EDIT_TARGET = null;
+  function openNegoEdit_(r) {
+    NEGO_EDIT_TARGET = r;
+    $('negoEditName').textContent = r.name;
+    setNegoContactedBtn_(r.contacted);
+    $('negoEditReply').value = r.reply || '';
+    var parts = r.reply === 'IN' && r.note ? r.note.split('〜') : [];
+    $('negoEditTimeStart').value = parts[0] || '';
+    $('negoEditTimeEnd').value = parts[1] || '';
+    $('negoEditNote').value = r.reply === '未定' ? (r.note || '') : '';
+    updateNegoEditFieldVisibility_();
+    $('negoEditOverlay').hidden = false;
+  }
+  function closeNegoEdit_() { $('negoEditOverlay').hidden = true; NEGO_EDIT_TARGET = null; }
+  function setNegoContactedBtn_(on) {
+    var btn = $('negoEditContactedBtn');
+    btn.dataset.on = on ? 'true' : 'false';
+    btn.textContent = on ? '連絡済み' : '未連絡';
+  }
+  function updateNegoEditFieldVisibility_() {
+    var reply = $('negoEditReply').value;
+    $('negoEditTimeWrap').hidden = reply !== 'IN';
+    $('negoEditNoteWrap').hidden = reply !== '未定';
   }
   function negoAddRow_(date, section) {
     var row = el('div', 'nego-add-row');
@@ -400,7 +463,7 @@
       var o = document.createElement('option'); o.value = name; o.textContent = name; sel.appendChild(o);
     });
     row.appendChild(sel);
-    var addBtn = el('button', null, '＋ 追加');
+    var addBtn = el('button', null, '＋');
     addBtn.type = 'button';
     addBtn.onclick = function () {
       if (!sel.value) { toast('スタッフを選択してください'); return; }
@@ -617,6 +680,33 @@
   $('refreshBtn').onclick = function () { if (VIEW === 'nego') loadNego(); else loadAll(); };
   $('viewLinesBtn').onclick = function () { switchView('lines'); };
   $('viewNegoBtn').onclick = function () { switchView('nego'); };
+  $('negoEditReply').onchange = updateNegoEditFieldVisibility_;
+  $('negoEditContactedBtn').onclick = function () { setNegoContactedBtn_($('negoEditContactedBtn').dataset.on !== 'true'); };
+  $('negoEditCancel').onclick = closeNegoEdit_;
+  $('negoEditOverlay').onclick = function (e) { if (e.target === $('negoEditOverlay')) closeNegoEdit_(); };
+  $('negoEditSave').onclick = function () {
+    if (!NEGO_EDIT_TARGET) return;
+    var r = NEGO_EDIT_TARGET;
+    var reply = $('negoEditReply').value;
+    var contacted = $('negoEditContactedBtn').dataset.on === 'true';
+    var note = '';
+    if (reply === 'IN') {
+      var ts = $('negoEditTimeStart').value, te = $('negoEditTimeEnd').value;
+      note = ts && te ? (ts + '〜' + te) : '';
+    } else if (reply === '未定') {
+      note = $('negoEditNote').value.trim();
+    }
+    // 保存ボタン押下時点でローカルを即更新・再描画し、サーバーへの反映は裏で行う（体感速度のため）
+    var prevReply = r.reply;
+    r.contacted = contacted; r.reply = reply; r.note = note;
+    if (prevReply !== reply && (prevReply === 'IN' || reply === 'IN')) {
+      negoAdjustNeedLocal_(r.date, reply === 'IN' ? -1 : 1);
+    }
+    renderNego();
+    closeNegoEdit_();
+    call('adminNegoUpdateStatus', { id: r.id, contacted: contacted, reply: reply, note: note },
+      function (data) { NEGO = data; renderNego(); });
+  };
   $('logoutBtn').onclick = function () {
     store('sb_admin_id', ''); store('sb_admin_pass', '');
     location.href = 'index.html';
