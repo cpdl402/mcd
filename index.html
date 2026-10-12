@@ -289,7 +289,9 @@
 
     var weeks = buildWeeks(DATA.lines);
     if (!WEEK_KEY || !weeks.some(function (w) { return w.key === WEEK_KEY; })) {
-      WEEK_KEY = weeks.length ? weeks[0].key : '';
+      // 初期値は「今週」。今週タブが無ければ先頭の週にフォールバックする
+      var curKey = ymd(mondayOf(TODAY_STR));
+      WEEK_KEY = weeks.some(function (w) { return w.key === curKey; }) ? curKey : (weeks.length ? weeks[0].key : '');
     }
     renderWeekbar(weeks);
 
