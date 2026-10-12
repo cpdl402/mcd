@@ -157,8 +157,7 @@
     <p class="notice" id="notice"></p>
     <div class="filter-bar">
       <div class="bar">
-        <input type="text" id="me" list="roster" placeholder="あなたの名前（シフト表と同じ表記）">
-        <datalist id="roster"></datalist>
+        <input type="text" id="me" placeholder="あなたの名前（シフト表と同じ表記）">
         <button class="sub" id="refreshBtn">更新</button>
       </div>
       <div class="chips" id="chips">
@@ -284,8 +283,6 @@
     if (!DATA) return;
     TODAY_STR = ymd(new Date());
     $('notice').textContent = DATA.notice;
-    var dl = $('roster'); dl.innerHTML = '';
-    DATA.roster.forEach(function (n) { var o = document.createElement('option'); o.value = n; dl.appendChild(o); });
 
     var weeks = buildWeeks(DATA.lines);
     if (!WEEK_KEY || !weeks.some(function (w) { return w.key === WEEK_KEY; })) {
