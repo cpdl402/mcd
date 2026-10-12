@@ -247,12 +247,13 @@
       if (!map[key]) map[key] = mon;
     });
     var keys = Object.keys(map).sort();
-    var counters = {};
+    // 「データがある週」の出現順ではなく、月内で実際に何週目の月曜かを日付から直接計算する
+    // （月初の週に募集ラインが無いと番号がずれてしまう不具合の修正）
     var weeks = keys.map(function (key) {
       var mon = map[key];
       var m = mon.getMonth() + 1;
-      counters[m] = (counters[m] || 0) + 1;
-      return { key: key, label: m + '月' + counters[m] + 'W', start: mon };
+      var w = Math.floor((mon.getDate() - 1) / 7) + 1;
+      return { key: key, label: m + '月' + w + 'W', start: mon };
     });
     return weeks;
   }
