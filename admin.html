@@ -84,6 +84,9 @@
   table.lines tr.cat-デリバリー td:first-child { border-left:4px solid var(--deli-ink); }
   table.lines tr.cat-その他 td:first-child { border-left:4px solid var(--etc-ink); }
   table.lines .need-ok { color:#1f6f5c; font-weight:700; }
+  table.lines .reflect-btn { font-size:11px; padding:3px 9px; border-radius:999px; font-weight:700; border:1px solid var(--line); }
+  table.lines .reflect-pending { background:#fff3cf; color:#8a6a12; }
+  table.lines .reflect-done { background:#e4f6ef; color:#1f6f5c; }
   table.lines .need-ng { color:var(--warn); font-weight:700; }
   table.lines .ap-list { white-space:normal; min-width:160px; }
   table.lines .ap-full { font-size:13px; font-weight:700; color:var(--ink); }
@@ -226,7 +229,7 @@
     var table = document.createElement('table');
     table.className = 'lines';
     var thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th>日付</th><th>時間</th><th>応募者</th><th>種別</th><th>内容</th><th>定員</th><th>公開</th><th>備考</th><th>操作</th></tr>';
+    thead.innerHTML = '<tr><th>日付</th><th>時間</th><th>応募者</th><th>種別</th><th>内容</th><th>定員</th><th>公開</th><th>反映</th><th>備考</th><th>操作</th></tr>';
     table.appendChild(thead);
     var tbody = document.createElement('tbody');
 
@@ -257,12 +260,23 @@
       tr.appendChild(apTd);
 
       tr.appendChild(td_(cat));
-      tr.appendChild(td_(l.what));
+      tr.appendChild(td_(l.what.indexOf('搬入') >= 0 ? l.what : ''));
 
       var needTd = td_(full.length + ' / ' + l.need + '人');
       needTd.className = full.length >= l.need ? 'need-ok' : 'need-ng';
       tr.appendChild(needTd);
       tr.appendChild(td_(l.published ? '公開' : '非公開'));
+
+      var refTd = document.createElement('td');
+      var refBtn = el('button', 'reflect-btn ' + (l.reflected ? 'reflect-done' : 'reflect-pending'), l.reflected ? '済' : '未反映');
+      refBtn.onclick = function () {
+        call('adminMarkReflected', { id: l.id }, function (data) {
+          DATA = data; render();
+          toast(l.reflected ? '未反映に戻しました' : '正規スケジュールへの反映済みにしました');
+        });
+      };
+      refTd.appendChild(refBtn);
+      tr.appendChild(refTd);
       tr.appendChild(td_(l.note || ''));
 
       var opTd = document.createElement('td');
