@@ -355,6 +355,18 @@
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="fillOverlay" hidden>
+  <div class="modal-box">
+    <h3 id="fillModalTitle"></h3>
+    <label class="fld"><span>氏名</span>
+      <input type="text" id="fillName" placeholder="クルーの氏名">
+    </label>
+    <div class="modal-actions">
+      <button type="button" class="ghost" id="fillCancelBtn">キャンセル</button>
+      <button type="button" id="fillOkBtn">追加する</button>
+    </div>
+  </div>
+</div>
 
 <script>
   // ▼ GASのウェブアプリURL（/exec で終わる。index.htmlと同じ値を貼る）
@@ -509,6 +521,16 @@
     $('negoEditOverlay').hidden = false;
   }
   function closeNegoEdit_() { $('negoEditOverlay').hidden = true; NEGO_EDIT_TARGET = null; }
+  var FILL_TARGET = null;
+  function openFillModal_(l, slotNo) {
+    FILL_TARGET = l;
+    var slotLabel = l.need > 1 ? '（' + slotNo + '/' + l.need + '枠目）' : '';
+    $('fillModalTitle').textContent = l.date + ' ' + l.start + '〜' + l.end + slotLabel;
+    $('fillName').value = '';
+    $('fillOverlay').hidden = false;
+    $('fillName').focus();
+  }
+  function closeFillModal_() { $('fillOverlay').hidden = true; FILL_TARGET = null; }
   function setNegoContactedBtn_(on) {
     var btn = $('negoEditContactedBtn');
     btn.dataset.on = on ? 'true' : 'false';
@@ -674,24 +696,17 @@
 
       var apTd = document.createElement('td');
       apTd.className = 'ap-list';
-      // 定員欄は廃止し、必要人数の分だけスロットを並べて表示する（埋まっていれば氏名、未充足なら「○ 募集中」）
-      for (var si = 0; si < l.need; si++) {
+      // 定員欄は廃止し、必要人数の分だけスロットを並べて表示する（埋まっていれば氏名、未充足なら「○ 募集中」）。
+      // 複数枠が同時に未充足のときは「募集中」が複数行並ぶため、見分けられるよう何枠目かを添える（2026-10-14）
+      for (let si = 0; si < l.need; si++) {
         if (si < full.length) {
           apTd.appendChild(apRow_(l, full[si], '● ' + full[si].name, 'ap-full'));
         } else {
+          let slotNo = si + 1;
           var openRow = el('div', 'ap-row');
-          openRow.appendChild(el('span', 'ap-open', '○ 募集中'));
+          openRow.appendChild(el('span', 'ap-open', l.need > 1 ? '○ 募集中（' + slotNo + '/' + l.need + '）' : '○ 募集中'));
           var fillBtn = el('button', 'ap-fill-btn', '追加');
-          fillBtn.onclick = function () {
-            var name = prompt('この枠に入れるクルーの氏名を入力してください\n' + l.date + ' ' + l.start + '〜' + l.end);
-            if (name === null) return;
-            name = name.trim();
-            if (!name) return;
-            call('adminApply', { id: l.id, name: name }, function (data) {
-              DATA = data; render();
-              toast(name + 'さんを追加しました');
-            });
-          };
+          fillBtn.onclick = function () { openFillModal_(l, slotNo); };
           openRow.appendChild(fillBtn);
           apTd.appendChild(openRow);
         }
@@ -914,6 +929,20 @@
     closeNegoEdit_();
     call('adminNegoUpdateStatus', { id: r.id, contacted: contacted, reply: reply, note: note },
       function (data) { NEGO = data; renderNego(); });
+  };
+  $('fillCancelBtn').onclick = closeFillModal_;
+  $('fillOverlay').onclick = function (e) { if (e.target === $('fillOverlay')) closeFillModal_(); };
+  $('fillName').onkeydown = function (e) { if (e.key === 'Enter') $('fillOkBtn').click(); };
+  $('fillOkBtn').onclick = function () {
+    if (!FILL_TARGET) return;
+    var l = FILL_TARGET;
+    var name = $('fillName').value.trim();
+    if (!name) { toast('氏名を入力してください'); return; }
+    closeFillModal_();
+    call('adminApply', { id: l.id, name: name }, function (data) {
+      DATA = data; render();
+      toast(name + 'さんを追加しました');
+    });
   };
   $('exportImageBtn').onclick = function () {
     closeSidebar();
