@@ -34,6 +34,8 @@
   input[type=text], input[type=password] { font-size:16px; padding:10px 12px; border:1px solid var(--line);
          border-radius:10px; background:#fff; width:100%; }
   input[type=time] { font-size:15px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  .time-picker { display:inline-flex; align-items:center; gap:3px; font-size:15px; color:var(--ink); }
+  .time-picker select { font-size:15px; padding:6px 4px; border:1px solid var(--line); border-radius:8px; background:#fff; }
   .bar input[type=text] { flex:1 1 200px; }
   label.chk { font-size:14px; color:var(--sub); white-space:nowrap; display:flex; gap:6px; align-items:center; }
   .chips { display:flex; gap:6px; flex-wrap:wrap; padding-bottom:10px; border-bottom:1px solid var(--line); margin-bottom:4px; }
@@ -261,6 +263,35 @@
   function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  // ネイティブ<input type="time">はstep属性があっても機種によって15分刻みを無視して全分数を選べてしまうため、
+  // 時・分（00/15/30/45限定）の2つのプルダウンで確実に15分刻みにする（2026-10-14）
+  function makeTimePicker_(initialHHMM) {
+    var parts = String(initialHHMM || '00:00').split(':');
+    var ih = parseInt(parts[0], 10) || 0;
+    var im = Math.round((parseInt(parts[1], 10) || 0) / 15) * 15;
+    if (im >= 60) { im = 0; ih = (ih + 1) % 24; }
+    var wrap = el('span', 'time-picker');
+    var hSel = document.createElement('select');
+    for (var h = 0; h < 24; h++) {
+      var oh = document.createElement('option');
+      oh.value = String(h).padStart(2, '0'); oh.textContent = oh.value;
+      if (h === ih) oh.selected = true;
+      hSel.appendChild(oh);
+    }
+    var mSel = document.createElement('select');
+    [0, 15, 30, 45].forEach(function (m) {
+      var om = document.createElement('option');
+      om.value = String(m).padStart(2, '0'); om.textContent = om.value;
+      if (m === im) om.selected = true;
+      mSel.appendChild(om);
+    });
+    wrap.appendChild(hSel);
+    wrap.appendChild(document.createTextNode(':'));
+    wrap.appendChild(mSel);
+    wrap.getValue = function () { return hSel.value + ':' + mSel.value; };
+    return wrap;
+  }
   function norm(s) { return String(s || '').replace(/[\s　]+/g, ''); }
   function toast(t) { var m = $('msg'); m.textContent = t; m.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { m.classList.remove('show'); }, 2600); }
 
@@ -497,19 +528,20 @@
     if (openApply === l.id) {
       var form = el('div', 'apply-form');
       var f1 = el('div', 'fld'); f1.appendChild(el('span', null, '開始'));
-      var i1 = document.createElement('input'); i1.type = 'time'; i1.step = 900; i1.value = l.start; i1.min = l.start; i1.max = l.end;
+      var i1 = makeTimePicker_(l.start);
       f1.appendChild(i1);
       var f2 = el('div', 'fld'); f2.appendChild(el('span', null, '終了'));
-      var i2 = document.createElement('input'); i2.type = 'time'; i2.step = 900; i2.value = l.end; i2.min = l.start; i2.max = l.end;
+      var i2 = makeTimePicker_(l.end);
       f2.appendChild(i2);
       form.appendChild(f1); form.appendChild(f2);
       var bGo = el('button', null, '確定');
       bGo.onclick = function () {
         var n = norm($('me').value);
         if (!n) { toast('先に名前を入力してください'); $('me').focus(); return; }
-        if (!i1.value || !i2.value || i1.value >= i2.value) { toast('時間を正しく入力してください'); return; }
+        var sv = i1.getValue(), ev = i2.getValue();
+        if (sv >= ev) { toast('時間を正しく入力してください'); return; }
         bGo.disabled = true;
-        call('apply', { id: l.id, name: n, start: i1.value, end: i2.value }, function () { openApply = null; toast('追加しました'); });
+        call('apply', { id: l.id, name: n, start: sv, end: ev }, function () { openApply = null; toast('追加しました'); });
       };
       form.appendChild(bGo);
       c.appendChild(form);

@@ -126,6 +126,8 @@
   h2 { font-size:15px; margin:24px 0 10px; }
   .notice { color:var(--sub); font-size:14px; margin:0 0 16px; }
   input, select { font-size:15px; padding:9px 11px; border:1px solid var(--line); border-radius:8px; background:#fff; width:100%; min-width:0; }
+  .time-picker { display:inline-flex; align-items:center; gap:3px; }
+  .time-picker select { width:auto; padding:9px 6px; }
   label.fld { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--sub); font-weight:600; min-width:0; }
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; min-width:0; }
   @media (max-width:460px) {
@@ -282,8 +284,8 @@
           </label>
         </div>
         <div class="grid2">
-          <label class="fld">開始<input type="time" id="nStart" step="900"></label>
-          <label class="fld">終了<input type="time" id="nEnd" step="900"></label>
+          <label class="fld">開始<span id="nStartWrap"></span></label>
+          <label class="fld">終了<span id="nEndWrap"></span></label>
         </div>
         <div class="grid2">
           <label class="fld">募集人数<input type="number" id="nNeed" value="1" min="1"></label>
@@ -630,6 +632,35 @@
   function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  // ネイティブ<input type="time">はiOS Safari等でスタイルを当てると空の箱にしか見えず分かりにくい上、
+  // step属性があっても15分刻みを確実には強制できないため、時・分（00/15/30/45限定）のプルダウンで代替する（2026-10-14）
+  function makeTimePicker_(initialHHMM) {
+    var parts = String(initialHHMM || '00:00').split(':');
+    var ih = parseInt(parts[0], 10) || 0;
+    var im = Math.round((parseInt(parts[1], 10) || 0) / 15) * 15;
+    if (im >= 60) { im = 0; ih = (ih + 1) % 24; }
+    var wrap = el('span', 'time-picker');
+    var hSel = document.createElement('select');
+    for (var h = 0; h < 24; h++) {
+      var oh = document.createElement('option');
+      oh.value = String(h).padStart(2, '0'); oh.textContent = oh.value;
+      if (h === ih) oh.selected = true;
+      hSel.appendChild(oh);
+    }
+    var mSel = document.createElement('select');
+    [0, 15, 30, 45].forEach(function (m) {
+      var om = document.createElement('option');
+      om.value = String(m).padStart(2, '0'); om.textContent = om.value;
+      if (m === im) om.selected = true;
+      mSel.appendChild(om);
+    });
+    wrap.appendChild(hSel);
+    wrap.appendChild(document.createTextNode(':'));
+    wrap.appendChild(mSel);
+    wrap.getValue = function () { return hSel.value + ':' + mSel.value; };
+    return wrap;
+  }
   function toast(t) { var m = $('msg'); m.textContent = t; m.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { m.classList.remove('show'); }, 2600); }
 
   // レスポンスが遅いときだけ「読み込み中…」を出す（速い呼び出しでチラつかせないよう400ms遅延させる）
@@ -1009,9 +1040,14 @@
     location.href = 'index.html';
   };
 
+  var NSTART_PICKER = makeTimePicker_('09:00');
+  var NEND_PICKER = makeTimePicker_('09:00');
+  $('nStartWrap').appendChild(NSTART_PICKER);
+  $('nEndWrap').appendChild(NEND_PICKER);
+
   $('addLineBtn').onclick = function () {
     var line = {
-      date: $('nDate').value, start: $('nStart').value, end: $('nEnd').value,
+      date: $('nDate').value, start: NSTART_PICKER.getValue(), end: NEND_PICKER.getValue(),
       what: '', note: $('nNote').value.trim(), category: $('nCat').value
     };
     var count = Number($('nNeed').value) || 1;
