@@ -175,6 +175,7 @@
   .gate-card .forgot { margin-top:16px; }
   .gate-confidential { margin-top:14px; padding-top:12px; border-top:1px dashed var(--line);
                         font-size:11px; color:var(--warn); font-weight:700; line-height:1.6; text-align:center; }
+  .gate-error { margin:-6px 0 14px; font-size:13px; color:var(--warn); font-weight:700; }
   button { font-size:15px; padding:10px 14px; border-radius:999px; border:0; cursor:pointer;
            background:linear-gradient(135deg,#e3001b,#b8001a); color:var(--accent-ink); font-weight:700; }
   button.ghost { background:transparent; color:var(--warn); border:1px solid var(--line); font-weight:500; font-size:13px; padding:7px 10px; }
@@ -234,6 +235,7 @@
         <button type="button" class="pw-eye" id="adminPassEye" aria-label="パスワードを表示"></button>
       </div>
     </div>
+    <p class="gate-error" id="gateError" hidden></p>
     <button id="loginBtn" class="gate-btn">ログイン</button>
     <p class="gate-confidential">この画面の内容（シフト・クルー情報等）を店舗外に共有・転載することは禁止します。</p>
   </div>
@@ -280,8 +282,8 @@
           </label>
         </div>
         <div class="grid2">
-          <label class="fld">開始<input type="time" id="nStart"></label>
-          <label class="fld">終了<input type="time" id="nEnd"></label>
+          <label class="fld">開始<input type="time" id="nStart" step="900"></label>
+          <label class="fld">終了<input type="time" id="nEnd" step="900"></label>
         </div>
         <div class="grid2">
           <label class="fld">募集人数<input type="number" id="nNeed" value="1" min="1"></label>
@@ -636,6 +638,7 @@
     var body = Object.assign({ action: action, adminId: ADMIN_ID, adminPass: ADMIN_PASS }, payload || {});
     PENDING_CALLS++;
     if (!loadingShowTimer) loadingShowTimer = setTimeout(function () { $('loadingBadge').hidden = false; }, 400);
+    var errMsg = null;
     fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
       .then(function (res) {
@@ -643,8 +646,8 @@
         ok && ok(res.data);
       })
       .catch(function (e) {
-        var t = (e && e.message) || 'エラーが発生しました';
-        toast(t);
+        errMsg = (e && e.message) || 'エラーが発生しました';
+        toast(errMsg);
       })
       .then(function () {
         PENDING_CALLS = Math.max(0, PENDING_CALLS - 1);
@@ -652,7 +655,7 @@
           clearTimeout(loadingShowTimer); loadingShowTimer = null;
           $('loadingBadge').hidden = true;
         }
-        always && always();
+        always && always(errMsg);
       });
   }
 
@@ -664,6 +667,7 @@
     if (!ADMIN_ID || !ADMIN_PASS) { toast('IDとパスワードを入力してください'); return; }
     var btn = $('loginBtn');
     if (btn.disabled) return;
+    $('gateError').hidden = true;
     btn.disabled = true;
     btn.innerHTML = '';
     btn.appendChild(el('span', 'spinner'));
@@ -672,9 +676,10 @@
       store('sb_admin_id', ADMIN_ID); store('sb_admin_pass', ADMIN_PASS);
       $('gate').hidden = true; $('app').hidden = false;
       DATA = data; render();
-    }, function () {
+    }, function (errMsg) {
       btn.disabled = false;
       btn.textContent = 'ログイン';
+      if (errMsg) { $('gateError').textContent = errMsg; $('gateError').hidden = false; }
     });
   }
 
@@ -1100,9 +1105,10 @@
     call('adminLoad', null, function (data) {
       $('gate').hidden = true; $('app').hidden = false;
       DATA = data; render();
-    }, function () {
+    }, function (errMsg) {
       autoBtn.disabled = false;
       autoBtn.textContent = 'ログイン';
+      if (errMsg) { $('gateError').textContent = errMsg; $('gateError').hidden = false; }
     });
   }
 </script>

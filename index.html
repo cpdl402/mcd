@@ -148,6 +148,7 @@
   .forgot a { color:var(--sub); font-size:12px; text-decoration:underline; }
   .gate-confidential { margin-top:14px; padding-top:12px; border-top:1px dashed var(--line);
                         font-size:11px; color:var(--warn); font-weight:700; line-height:1.6; text-align:center; }
+  .gate-error { margin:-6px 0 14px; font-size:13px; color:var(--warn); font-weight:700; }
   .weekbar { position:fixed; left:0; right:0; bottom:0; background:#fffdf6; border-top:1px solid var(--line);
              display:flex; gap:6px; padding:8px 10px; overflow-x:auto; z-index:4;
              box-shadow:0 -2px 8px rgba(0,0,0,.05); }
@@ -173,6 +174,7 @@
           <button type="button" class="pw-eye" id="passEye" aria-label="パスワードを表示"></button>
         </div>
       </div>
+      <p class="gate-error" id="gateError" hidden></p>
       <button id="enter" class="gate-btn">ログイン</button>
       <p class="forgot"><a href="admin.html">管理者画面はこちら</a></p>
       <p class="gate-confidential">この画面の内容（シフト情報・氏名等）を店舗外に共有・転載することは禁止します。</p>
@@ -274,7 +276,10 @@
       .catch(function (e) {
         var t = (e && e.message) || 'エラーが発生しました';
         if (/Failed to fetch|NetworkError|JSON/.test(t)) t = '通信できませんでした。電波の良い所でもう一度お試しください';
-        if (t.indexOf('パスワード') >= 0) { store('sb_pass', ''); $('board').hidden = true; $('gate').hidden = false; }
+        if (t.indexOf('パスワード') >= 0) {
+          store('sb_pass', ''); $('board').hidden = true; $('gate').hidden = false;
+          $('gateError').textContent = t; $('gateError').hidden = false;
+        }
         toast(t);
         render();
       })
@@ -286,6 +291,7 @@
     if (!PASS) return;
     var btn = $('enter');
     if (btn.disabled) return;
+    $('gateError').hidden = true;
     btn.disabled = true;
     btn.innerHTML = '';
     btn.appendChild(el('span', 'spinner'));
@@ -491,10 +497,10 @@
     if (openApply === l.id) {
       var form = el('div', 'apply-form');
       var f1 = el('div', 'fld'); f1.appendChild(el('span', null, '開始'));
-      var i1 = document.createElement('input'); i1.type = 'time'; i1.value = l.start; i1.min = l.start; i1.max = l.end;
+      var i1 = document.createElement('input'); i1.type = 'time'; i1.step = 900; i1.value = l.start; i1.min = l.start; i1.max = l.end;
       f1.appendChild(i1);
       var f2 = el('div', 'fld'); f2.appendChild(el('span', null, '終了'));
-      var i2 = document.createElement('input'); i2.type = 'time'; i2.value = l.end; i2.min = l.start; i2.max = l.end;
+      var i2 = document.createElement('input'); i2.type = 'time'; i2.step = 900; i2.value = l.end; i2.min = l.start; i2.max = l.end;
       f2.appendChild(i2);
       form.appendChild(f1); form.appendChild(f2);
       var bGo = el('button', null, '確定');
