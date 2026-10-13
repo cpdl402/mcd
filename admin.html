@@ -161,6 +161,10 @@
   .gate-btn { width:100%; padding:13px 14px; border-radius:999px; font-size:15px;
               background:linear-gradient(135deg,#e3001b,#b8001a); color:#fff;
               box-shadow:0 10px 20px rgba(200,0,20,.35); }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .spinner { display:inline-block; width:14px; height:14px; margin-right:6px; vertical-align:-2px;
+             border:2px solid rgba(255,255,255,.45); border-top-color:#fff; border-radius:50%;
+             animation:spin .6s linear infinite; }
   .gate-card .forgot { margin-top:16px; }
   button { font-size:15px; padding:10px 14px; border-radius:999px; border:0; cursor:pointer;
            background:linear-gradient(135deg,#e3001b,#b8001a); color:var(--accent-ink); font-weight:700; }
@@ -578,7 +582,7 @@
 
   // レスポンスが遅いときだけ「読み込み中…」を出す（速い呼び出しでチラつかせないよう400ms遅延させる）
   var PENDING_CALLS = 0, loadingShowTimer = null;
-  function call(action, payload, ok) {
+  function call(action, payload, ok, always) {
     var body = Object.assign({ action: action, adminId: ADMIN_ID, adminPass: ADMIN_PASS }, payload || {});
     PENDING_CALLS++;
     if (!loadingShowTimer) loadingShowTimer = setTimeout(function () { $('loadingIndicator').hidden = false; }, 400);
@@ -598,6 +602,7 @@
           clearTimeout(loadingShowTimer); loadingShowTimer = null;
           $('loadingIndicator').hidden = true;
         }
+        always && always();
       });
   }
 
@@ -607,10 +612,19 @@
     ADMIN_ID = $('adminId').value.trim();
     ADMIN_PASS = $('adminPass').value;
     if (!ADMIN_ID || !ADMIN_PASS) { toast('IDとパスワードを入力してください'); return; }
+    var btn = $('loginBtn');
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.innerHTML = '';
+    btn.appendChild(el('span', 'spinner'));
+    btn.appendChild(document.createTextNode('ログイン中…'));
     call('adminLoad', null, function (data) {
       store('sb_admin_id', ADMIN_ID); store('sb_admin_pass', ADMIN_PASS);
       $('gate').hidden = true; $('app').hidden = false;
       DATA = data; render();
+    }, function () {
+      btn.disabled = false;
+      btn.textContent = 'ログイン';
     });
   }
 
@@ -859,9 +873,17 @@
   if (sId && sPass) {
     $('adminId').value = sId; $('adminPass').value = sPass;
     ADMIN_ID = sId; ADMIN_PASS = sPass;
+    var autoBtn = $('loginBtn');
+    autoBtn.disabled = true;
+    autoBtn.innerHTML = '';
+    autoBtn.appendChild(el('span', 'spinner'));
+    autoBtn.appendChild(document.createTextNode('ログイン中…'));
     call('adminLoad', null, function (data) {
       $('gate').hidden = true; $('app').hidden = false;
       DATA = data; render();
+    }, function () {
+      autoBtn.disabled = false;
+      autoBtn.textContent = 'ログイン';
     });
   }
 </script>

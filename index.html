@@ -135,6 +135,10 @@
   .gate-btn { width:100%; padding:13px 14px; border-radius:999px; font-size:15px;
               background:linear-gradient(135deg,#e3001b,#b8001a); color:#fff;
               box-shadow:0 10px 20px rgba(200,0,20,.35); }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .spinner { display:inline-block; width:14px; height:14px; margin-right:6px; vertical-align:-2px;
+             border:2px solid rgba(255,255,255,.45); border-top-color:#fff; border-radius:50%;
+             animation:spin .6s linear infinite; }
   .gate-card .forgot { margin-top:16px; }
   .forgot { text-align:center; margin-top:8px; }
   .forgot a { color:var(--sub); font-size:12px; text-decoration:underline; }
@@ -247,7 +251,7 @@
   function norm(s) { return String(s || '').replace(/[\s　]+/g, ''); }
   function toast(t) { var m = $('msg'); m.textContent = t; m.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { m.classList.remove('show'); }, 2600); }
 
-  function call(action, payload, ok) {
+  function call(action, payload, ok, always) {
     var body = Object.assign({ action: action, pass: PASS, me: $('me') ? $('me').value : '' }, payload || {});
     $('list').classList.add('busy');
     fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
@@ -263,15 +267,24 @@
         toast(t);
         render();
       })
-      .then(function () { $('list').classList.remove('busy'); });
+      .then(function () { $('list').classList.remove('busy'); always && always(); });
   }
 
   function enter() {
     PASS = $('pass').value.trim();
     if (!PASS) return;
+    var btn = $('enter');
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.innerHTML = '';
+    btn.appendChild(el('span', 'spinner'));
+    btn.appendChild(document.createTextNode('ログイン中…'));
     call('load', null, function () {
       store('sb_pass', PASS);
       $('gate').hidden = true; $('board').hidden = false;
+    }, function () {
+      btn.disabled = false;
+      btn.textContent = 'ログイン';
     });
   }
 
