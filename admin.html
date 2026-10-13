@@ -23,7 +23,10 @@
   .topbar-brand-text { display:none; flex-direction:column; line-height:1.15; }
   .topbar-brand-word { font-size:12px; font-weight:800; color:#fff; white-space:nowrap; }
   .topbar-brand-sub { font-size:9px; font-weight:600; color:#fff; opacity:.85; white-space:nowrap; }
-  .loading-indicator { font-size:11px; color:#fff; opacity:.85; white-space:nowrap; }
+  .loading-badge { position:fixed; top:calc(var(--topbar-h) + 10px); left:50%; transform:translateX(-50%);
+                    background:#2a2410; color:#fff; padding:9px 18px; border-radius:999px; font-size:13px;
+                    font-weight:700; display:flex; align-items:center; z-index:25; box-shadow:0 6px 16px rgba(0,0,0,.25);
+                    pointer-events:none; }
   .topbar { background:linear-gradient(135deg,#e3001b,#8f0012); color:#fff; padding:0 16px; font-size:14px; font-weight:700;
             display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
             position:sticky; top:0; z-index:20; height:var(--topbar-h); box-sizing:border-box; }
@@ -244,7 +247,6 @@
       <button type="button" id="viewNegoBtn" data-view="nego">交渉集計</button>
     </div>
     <span class="topbar-right">
-      <span class="loading-indicator" id="loadingIndicator" hidden>読み込み中…</span>
       <button class="ghost" id="refreshBtn" style="color:#fff;border-color:rgba(255,255,255,.55);">更新</button>
     </span>
   </div>
@@ -317,6 +319,7 @@
   </div>
 </div>
 <div class="msg" id="msg"></div>
+<div class="loading-badge" id="loadingBadge" hidden><span class="spinner"></span>読み込み中…</div>
 <div class="weekbar" id="weekbar" hidden></div>
 <div class="modal-overlay" id="negoEditOverlay" hidden>
   <div class="modal-box">
@@ -585,7 +588,7 @@
   function call(action, payload, ok, always) {
     var body = Object.assign({ action: action, adminId: ADMIN_ID, adminPass: ADMIN_PASS }, payload || {});
     PENDING_CALLS++;
-    if (!loadingShowTimer) loadingShowTimer = setTimeout(function () { $('loadingIndicator').hidden = false; }, 400);
+    if (!loadingShowTimer) loadingShowTimer = setTimeout(function () { $('loadingBadge').hidden = false; }, 400);
     fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
       .then(function (res) {
@@ -600,7 +603,7 @@
         PENDING_CALLS = Math.max(0, PENDING_CALLS - 1);
         if (PENDING_CALLS === 0) {
           clearTimeout(loadingShowTimer); loadingShowTimer = null;
-          $('loadingIndicator').hidden = true;
+          $('loadingBadge').hidden = true;
         }
         always && always();
       });
