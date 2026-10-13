@@ -128,6 +128,10 @@
   input, select { font-size:15px; padding:9px 11px; border:1px solid var(--line); border-radius:8px; background:#fff; width:100%; min-width:0; }
   label.fld { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--sub); font-weight:600; min-width:0; }
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; min-width:0; }
+  @media (max-width:460px) {
+    /* スマホ幅ではネイティブの日付・時刻ピッカーが2カラムに収まらず崩れるため、1カラムに積む */
+    .grid2 { grid-template-columns:1fr; }
+  }
   /* ---- M Crew ログインゲート ---- */
   .gate-screen {
     position:fixed; inset:0; z-index:50;
@@ -169,6 +173,8 @@
              border:2px solid rgba(255,255,255,.45); border-top-color:#fff; border-radius:50%;
              animation:spin .6s linear infinite; }
   .gate-card .forgot { margin-top:16px; }
+  .gate-confidential { margin-top:14px; padding-top:12px; border-top:1px dashed var(--line);
+                        font-size:11px; color:var(--warn); font-weight:700; line-height:1.6; text-align:center; }
   button { font-size:15px; padding:10px 14px; border-radius:999px; border:0; cursor:pointer;
            background:linear-gradient(135deg,#e3001b,#b8001a); color:var(--accent-ink); font-weight:700; }
   button.ghost { background:transparent; color:var(--warn); border:1px solid var(--line); font-weight:500; font-size:13px; padding:7px 10px; }
@@ -229,6 +235,7 @@
       </div>
     </div>
     <button id="loginBtn" class="gate-btn">ログイン</button>
+    <p class="gate-confidential">この画面の内容（シフト・クルー情報等）を店舗外に共有・転載することは禁止します。</p>
   </div>
 </div>
 
@@ -355,6 +362,16 @@
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="imagePreviewOverlay" hidden>
+  <div class="modal-box" style="max-width:92vw;max-height:90vh;overflow:auto;">
+    <h3>画像を保存</h3>
+    <p style="font-size:13px;color:var(--sub);margin:0 0 10px;">画像を長押しして「写真に保存」などを選んでください。</p>
+    <img id="imagePreviewImg" style="width:100%;border-radius:8px;border:1px solid var(--line);display:block;">
+    <div class="modal-actions">
+      <button type="button" class="ghost" id="imagePreviewCloseBtn">閉じる</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="fillOverlay" hidden>
   <div class="modal-box">
     <h3 id="fillModalTitle"></h3>
@@ -378,6 +395,13 @@
   var WEEK_JA = ['日', '月', '火', '水', '木', '金', '土'];
   var NEGO_SECTIONS = ['新規', '延ばし'];
   var CATEGORIES = ['FC', 'OP', 'デリバリー', 'その他'];
+  // 画面の種別配色（--fc-bg等）と揃えた、画像出力（canvas）用の色定義
+  var CAT_COLORS = {
+    'FC': { bg: '#ffe1ec', ink: '#9c2a54' },
+    'OP': { bg: '#dbe8ff', ink: '#27508c' },
+    'デリバリー': { bg: '#fff3cf', ink: '#8a6a12' },
+    'その他': { bg: '#eee7d6', ink: '#6b6248' }
+  };
   function negoReplyLabel(r) { return r === '無理' ? '無理' : r === 'IN' ? 'IN可能' : r === '未定' ? '未定' : '未回答'; }
   function switchView(v) {
     VIEW = v;
@@ -522,10 +546,9 @@
   }
   function closeNegoEdit_() { $('negoEditOverlay').hidden = true; NEGO_EDIT_TARGET = null; }
   var FILL_TARGET = null;
-  function openFillModal_(l, slotNo) {
+  function openFillModal_(l) {
     FILL_TARGET = l;
-    var slotLabel = l.need > 1 ? '（' + slotNo + '/' + l.need + '枠目）' : '';
-    $('fillModalTitle').textContent = l.date + ' ' + l.start + '〜' + l.end + slotLabel;
+    $('fillModalTitle').textContent = l.date + ' ' + l.start + '〜' + l.end;
     $('fillName').value = '';
     $('fillOverlay').hidden = false;
     $('fillName').focus();
@@ -696,17 +719,15 @@
 
       var apTd = document.createElement('td');
       apTd.className = 'ap-list';
-      // 定員欄は廃止し、必要人数の分だけスロットを並べて表示する（埋まっていれば氏名、未充足なら「○ 募集中」）。
-      // 複数枠が同時に未充足のときは「募集中」が複数行並ぶため、見分けられるよう何枠目かを添える（2026-10-14）
-      for (let si = 0; si < l.need; si++) {
+      // 定員欄は廃止し、必要人数の分だけスロットを並べて表示する（埋まっていれば氏名、未充足なら「○ 募集中」）
+      for (var si = 0; si < l.need; si++) {
         if (si < full.length) {
           apTd.appendChild(apRow_(l, full[si], '● ' + full[si].name, 'ap-full'));
         } else {
-          let slotNo = si + 1;
           var openRow = el('div', 'ap-row');
-          openRow.appendChild(el('span', 'ap-open', l.need > 1 ? '○ 募集中（' + slotNo + '/' + l.need + '）' : '○ 募集中'));
+          openRow.appendChild(el('span', 'ap-open', '○ 募集中'));
           var fillBtn = el('button', 'ap-fill-btn', '追加');
-          fillBtn.onclick = function () { openFillModal_(l, slotNo); };
+          fillBtn.onclick = function () { openFillModal_(l); };
           openRow.appendChild(fillBtn);
           apTd.appendChild(openRow);
         }
@@ -798,9 +819,11 @@
       partial.forEach(function (a) { crewParts.push('(一部)' + a.name); });
       var crewLines = wrapText_(mctx, crewParts.join('、'), cols[4].w - 16);
       var what = (l.what && l.what.indexOf('搬入') >= 0) ? l.what : '';
+      var cat = l.category || 'その他';
       return {
-        cells: [l.label, l.start + '〜' + l.end, l.category || 'その他', what],
+        cells: [l.label, l.start + '〜' + l.end, cat, what],
         crewLines: crewLines,
+        color: CAT_COLORS[cat] || CAT_COLORS['その他'],
         h: Math.max(lineH + rowPad, crewLines.length * lineH + rowPad)
       };
     });
@@ -831,18 +854,22 @@
     y += headH;
 
     rows.forEach(function (r, i) {
-      ctx.fillStyle = i % 2 === 0 ? '#fffdf6' : '#fff6de';
+      // 種別（FC/OP/デリバリー等）の配色で行全体を塗り、画像だけでも一目で種別が分かるようにする（2026-10-14）
+      ctx.fillStyle = r.color.bg;
       ctx.fillRect(padX, y, tableW, r.h);
       ctx.strokeStyle = '#f0e4b8';
       ctx.strokeRect(padX + 0.5, y + 0.5, tableW - 1, r.h - 1);
 
-      ctx.fillStyle = '#2a2410';
       ctx.font = '13px sans-serif';
       var cx = padX;
       r.cells.forEach(function (text, ci) {
+        if (ci === 2) { ctx.font = 'bold 13px sans-serif'; ctx.fillStyle = r.color.ink; }
+        else { ctx.font = '13px sans-serif'; ctx.fillStyle = '#2a2410'; }
         ctx.fillText(text, cx + 8, y + r.h / 2 + 4);
         cx += cols[ci].w;
       });
+      ctx.font = '13px sans-serif';
+      ctx.fillStyle = '#2a2410';
       r.crewLines.forEach(function (line, li) {
         var ly = y + rowPad / 2 + lineH * (li + 1) - 3;
         ctx.fillText(line, cx + 8, ly);
@@ -850,16 +877,38 @@
       y += r.h;
     });
 
+    var filename = '募集ライン_' + weekLabel.replace(/\s/g, '') + '.png';
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
     canvas.toBlob(function (blob) {
+      if (!blob) { showImagePreview_(canvas.toDataURL('image/png')); return; }
+      // スマホ（特にiOS Safari）はdownload属性でのダウンロードが機能しないことがあるため、
+      // 可能ならWeb Share APIで共有シート（「画像を保存」）を出す。使えない場合は画像を表示して長押し保存してもらう（2026-10-14）
+      if (isMobile && navigator.canShare && typeof File !== 'undefined') {
+        var file = new File([blob], filename, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: filename }).catch(function () {
+            showImagePreview_(canvas.toDataURL('image/png'));
+          });
+          return;
+        }
+      }
+      if (isMobile) { showImagePreview_(canvas.toDataURL('image/png')); return; }
+
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
       a.href = url;
-      a.download = '募集ライン_' + weekLabel.replace(/\s/g, '') + '.png';
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
     });
+  }
+
+  function showImagePreview_(dataUrl) {
+    $('imagePreviewImg').src = dataUrl;
+    $('imagePreviewOverlay').hidden = false;
   }
 
   function td_(text) {
@@ -930,6 +979,8 @@
     call('adminNegoUpdateStatus', { id: r.id, contacted: contacted, reply: reply, note: note },
       function (data) { NEGO = data; renderNego(); });
   };
+  $('imagePreviewCloseBtn').onclick = function () { $('imagePreviewOverlay').hidden = true; };
+  $('imagePreviewOverlay').onclick = function (e) { if (e.target === $('imagePreviewOverlay')) $('imagePreviewOverlay').hidden = true; };
   $('fillCancelBtn').onclick = closeFillModal_;
   $('fillOverlay').onclick = function (e) { if (e.target === $('fillOverlay')) closeFillModal_(); };
   $('fillName').onkeydown = function (e) { if (e.key === 'Enter') $('fillOkBtn').click(); };
@@ -956,12 +1007,15 @@
   $('addLineBtn').onclick = function () {
     var line = {
       date: $('nDate').value, start: $('nStart').value, end: $('nEnd').value,
-      what: '', need: Number($('nNeed').value) || 1,
-      note: $('nNote').value.trim(), category: $('nCat').value
+      what: '', note: $('nNote').value.trim(), category: $('nCat').value
     };
+    var count = Number($('nNeed').value) || 1;
     if (!line.date || !line.start || !line.end) { toast('日付・時間は必須です'); return; }
-    call('adminAddLine', { line: line }, function (data) {
-      DATA = data; render(); toast('追加しました');
+    // 同じ日付・時間・種別でも「別の募集枠」として扱いたいため、人数分だけ別々のラインを作る
+    // （2026-10-14変更。以前は1ラインに募集人数=Nを持たせていたが、画像出力や一覧で「募集中」が
+    // 1マスに複数並んで見分けにくいという指摘を受け、人数分バラしてそれぞれ1人ずつの独立したラインにした）
+    call('adminAddLine', { line: line, count: count }, function (data) {
+      DATA = data; render(); toast(count > 1 ? (count + '件追加しました') : '追加しました');
       $('nNote').value = '';
       closeSidebar();
     });

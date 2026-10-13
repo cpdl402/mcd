@@ -146,6 +146,8 @@
   .gate-card .forgot { margin-top:16px; }
   .forgot { text-align:center; margin-top:8px; }
   .forgot a { color:var(--sub); font-size:12px; text-decoration:underline; }
+  .gate-confidential { margin-top:14px; padding-top:12px; border-top:1px dashed var(--line);
+                        font-size:11px; color:var(--warn); font-weight:700; line-height:1.6; text-align:center; }
   .weekbar { position:fixed; left:0; right:0; bottom:0; background:#fffdf6; border-top:1px solid var(--line);
              display:flex; gap:6px; padding:8px 10px; overflow-x:auto; z-index:4;
              box-shadow:0 -2px 8px rgba(0,0,0,.05); }
@@ -173,6 +175,7 @@
       </div>
       <button id="enter" class="gate-btn">ログイン</button>
       <p class="forgot"><a href="admin.html">管理者画面はこちら</a></p>
+      <p class="gate-confidential">この画面の内容（シフト情報・氏名等）を店舗外に共有・転載することは禁止します。</p>
     </div>
   </div>
   <div id="board" hidden>
