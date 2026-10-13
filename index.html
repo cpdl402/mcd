@@ -25,6 +25,10 @@
   .appbar-sub { font-size:12px; color:var(--sub); font-weight:600; }
   .notice { color:var(--sub); font-size:14px; margin:0 0 16px; white-space:pre-wrap; }
   .filter-bar { position:sticky; top:0; background:var(--bg); z-index:2; padding-top:4px; }
+  .view-toggle { display:flex; background:#f3ecd2; border-radius:999px; padding:3px; gap:2px; margin-bottom:6px; }
+  .view-toggle button { flex:1; background:transparent; color:var(--sub); border:none; padding:7px 10px;
+                         border-radius:999px; font-size:13px; font-weight:700; }
+  .view-toggle button.on { background:var(--accent); color:var(--accent-ink); }
   .bar { background:var(--bg); padding:8px 0 10px;
          display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   input[type=text], input[type=password] { font-size:16px; padding:10px 12px; border:1px solid var(--line);
@@ -181,6 +185,10 @@
     </div>
     <p class="notice" id="notice"></p>
     <div class="filter-bar">
+      <div class="view-toggle" id="viewToggle">
+        <button type="button" class="on" data-view="lines">募集一覧</button>
+        <button type="button" data-view="mine">マイシフト</button>
+      </div>
       <div class="bar">
         <input type="text" id="me" placeholder="あなたの名前（シフト表と同じ表記）">
         <button type="button" class="icon-btn" id="filterBtn" aria-label="フィルター">
@@ -232,7 +240,7 @@
   // ▼ GASのウェブアプリURL（/exec で終わる）
   var API_URL = 'https://script.google.com/macros/s/AKfycbznL5E_kKaEBiU8CNkYh4ZBXsIMClbd-t72euVqpzIcv5vbU3x31FIXvSoQiKpKj9Ygng/exec';
 
-  var PASS = '', DATA = null, CAT_SEL = {}, WEEK_KEY = '', openApply = null;
+  var PASS = '', DATA = null, CAT_SEL = {}, WEEK_KEY = '', openApply = null, VIEW = 'lines';
   var TODAY_STR = '';
   function catSelActive_() { return Object.keys(CAT_SEL).some(function (k) { return CAT_SEL[k]; }); }
   var TIME_BANDS = [
@@ -353,14 +361,30 @@
     var list = $('list'); list.innerHTML = '';
     var groups = {}, order = [];
     DATA.lines.forEach(function (l) {
-      if (catSelActive_() && !CAT_SEL[l.category]) return;
-      if (timeSelActive_() && !TIME_BANDS.some(function (b) { return TIME_SEL[b.key] && bandOverlaps_(l, b); })) return;
+      var isMine = !!(l.mine && l.mine.length);
+      var isFull = l.filled >= l.need;
+      var isPastL = l.date < TODAY_STR;
+      if (VIEW === 'mine') {
+        if (!isMine) return;
+      } else {
+        // 自分自身が参加予定で満員になった未来・現在のラインは、募集一覧には出さない
+        // （「マイシフト」側で確認する。2026-10-14追加。過去分はこれまで通り履歴として一覧にも残す）
+        if (isMine && isFull && !isPastL) return;
+        if (catSelActive_() && !CAT_SEL[l.category]) return;
+        if (timeSelActive_() && !TIME_BANDS.some(function (b) { return TIME_SEL[b.key] && bandOverlaps_(l, b); })) return;
+      }
       if (WEEK_KEY && ymd(mondayOf(l.date)) !== WEEK_KEY) return;
       if (!groups[l.date]) { groups[l.date] = { label: l.label, items: [] }; order.push(l.date); }
       groups[l.date].items.push(l);
     });
     renderDayJump(order, WEEK_KEY);
-    if (!order.length) { list.appendChild(el('p', 'empty', '表示できる募集ラインはありません')); return; }
+    if (!order.length) {
+      var emptyMsg = VIEW === 'mine'
+        ? (me ? 'この週に参加予定の募集ラインはありません' : '名前を入力すると、あなたが参加予定の募集ラインが表示されます')
+        : '表示できる募集ラインはありません';
+      list.appendChild(el('p', 'empty', emptyMsg));
+      return;
+    }
 
     order.forEach(function (d) {
       var g = groups[d], sec = el('section', 'day');
@@ -497,6 +521,15 @@
   };
   $('me').oninput = function () { store('sb_me', $('me').value); render(); };
   $('refreshBtn').onclick = function () { call('load'); };
+  $('viewToggle').addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    VIEW = btn.dataset.view;
+    Array.prototype.forEach.call($('viewToggle').children, function (b) {
+      b.classList.toggle('on', b.dataset.view === VIEW);
+    });
+    render();
+  });
   $('chips').addEventListener('click', function (e) {
     var chip = e.target.closest('.chip');
     if (!chip) return;
