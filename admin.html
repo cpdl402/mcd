@@ -276,7 +276,6 @@
           <label class="fld">開始<input type="time" id="nStart"></label>
           <label class="fld">終了<input type="time" id="nEnd"></label>
         </div>
-        <label class="fld">内容<input type="text" id="nWhat" placeholder="例: OTCSS:OTキャッシャー/SOK"></label>
         <div class="grid2">
           <label class="fld">募集人数<input type="number" id="nNeed" value="1" min="1"></label>
           <label class="fld">備考<input type="text" id="nNote"></label>
@@ -928,13 +927,13 @@
   $('addLineBtn').onclick = function () {
     var line = {
       date: $('nDate').value, start: $('nStart').value, end: $('nEnd').value,
-      what: $('nWhat').value.trim(), need: Number($('nNeed').value) || 1,
+      what: '', need: Number($('nNeed').value) || 1,
       note: $('nNote').value.trim(), category: $('nCat').value
     };
-    if (!line.date || !line.start || !line.end || !line.what) { toast('日付・時間・内容は必須です'); return; }
+    if (!line.date || !line.start || !line.end) { toast('日付・時間は必須です'); return; }
     call('adminAddLine', { line: line }, function (data) {
       DATA = data; render(); toast('追加しました');
-      $('nWhat').value = ''; $('nNote').value = '';
+      $('nNote').value = '';
       closeSidebar();
     });
   };
