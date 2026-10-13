@@ -266,14 +266,23 @@
 
   // ネイティブ<input type="time">はstep属性があっても機種によって15分刻みを無視して全分数を選べてしまうため、
   // 時・分（00/15/30/45限定）の2つのプルダウンで確実に15分刻みにする（2026-10-14）
-  function makeTimePicker_(initialHHMM) {
+  function makeTimePicker_(initialHHMM, minHHMM, maxHHMM) {
     var parts = String(initialHHMM || '00:00').split(':');
     var ih = parseInt(parts[0], 10) || 0;
     var im = Math.round((parseInt(parts[1], 10) || 0) / 15) * 15;
     if (im >= 60) { im = 0; ih = (ih + 1) % 24; }
+    // min/maxが渡された場合は、時の選択肢をその範囲内に絞る（例: 11:00〜14:00のラインなら11〜14時のみ表示）。
+    // 範囲ちょうどの境界値（例: 終了=14:00）は必ず選べる必要があるため、時だけで大まかに絞り、
+    // 分まで含めた厳密な範囲チェックはこれまで通りサーバー側（withinRange_）に任せる
+    var minH = 0, maxH = 23;
+    if (minHHMM) minH = parseInt(String(minHHMM).split(':')[0], 10) || 0;
+    if (maxHHMM) {
+      maxH = parseInt(String(maxHHMM).split(':')[0], 10);
+      if (isNaN(maxH)) maxH = 23;
+    }
     var wrap = el('span', 'time-picker');
     var hSel = document.createElement('select');
-    for (var h = 0; h < 24; h++) {
+    for (var h = minH; h <= maxH; h++) {
       var oh = document.createElement('option');
       oh.value = String(h).padStart(2, '0'); oh.textContent = oh.value;
       if (h === ih) oh.selected = true;
@@ -528,10 +537,10 @@
     if (openApply === l.id) {
       var form = el('div', 'apply-form');
       var f1 = el('div', 'fld'); f1.appendChild(el('span', null, '開始'));
-      var i1 = makeTimePicker_(l.start);
+      var i1 = makeTimePicker_(l.start, l.start, l.end);
       f1.appendChild(i1);
       var f2 = el('div', 'fld'); f2.appendChild(el('span', null, '終了'));
-      var i2 = makeTimePicker_(l.end);
+      var i2 = makeTimePicker_(l.end, l.start, l.end);
       f2.appendChild(i2);
       form.appendChild(f1); form.appendChild(f2);
       var bGo = el('button', null, '確定');
