@@ -426,6 +426,13 @@
       if (!groups[l.date]) { groups[l.date] = { label: l.label, items: [] }; order.push(l.date); }
       groups[l.date].items.push(l);
     });
+    // 管理者側では「同じ日付・時間・種別でも別の募集枠」として個別に管理しているが、
+    // スタッフ画面では従来どおり同一条件の枠をまとめて1枚のカードで表示する（2026-10-14、
+    // 「使用者の画面ではまとめて表示するロジックは変えないでおきたい」との要望）。
+    // 「マイシフト」ビューは個々の応募実績をそのまま見せたいのでまとめない
+    if (VIEW !== 'mine') {
+      order.forEach(function (d) { groups[d].items = mergeLines_(groups[d].items); });
+    }
     renderDayJump(order, WEEK_KEY);
     if (!order.length) {
       var emptyMsg = VIEW === 'mine'
@@ -441,6 +448,35 @@
       sec.appendChild(el('h2', null, g.label));
       g.items.forEach(function (l) { sec.appendChild(renderCard(l, me)); });
       list.appendChild(sec);
+    });
+  }
+
+  // 同じ日付・開始・終了・種別・内容の募集ライン（管理者側では別枠として独立している）を、
+  // スタッフ画面の表示だけ1枚のカードにまとめる。応募先IDには空きがあるラインのものを使う
+  function mergeLines_(items) {
+    var map = {}, keyOrder = [];
+    items.forEach(function (l) {
+      var key = l.start + '|' + l.end + '|' + l.category + '|' + l.what;
+      if (!map[key]) { map[key] = []; keyOrder.push(key); }
+      map[key].push(l);
+    });
+    return keyOrder.map(function (key) {
+      var group = map[key];
+      if (group.length === 1) return group[0];
+      var need = 0, filled = 0, names = [], partial = [], mine = [], openId = null;
+      group.forEach(function (l) {
+        need += l.need; filled += l.filled;
+        names = names.concat(l.names || []);
+        partial = partial.concat(l.partial || []);
+        mine = mine.concat(l.mine || []);
+        if (!openId && l.filled < l.need) openId = l.id;
+      });
+      var base = group[0];
+      return {
+        id: openId || base.id, date: base.date, label: base.label,
+        start: base.start, end: base.end, what: base.what, category: base.category,
+        need: need, filled: filled, names: names, partial: partial, mine: mine
+      };
     });
   }
 
