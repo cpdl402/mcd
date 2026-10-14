@@ -197,6 +197,7 @@
   table.lines .reflect-btn { font-size:11px; padding:3px 9px; border-radius:999px; font-weight:700; border:1px solid var(--line); }
   table.lines .reflect-pending { background:#fff3cf; color:#8a6a12; }
   table.lines .reflect-done { background:#e4f6ef; color:#1f6f5c; }
+  table.lines .log-sub { font-size:10px; color:var(--sub); margin-top:3px; white-space:nowrap; }
   table.lines .ap-list { white-space:normal; min-width:160px; }
   table.lines .ap-full { font-size:13px; font-weight:700; color:var(--ink); }
   table.lines .ap-open { font-size:13px; color:var(--sub); font-weight:600; padding:2px 0; }
@@ -750,7 +751,10 @@
       var tr = document.createElement('tr');
       tr.className = 'cat-' + cat + (needsAttention ? ' need-attention' : '');
 
-      tr.appendChild(td_(l.label));
+      var dateTd = document.createElement('td');
+      dateTd.appendChild(el('div', null, l.label));
+      if (l.addedBy) dateTd.appendChild(el('div', 'log-sub', '追加:' + l.addedBy));
+      tr.appendChild(dateTd);
       tr.appendChild(td_(l.start + '〜' + l.end));
 
       var apTd = document.createElement('td');
@@ -786,6 +790,7 @@
         });
       };
       refTd.appendChild(refBtn);
+      if (l.reflected && l.reflectedLog) refTd.appendChild(el('div', 'log-sub', l.reflectedLog));
       tr.appendChild(refTd);
       tr.appendChild(td_(l.note || ''));
 
