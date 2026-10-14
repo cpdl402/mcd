@@ -959,6 +959,7 @@
   }
 
   function apRow_(l, a, text, cls) {
+    var wrap = el('div', 'ap-row-wrap');
     var row = el('div', 'ap-row');
     row.appendChild(el('span', cls, text));
     if (!a.full) {
@@ -977,7 +978,11 @@
       call('adminCancel', { id: l.id, name: a.name }, function (data) { DATA = data; render(); toast('取り消しました'); });
     };
     row.appendChild(x);
-    return row;
+    wrap.appendChild(row);
+    // 管理者が代理登録した応募（adminApply）は、応募シートのメモに「誰が・いつ」が入っているので表示する
+    // （スタッフ本人が応募した分はメモが空なので何も出ない）
+    if (a.memo) wrap.appendChild(el('div', 'log-sub', a.memo));
+    return wrap;
   }
 
   $('loginBtn').onclick = login;
