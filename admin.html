@@ -116,6 +116,20 @@
   .nego-time-range { display:flex; align-items:center; gap:8px; margin-top:5px; }
   .nego-time-range input[type="time"] { flex:1; padding:7px 9px; }
   .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
+  /* アカウント管理（2026-10-16追加）: PC幅でも横スクロールが出ないよう、固定幅の表ではなく
+     折り返し可能なflexの行で一覧を組む */
+  .account-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px 0;
+                  border-bottom:1px solid var(--line); }
+  .account-row:last-child { border-bottom:none; }
+  .account-id { font-weight:800; font-size:14px; min-width:90px; word-break:break-all; }
+  .account-meta { font-size:11px; color:var(--sub); }
+  .account-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:#eee7d6; color:#6b6248; }
+  .account-badge.on { background:#e4f6ef; color:#1f6f5c; }
+  .account-actions { display:flex; gap:6px; flex-wrap:wrap; margin-left:auto; }
+  .account-actions button { font-size:11px; padding:5px 10px; }
+  .accounts-add-form { margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
+  .fld-title { font-size:13px; font-weight:800; color:var(--ink); margin-bottom:8px; }
+  .chk-row { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--sub); font-weight:600; margin-bottom:10px; }
   .weekbar { position:fixed; left:0; right:0; bottom:0; background:#fffdf6; border-top:1px solid var(--line);
              display:flex; gap:6px; padding:8px 10px; overflow-x:auto; z-index:4;
              box-shadow:0 -2px 8px rgba(0,0,0,.05); }
@@ -270,31 +284,7 @@
       <span class="sidebar-title">Menu</span>
       <button type="button" class="sidebar-close" id="sidebarClose" aria-label="閉じる">×</button>
     </div>
-    <details class="panel" id="newlinePanel">
-      <summary>募集ラインを追加</summary>
-      <div class="newline-form" style="margin-top:12px;">
-        <div class="grid2">
-          <label class="fld">日付<input type="date" id="nDate"></label>
-          <label class="fld">区分
-            <select id="nCat">
-              <option value="FC">FC</option>
-              <option value="OP">OP</option>
-              <option value="デリバリー">デリバリー</option>
-              <option value="その他">その他</option>
-            </select>
-          </label>
-        </div>
-        <div class="grid2">
-          <label class="fld">開始<span id="nStartWrap"></span></label>
-          <label class="fld">終了<span id="nEndWrap"></span></label>
-        </div>
-        <div class="grid2">
-          <label class="fld">募集人数<input type="number" id="nNeed" value="1" min="1"></label>
-          <label class="fld">備考<input type="text" id="nNote"></label>
-        </div>
-        <button id="addLineBtn">追加する</button>
-      </div>
-    </details>
+    <button class="ghost" id="openAddLineBtn" style="width:100%; margin-bottom:10px;">募集ラインを追加</button>
 
     <details class="panel" id="bulkImportPanel">
       <summary>まとめて挿入（ファイルから）</summary>
@@ -307,15 +297,8 @@
       </div>
     </details>
 
-    <details class="panel" id="adminPanel">
-      <summary>管理者を追加</summary>
-      <div class="newline-form" style="margin-top:12px;">
-        <label class="fld">新しい管理者ID<input type="text" id="aNewId"></label>
-        <label class="fld">新しいパスワード<input type="text" id="aNewPass"></label>
-        <button id="addAdminBtn">管理者を追加する</button>
-      </div>
-    </details>
-
+    <button class="ghost" id="openPwChangeBtn" style="width:100%; margin-top:8px;">パスワードを変更</button>
+    <button class="ghost" id="openAccountsBtn" style="width:100%; margin-top:8px;" hidden>アカウント管理</button>
     <button class="ghost" id="exportImageBtn" style="width:100%; margin-top:8px;">この週を画像で保存</button>
     <button class="ghost" id="logoutBtn" style="width:100%; margin-top:8px;">ログアウト</button>
   </div>
@@ -374,6 +357,108 @@
     <img id="imagePreviewImg" style="width:100%;border-radius:8px;border:1px solid var(--line);display:block;">
     <div class="modal-actions">
       <button type="button" class="ghost" id="imagePreviewCloseBtn">閉じる</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="addLineOverlay" hidden>
+  <div class="modal-box" style="max-width:400px;">
+    <h3>募集ラインを追加</h3>
+    <div class="grid2">
+      <label class="fld">日付<input type="date" id="nDate"></label>
+      <label class="fld">区分
+        <select id="nCat">
+          <option value="FC">FC</option>
+          <option value="OP">OP</option>
+          <option value="デリバリー">デリバリー</option>
+          <option value="その他">その他</option>
+        </select>
+      </label>
+    </div>
+    <div class="grid2">
+      <label class="fld">開始<span id="nStartWrap"></span></label>
+      <label class="fld">終了<span id="nEndWrap"></span></label>
+    </div>
+    <div class="grid2">
+      <label class="fld">募集人数<input type="number" id="nNeed" value="1" min="1"></label>
+      <label class="fld">備考<input type="text" id="nNote"></label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="ghost" id="addLineCancelBtn">キャンセル</button>
+      <button type="button" id="addLineBtn">追加する</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="editLineOverlay" hidden>
+  <div class="modal-box" style="max-width:400px;">
+    <h3>募集ラインを編集</h3>
+    <div class="grid2">
+      <label class="fld">日付<input type="date" id="eDate"></label>
+      <label class="fld">区分
+        <select id="eCat">
+          <option value="FC">FC</option>
+          <option value="OP">OP</option>
+          <option value="デリバリー">デリバリー</option>
+          <option value="その他">その他</option>
+        </select>
+      </label>
+    </div>
+    <div class="grid2">
+      <label class="fld">開始<span id="eStartWrap"></span></label>
+      <label class="fld">終了<span id="eEndWrap"></span></label>
+    </div>
+    <div class="grid2">
+      <label class="fld">募集人数<input type="number" id="eNeed" min="1"></label>
+      <label class="fld">備考<input type="text" id="eNote"></label>
+    </div>
+    <label class="fld">内容<input type="text" id="eWhat"></label>
+    <div class="modal-actions">
+      <button type="button" class="ghost" id="editLineCancelBtn">キャンセル</button>
+      <button type="button" id="editLineSaveBtn">保存する</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="pwChangeOverlay" hidden>
+  <div class="modal-box">
+    <h3>パスワードを変更</h3>
+    <label class="fld"><span>新しいパスワード</span>
+      <input type="text" id="pwChangeNew" placeholder="新しいパスワード">
+    </label>
+    <label class="fld"><span>確認用（もう一度入力）</span>
+      <input type="text" id="pwChangeConfirm" placeholder="もう一度入力">
+    </label>
+    <div class="modal-actions">
+      <button type="button" class="ghost" id="pwChangeCancelBtn">キャンセル</button>
+      <button type="button" id="pwChangeOkBtn">変更する</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="accountsOverlay" hidden>
+  <div class="modal-box" style="max-width:480px; max-height:85vh; overflow-y:auto;">
+    <div class="modal-head">
+      <span class="modal-title">アカウント管理</span>
+      <button type="button" class="modal-close" id="accountsCloseBtn" aria-label="閉じる">×</button>
+    </div>
+    <div id="accountsList"></div>
+    <div class="accounts-add-form">
+      <div class="fld-title">新しいアカウントを追加</div>
+      <div class="grid2">
+        <label class="fld">管理者ID<input type="text" id="acctNewId"></label>
+        <label class="fld">パスワード<input type="text" id="acctNewPass"></label>
+      </div>
+      <label class="chk-row"><input type="checkbox" id="acctNewCanManage"> アカウント管理権限を付与する</label>
+      <button type="button" id="acctAddBtn" style="width:100%;">追加する</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="acctResetOverlay" hidden>
+  <div class="modal-box">
+    <h3 id="acctResetTitle"></h3>
+    <label class="fld"><span>新しいパスワード</span>
+      <input type="text" id="acctResetPass" placeholder="新しいパスワード">
+    </label>
+    <div class="modal-actions">
+      <button type="button" class="ghost" id="acctResetCancelBtn">キャンセル</button>
+      <button type="button" id="acctResetOkBtn">リセットする</button>
     </div>
   </div>
 </div>
@@ -707,7 +792,7 @@
     call('adminLoad', null, function (data) {
       store('sb_admin_id', ADMIN_ID); store('sb_admin_pass', ADMIN_PASS);
       $('gate').hidden = true; $('app').hidden = false;
-      DATA = data; render();
+      DATA = Object.assign({}, DATA, data); render();
     }, function (errMsg) {
       btn.disabled = false;
       btn.textContent = 'ログイン';
@@ -716,13 +801,14 @@
   }
 
   function loadAll() {
-    call('adminLoad', null, function (data) { DATA = data; render(); });
+    call('adminLoad', null, function (data) { DATA = Object.assign({}, DATA, data); render(); });
   }
 
   function render() {
     var list = $('list');
     list.innerHTML = '';
     if (!DATA) return;
+    $('openAccountsBtn').hidden = !DATA.canManageAccounts;
 
     var weeks = buildWeeks(DATA.lines);
     if (!WEEK_KEY || !weeks.some(function (w) { return w.key === WEEK_KEY; })) {
@@ -785,7 +871,7 @@
       var refBtn = el('button', 'reflect-btn ' + (l.reflected ? 'reflect-done' : 'reflect-pending'), l.reflected ? '済' : '未反映');
       refBtn.onclick = function () {
         call('adminMarkReflected', { id: l.id }, function (data) {
-          DATA = data; render();
+          DATA = Object.assign({}, DATA, data); render();
           toast(l.reflected ? '未反映に戻しました' : '正規スケジュールへの反映済みにしました');
         });
       };
@@ -795,10 +881,15 @@
       tr.appendChild(td_(l.note || ''));
 
       var opTd = document.createElement('td');
+      opTd.style.whiteSpace = 'nowrap';
+      var editBtn = el('button', 'ghost', '編集');
+      editBtn.style.marginRight = '4px';
+      editBtn.onclick = function () { openEditLineModal_(l); };
+      opTd.appendChild(editBtn);
       var del = el('button', 'ghost', '削除');
       del.onclick = function () {
         if (!confirm('削除しますか？\n' + l.date + ' ' + l.start + '〜' + l.end + ' ' + l.what)) return;
-        call('adminDeleteLine', { id: l.id }, function (data) { DATA = data; render(); toast('削除しました'); });
+        call('adminDeleteLine', { id: l.id }, function (data) { DATA = Object.assign({}, DATA, data); render(); toast('削除しました'); });
       };
       opTd.appendChild(del);
       tr.appendChild(opTd);
@@ -966,7 +1057,7 @@
       var ap = el('button', 'ap-approve', a.approved ? '承認解除' : '承認する');
       ap.onclick = function () {
         call('adminApprove', { id: l.id, name: a.name }, function (data) {
-          DATA = data; render();
+          DATA = Object.assign({}, DATA, data); render();
           toast(a.approved ? '承認を解除しました' : '承認しました（必要人数にカウントされます）');
         });
       };
@@ -975,7 +1066,7 @@
     var x = el('button', 'ap-cancel', '取消');
     x.onclick = function () {
       if (!confirm(a.name + 'さんの応募を取り消しますか？\n' + l.date + ' ' + l.start + '〜' + l.end + ' ' + l.what)) return;
-      call('adminCancel', { id: l.id, name: a.name }, function (data) { DATA = data; render(); toast('取り消しました'); });
+      call('adminCancel', { id: l.id, name: a.name }, function (data) { DATA = Object.assign({}, DATA, data); render(); toast('取り消しました'); });
     };
     row.appendChild(x);
     wrap.appendChild(row);
@@ -1037,7 +1128,7 @@
     if (!name) { toast('氏名を入力してください'); return; }
     closeFillModal_();
     call('adminApply', { id: l.id, name: name }, function (data) {
-      DATA = data; render();
+      DATA = Object.assign({}, DATA, data); render();
       toast(name + 'さんを追加しました');
     });
   };
@@ -1050,10 +1141,18 @@
     location.href = 'index.html';
   };
 
+  // ---- 募集ラインを追加（モーダル化。2026-10-16、サイドバー埋め込み式だと入力しづらいとの指摘対応） ----
   var NSTART_PICKER = makeTimePicker_('09:00');
   var NEND_PICKER = makeTimePicker_('09:00');
   $('nStartWrap').appendChild(NSTART_PICKER);
   $('nEndWrap').appendChild(NEND_PICKER);
+
+  $('openAddLineBtn').onclick = function () {
+    closeSidebar();
+    $('addLineOverlay').hidden = false;
+  };
+  $('addLineCancelBtn').onclick = function () { $('addLineOverlay').hidden = true; };
+  $('addLineOverlay').onclick = function (e) { if (e.target === $('addLineOverlay')) $('addLineOverlay').hidden = true; };
 
   $('addLineBtn').onclick = function () {
     var line = {
@@ -1066,9 +1165,139 @@
     // （2026-10-14変更。以前は1ラインに募集人数=Nを持たせていたが、画像出力や一覧で「募集中」が
     // 1マスに複数並んで見分けにくいという指摘を受け、人数分バラしてそれぞれ1人ずつの独立したラインにした）
     call('adminAddLine', { line: line, count: count }, function (data) {
-      DATA = data; render(); toast(count > 1 ? (count + '件追加しました') : '追加しました');
+      DATA = Object.assign({}, DATA, data); render(); toast(count > 1 ? (count + '件追加しました') : '追加しました');
       $('nNote').value = '';
-      closeSidebar();
+      $('addLineOverlay').hidden = true;
+    });
+  };
+
+  // ---- 募集ラインを編集（2026-10-16追加） ----
+  var ESTART_PICKER = null, EEND_PICKER = null, EDIT_TARGET_ID = null;
+  function openEditLineModal_(l) {
+    EDIT_TARGET_ID = l.id;
+    $('eDate').value = l.date.replace(/\//g, '-');
+    $('eCat').value = l.category;
+    $('eNeed').value = l.need;
+    $('eNote').value = l.note || '';
+    $('eWhat').value = l.what || '';
+    $('eStartWrap').innerHTML = '';
+    $('eEndWrap').innerHTML = '';
+    ESTART_PICKER = makeTimePicker_(l.start);
+    EEND_PICKER = makeTimePicker_(l.end);
+    $('eStartWrap').appendChild(ESTART_PICKER);
+    $('eEndWrap').appendChild(EEND_PICKER);
+    $('editLineOverlay').hidden = false;
+  }
+  $('editLineCancelBtn').onclick = function () { $('editLineOverlay').hidden = true; };
+  $('editLineOverlay').onclick = function (e) { if (e.target === $('editLineOverlay')) $('editLineOverlay').hidden = true; };
+  $('editLineSaveBtn').onclick = function () {
+    if (!EDIT_TARGET_ID) return;
+    var line = {
+      date: $('eDate').value, start: ESTART_PICKER.getValue(), end: EEND_PICKER.getValue(),
+      what: $('eWhat').value.trim(), note: $('eNote').value.trim(), category: $('eCat').value,
+      need: Number($('eNeed').value) || 1
+    };
+    if (!line.date || !line.start || !line.end) { toast('日付・時間は必須です'); return; }
+    call('adminEditLine', { id: EDIT_TARGET_ID, line: line }, function (data) {
+      DATA = Object.assign({}, DATA, data); render(); toast('保存しました');
+      $('editLineOverlay').hidden = true;
+    });
+  };
+
+  // ---- 自分のパスワードを変更（2026-10-16追加。アカウント管理権限の有無に関わらず誰でも可） ----
+  $('openPwChangeBtn').onclick = function () {
+    closeSidebar();
+    $('pwChangeNew').value = ''; $('pwChangeConfirm').value = '';
+    $('pwChangeOverlay').hidden = false;
+  };
+  $('pwChangeCancelBtn').onclick = function () { $('pwChangeOverlay').hidden = true; };
+  $('pwChangeOverlay').onclick = function (e) { if (e.target === $('pwChangeOverlay')) $('pwChangeOverlay').hidden = true; };
+  $('pwChangeOkBtn').onclick = function () {
+    var newPass = $('pwChangeNew').value.trim(), confirmPass = $('pwChangeConfirm').value.trim();
+    if (!newPass) { toast('新しいパスワードを入力してください'); return; }
+    if (newPass !== confirmPass) { toast('確認用のパスワードが一致しません'); return; }
+    call('adminChangeOwnPassword', { newPass: newPass }, function () {
+      ADMIN_PASS = newPass;
+      store('sb_admin_pass', newPass);
+      toast('パスワードを変更しました');
+      $('pwChangeOverlay').hidden = true;
+    });
+  };
+
+  // ---- アカウント管理（2026-10-16追加。アカウント管理権限を持つ管理者のみサイドバーにボタンが出る） ----
+  function renderAccountsList_(accounts) {
+    var box = $('accountsList');
+    box.innerHTML = '';
+    accounts.forEach(function (a) {
+      var row = el('div', 'account-row');
+      row.appendChild(el('span', 'account-id', a.id));
+      row.appendChild(el('span', 'account-meta', a.createdAt));
+      row.appendChild(el('span', 'account-badge' + (a.canManage ? ' on' : ''), a.canManage ? '管理権限あり' : '管理権限なし'));
+      var actions = el('div', 'account-actions');
+      var resetBtn = el('button', 'ghost', 'パスワードリセット');
+      resetBtn.onclick = function () { openAcctReset_(a.id); };
+      actions.appendChild(resetBtn);
+      if (a.id !== 'FY5824') {
+        var permBtn = el('button', 'ghost', a.canManage ? '権限を外す' : '権限を付与');
+        permBtn.onclick = function () {
+          call('adminAccountsSetPermission', { targetId: a.id, canManage: !a.canManage }, function (data) {
+            renderAccountsList_(data.accounts);
+            toast(a.canManage ? '権限を外しました' : '権限を付与しました');
+          });
+        };
+        actions.appendChild(permBtn);
+        if (a.id !== ADMIN_ID) {
+          var delBtn = el('button', 'ghost', '削除');
+          delBtn.onclick = function () {
+            if (!confirm(a.id + ' を削除しますか？')) return;
+            call('adminAccountsDelete', { targetId: a.id }, function (data) {
+              renderAccountsList_(data.accounts);
+              toast('削除しました');
+            });
+          };
+          actions.appendChild(delBtn);
+        }
+      }
+      row.appendChild(actions);
+      box.appendChild(row);
+    });
+  }
+  $('openAccountsBtn').onclick = function () {
+    closeSidebar();
+    call('adminAccountsList', null, function (data) {
+      renderAccountsList_(data.accounts);
+      $('accountsOverlay').hidden = false;
+    });
+  };
+  $('accountsCloseBtn').onclick = function () { $('accountsOverlay').hidden = true; };
+  $('accountsOverlay').onclick = function (e) { if (e.target === $('accountsOverlay')) $('accountsOverlay').hidden = true; };
+  $('acctAddBtn').onclick = function () {
+    var newId = $('acctNewId').value.trim(), newPass = $('acctNewPass').value.trim();
+    var canManage = $('acctNewCanManage').checked;
+    if (!newId || !newPass) { toast('管理者IDとパスワードを入力してください'); return; }
+    call('adminAccountsAdd', { newId: newId, newPass: newPass, canManage: canManage }, function (data) {
+      renderAccountsList_(data.accounts);
+      $('acctNewId').value = ''; $('acctNewPass').value = ''; $('acctNewCanManage').checked = false;
+      toast('追加しました');
+    });
+  };
+  var ACCT_RESET_TARGET = null;
+  function openAcctReset_(id) {
+    ACCT_RESET_TARGET = id;
+    $('acctResetTitle').textContent = id + ' のパスワードをリセット';
+    $('acctResetPass').value = '';
+    $('acctResetOverlay').hidden = false;
+  }
+  $('acctResetCancelBtn').onclick = function () { $('acctResetOverlay').hidden = true; };
+  $('acctResetOverlay').onclick = function (e) { if (e.target === $('acctResetOverlay')) $('acctResetOverlay').hidden = true; };
+  $('acctResetOkBtn').onclick = function () {
+    if (!ACCT_RESET_TARGET) return;
+    var newPass = $('acctResetPass').value.trim();
+    if (!newPass) { toast('新しいパスワードを入力してください'); return; }
+    call('adminAccountsResetPassword', { targetId: ACCT_RESET_TARGET, newPass: newPass }, function (data) {
+      renderAccountsList_(data.accounts);
+      toast('パスワードをリセットしました');
+      $('acctResetOverlay').hidden = true;
     });
   };
 
@@ -1120,7 +1349,7 @@
     goBtn.onclick = function () {
       goBtn.disabled = true;
       call('adminBulkAddLines', { lines: BULK_LINES }, function (data) {
-        DATA = data; render();
+        DATA = Object.assign({}, DATA, data); render();
         toast(BULK_LINES.length + '件のラインを追加しました');
         BULK_LINES = null; box.innerHTML = ''; $('bulkFile').value = '';
         closeSidebar();
@@ -1128,16 +1357,6 @@
     };
     box.appendChild(goBtn);
   }
-
-  $('addAdminBtn').onclick = function () {
-    var newId = $('aNewId').value.trim(), newPass = $('aNewPass').value.trim();
-    if (!newId || !newPass) { toast('新しいIDとパスワードを入力してください'); return; }
-    call('adminAddAdmin', { newId: newId, newPass: newPass }, function () {
-      toast('管理者を追加しました');
-      $('aNewId').value = ''; $('aNewPass').value = '';
-      closeSidebar();
-    });
-  };
 
   var sId = store('sb_admin_id'), sPass = store('sb_admin_pass');
   if (sId && sPass) {
@@ -1150,7 +1369,7 @@
     autoBtn.appendChild(document.createTextNode('ログイン中…'));
     call('adminLoad', null, function (data) {
       $('gate').hidden = true; $('app').hidden = false;
-      DATA = data; render();
+      DATA = Object.assign({}, DATA, data); render();
     }, function (errMsg) {
       autoBtn.disabled = false;
       autoBtn.textContent = 'ログイン';
