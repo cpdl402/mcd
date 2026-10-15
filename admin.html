@@ -212,6 +212,9 @@
   table.lines .reflect-pending { background:#fff3cf; color:#8a6a12; }
   table.lines .reflect-done { background:#e4f6ef; color:#1f6f5c; }
   table.lines .log-sub { font-size:10px; color:var(--sub); margin-top:3px; white-space:nowrap; }
+  .pending-row { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--line); font-size:12px; }
+  .pending-row .pending-text { flex:1; }
+  .pending-row button { font-size:11px; padding:4px 9px; background:transparent; color:var(--warn); border:1px solid var(--line); }
   table.lines .ap-list { white-space:normal; min-width:160px; }
   table.lines .ap-full { font-size:13px; font-weight:700; color:var(--ink); }
   table.lines .ap-open { font-size:13px; color:var(--sub); font-weight:600; padding:2px 0; }
@@ -382,6 +385,8 @@
       <label class="fld">募集人数<input type="number" id="nNeed" value="1" min="1"></label>
       <label class="fld">備考<input type="text" id="nNote"></label>
     </div>
+    <button type="button" class="ghost" id="addLineStageBtn" style="width:100%; margin-top:4px;">+ リストに追加（まとめて登録する場合）</button>
+    <div id="addLinePendingList"></div>
     <div class="modal-actions">
       <button type="button" class="ghost" id="addLineCancelBtn">キャンセル</button>
       <button type="button" id="addLineBtn">追加する</button>
@@ -1149,23 +1154,74 @@
 
   $('openAddLineBtn').onclick = function () {
     closeSidebar();
+    ADD_LINE_PENDING = [];
+    renderAddLinePending_();
     $('addLineOverlay').hidden = false;
   };
   $('addLineCancelBtn').onclick = function () { $('addLineOverlay').hidden = true; };
   $('addLineOverlay').onclick = function (e) { if (e.target === $('addLineOverlay')) $('addLineOverlay').hidden = true; };
 
-  $('addLineBtn').onclick = function () {
+  function readLineForm_() {
     var line = {
       date: $('nDate').value, start: NSTART_PICKER.getValue(), end: NEND_PICKER.getValue(),
       what: '', note: $('nNote').value.trim(), category: $('nCat').value
     };
     var count = Number($('nNeed').value) || 1;
-    if (!line.date || !line.start || !line.end) { toast('日付・時間は必須です'); return; }
+    if (!line.date || !line.start || !line.end) { toast('日付・時間は必須です'); return null; }
+    return { line: line, count: count };
+  }
+
+  // ---- 日付・時間・種別などが異なる複数の募集ラインを、まとめて一括登録できるようにする
+  // （2026-10-16追加。「まとめて追加できるような機能があってもいい」との要望。
+  // 「リストに追加」で入力内容を貯めていき、最後に1回でadminBulkAddLinesへ送る。
+  // 1件も貯めていなければ従来通りその場でadminAddLineする） ----
+  var ADD_LINE_PENDING = [];
+  function renderAddLinePending_() {
+    var box = $('addLinePendingList');
+    box.innerHTML = '';
+    ADD_LINE_PENDING.forEach(function (item, idx) {
+      var row = el('div', 'pending-row');
+      var l = item.line;
+      var text = l.date + ' ' + l.start + '〜' + l.end + ' ' + l.category + (item.count > 1 ? '（' + item.count + '件）' : '') + (l.note ? '／' + l.note : '');
+      row.appendChild(el('span', 'pending-text', text));
+      var rm = el('button', null, '削除');
+      rm.onclick = function () { ADD_LINE_PENDING.splice(idx, 1); renderAddLinePending_(); };
+      row.appendChild(rm);
+      box.appendChild(row);
+    });
+    $('addLineBtn').textContent = ADD_LINE_PENDING.length ? ('まとめて追加する（' + ADD_LINE_PENDING.length + '件）') : '追加する';
+  }
+  $('addLineStageBtn').onclick = function () {
+    var r = readLineForm_();
+    if (!r) return;
+    ADD_LINE_PENDING.push(r);
+    renderAddLinePending_();
+    $('nNote').value = '';
+  };
+
+  $('addLineBtn').onclick = function () {
+    if (ADD_LINE_PENDING.length) {
+      // count>1の行は人数分に展開してadminBulkAddLinesへ渡す（サーバー側でも人数分の自動分割はされるが、
+      // クライアント側でも展開しておくことで「何件送ったか」がそのまま件数として分かりやすい）
+      var lines = [];
+      ADD_LINE_PENDING.forEach(function (item) {
+        for (var i = 0; i < item.count; i++) lines.push(item.line);
+      });
+      call('adminBulkAddLines', { lines: lines }, function (data) {
+        DATA = Object.assign({}, DATA, data); render(); toast(lines.length + '件まとめて追加しました');
+        ADD_LINE_PENDING = []; renderAddLinePending_();
+        $('nNote').value = '';
+        $('addLineOverlay').hidden = true;
+      });
+      return;
+    }
+    var r = readLineForm_();
+    if (!r) return;
     // 同じ日付・時間・種別でも「別の募集枠」として扱いたいため、人数分だけ別々のラインを作る
     // （2026-10-14変更。以前は1ラインに募集人数=Nを持たせていたが、画像出力や一覧で「募集中」が
     // 1マスに複数並んで見分けにくいという指摘を受け、人数分バラしてそれぞれ1人ずつの独立したラインにした）
-    call('adminAddLine', { line: line, count: count }, function (data) {
-      DATA = Object.assign({}, DATA, data); render(); toast(count > 1 ? (count + '件追加しました') : '追加しました');
+    call('adminAddLine', { line: r.line, count: r.count }, function (data) {
+      DATA = Object.assign({}, DATA, data); render(); toast(r.count > 1 ? (r.count + '件追加しました') : '追加しました');
       $('nNote').value = '';
       $('addLineOverlay').hidden = true;
     });
