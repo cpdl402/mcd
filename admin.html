@@ -195,6 +195,7 @@
   button { font-size:15px; padding:10px 14px; border-radius:999px; border:0; cursor:pointer;
            background:linear-gradient(135deg,#e3001b,#b8001a); color:var(--accent-ink); font-weight:700; }
   button.ghost { background:transparent; color:var(--warn); border:1px solid var(--line); font-weight:500; font-size:13px; padding:7px 10px; }
+  button.sidebar-btn { background:transparent; color:var(--ink); border:1px solid var(--line); font-weight:600; font-size:13px; padding:7px 10px; }
   button:disabled { background:var(--full); color:#fff; cursor:default; }
   .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:16px; }
   .newline-form { display:grid; gap:10px; }
@@ -287,7 +288,7 @@
       <span class="sidebar-title">Menu</span>
       <button type="button" class="sidebar-close" id="sidebarClose" aria-label="閉じる">×</button>
     </div>
-    <button class="ghost" id="openAddLineBtn" style="width:100%; margin-bottom:10px;">募集ラインを追加</button>
+    <button class="sidebar-btn" id="openAddLineBtn" style="width:100%; margin-bottom:10px;">募集ラインを追加</button>
 
     <details class="panel" id="bulkImportPanel">
       <summary>まとめて挿入（ファイルから）</summary>
@@ -300,9 +301,9 @@
       </div>
     </details>
 
-    <button class="ghost" id="openPwChangeBtn" style="width:100%; margin-top:8px;">パスワードを変更</button>
-    <button class="ghost" id="openAccountsBtn" style="width:100%; margin-top:8px;" hidden>アカウント管理</button>
-    <button class="ghost" id="exportImageBtn" style="width:100%; margin-top:8px;">この週を画像で保存</button>
+    <button class="sidebar-btn" id="openPwChangeBtn" style="width:100%; margin-top:8px;">パスワードを変更</button>
+    <button class="sidebar-btn" id="openAccountsBtn" style="width:100%; margin-top:8px;" hidden>アカウント管理</button>
+    <button class="sidebar-btn" id="exportImageBtn" style="width:100%; margin-top:8px;">この週を画像で保存</button>
     <button class="ghost" id="logoutBtn" style="width:100%; margin-top:8px;">ログアウト</button>
   </div>
 
