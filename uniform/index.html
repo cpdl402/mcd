@@ -263,6 +263,8 @@
     border-radius:999px; background:var(--accent); color:#fff; font-size:10px; font-weight:800;
     display:flex; align-items:center; justify-content:center; line-height:1;
   }
+  /* 2026-10-17修正: loading-badgeと同じ[hidden]詳細度バグの対象だったため合わせて修正 */
+  .filter-badge[hidden]{display:none;}
 
   /* ==== アイテムカード／在庫 ==== */
   .item-card{background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:13px; margin-bottom:10px;}
@@ -500,6 +502,11 @@
     font-size:13px; font-weight:700; display:flex; align-items:center; z-index:25;
     box-shadow:0 6px 16px rgba(0,0,0,0.25); pointer-events:none;
   }
+  /* 2026-10-17修正: 「処理中…」が常に表示され続ける不具合の真因。クラス側のdisplay:flexと[hidden]属性の
+     UAスタイル（display:none）はCSS詳細度が同じため、後に書かれたクラス側が勝ってしまい、hidden属性を
+     付けても実際には非表示にならなかった（JS側のbeginLoading/endLoadingやAPIのロック・並列数を
+     いくら直しても解消しなかったのはこれが原因）。詳細度を上げて[hidden]側を確実に勝たせる。 */
+  .loading-badge[hidden]{display:none;}
   @keyframes spin{ to{ transform:rotate(360deg); } }
   .spinner{
     display:inline-block; width:14px; height:14px; margin-right:7px; vertical-align:-2px;
