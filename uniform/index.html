@@ -1008,8 +1008,19 @@
       <select id="itmType"></select>
     </div>
     <div class="checkbox-field">
-      <input type="checkbox" id="itmHasSize">
+      <input type="checkbox" id="itmHasSize" onchange="updateItemInitialSizesVisibility()">
       <label for="itmHasSize">サイズで管理する（S/M/Lなど）</label>
+    </div>
+    <div class="field" id="itmInitialSizesWrap" style="display:none;">
+      <label>初期在庫数量（任意・あとから補正できます）</label>
+      <div class="field-row">
+        <div class="field"><label>S</label><input type="number" id="itmInitQtyS" min="0" inputmode="numeric" placeholder="0"></div>
+        <div class="field"><label>M</label><input type="number" id="itmInitQtyM" min="0" inputmode="numeric" placeholder="0"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>L</label><input type="number" id="itmInitQtyL" min="0" inputmode="numeric" placeholder="0"></div>
+        <div class="field"><label>LL</label><input type="number" id="itmInitQtyLL" min="0" inputmode="numeric" placeholder="0"></div>
+      </div>
     </div>
     <p class="error-text" id="itemModalError"></p>
     <div class="modal-actions">
@@ -1100,21 +1111,31 @@
     }
   }
 
-  /** 読み取り・書き込み共通のAPI呼び出し。pinは全リクエストに必ず付与し、サーバー側で毎回検証される。 */
+  /** 読み取り・書き込み共通のAPI呼び出し。pinは全リクエストに必ず付与し、サーバー側で毎回検証される。
+   * 通信がまれに応答なしのまま固まり、画面中央の「処理中…」バッジが消えなくなる不具合の報告
+   * （2026-10-17）を受け、AbortControllerで25秒のタイムアウトを設けた。サーバーが本当に応答しない
+   * 場合でも、必ずエラーとして処理が終わり、バッジ・ボタンのスピナーが元に戻るようにする。 */
   async function apiCall(resource, action, payload){
     beginLoading();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(function(){ controller.abort(); }, 25000);
     try{
       const body = Object.assign({ resource: resource, action: action, pin: getStoredPin() }, payload || {});
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
+        signal: controller.signal
       });
       return await res.json();
     }catch(e){
       console.error(e);
-      return { ok:false, error:'通信に失敗しました。ネットワーク環境を確認してください' };
+      const msg = (e && e.name === 'AbortError')
+        ? '通信がタイムアウトしました。電波の良い場所でもう一度お試しください'
+        : '通信に失敗しました。ネットワーク環境を確認してください';
+      return { ok:false, error: msg };
     }finally{
+      clearTimeout(timeoutId);
       endLoading();
     }
   }
@@ -1319,6 +1340,14 @@
   }
   function catBadgeClass(category){
     return { 'クルー':'cat-crew', 'MGR':'cat-mgr', 'GEL':'cat-gel', '共通':'cat-common' }[category] || 'cat-common';
+  }
+  /** カテゴリ・性別バッジのHTML。両方が「共通」のときは「共通」を1つだけ表示する（2026-10-17: 重複表示の指摘を反映）。 */
+  function catGenderBadgesHtml(it){
+    if(it.category === '共通' && it.gender === '共通'){
+      return '<span class="cat-badge ' + catBadgeClass(it.category) + '">共通</span>';
+    }
+    return '<span class="cat-badge ' + catBadgeClass(it.category) + '">' + escapeHtml(it.category) + '</span>' +
+      '<span class="gender-badge">' + escapeHtml(it.gender) + '</span>';
   }
   function showConfirm(message, onYes, yesLabel){
     document.getElementById('confirmModalMessage').textContent = message;
@@ -1559,8 +1588,7 @@
     }
     return '<div class="item-card">' +
       '<div class="item-card-title">' +
-        '<span class="cat-badge ' + catBadgeClass(it.category) + '">' + escapeHtml(it.category) + '</span>' +
-        '<span class="gender-badge">' + escapeHtml(it.gender) + '</span>' +
+        catGenderBadgesHtml(it) +
         '<strong>' + escapeHtml(it.name) + '</strong>' +
       '</div>' +
       '<div class="item-card-type">' + escapeHtml(it.itemType) + '</div>' +
@@ -1656,6 +1684,7 @@
     state.editingItemId = itemId;
     buildItemTypeSelectOptions();
     document.getElementById('itemModalError').textContent = '';
+    ['itmInitQtyS','itmInitQtyM','itmInitQtyL','itmInitQtyLL'].forEach(function(id){ document.getElementById(id).value = ''; });
     if(itemId){
       const it = findItem(itemId);
       document.getElementById('itemModalTitle').textContent = 'アイテムを編集';
@@ -1672,7 +1701,13 @@
       document.getElementById('itmType').value = ITEM_TYPES[0];
       document.getElementById('itmHasSize').checked = false;
     }
+    // 初期数量入力欄は「新規追加」かつ「サイズで管理する」がオンのときのみ表示する（編集時は在庫画面から補正する運用のため対象外）
+    updateItemInitialSizesVisibility();
     document.getElementById('itemModal').classList.add('active');
+  };
+  window.updateItemInitialSizesVisibility = function(){
+    const show = !state.editingItemId && document.getElementById('itmHasSize').checked;
+    document.getElementById('itmInitialSizesWrap').style.display = show ? '' : 'none';
   };
   window.closeItemModal = function(){ document.getElementById('itemModal').classList.remove('active'); };
 
@@ -1681,8 +1716,7 @@
     return '<div class="item-manage-row" onclick="openItemFromManage(\'' + it.id + '\')">' +
       '<div class="texts">' +
         '<div class="item-manage-row-title">' +
-          '<span class="cat-badge ' + catBadgeClass(it.category) + '">' + escapeHtml(it.category) + '</span>' +
-          '<span class="gender-badge">' + escapeHtml(it.gender) + '</span>' +
+          catGenderBadgesHtml(it) +
           '<strong>' + escapeHtml(it.name) + '</strong>' +
         '</div>' +
         '<div class="item-manage-row-sub">' + escapeHtml(it.itemType) + '・サイズ管理' + (it.hasSize ? 'あり' : 'なし') + '</div>' +
@@ -1719,6 +1753,16 @@
     if(!name){ errEl.textContent = '名称を入力してください'; return; }
     errEl.textContent = '';
 
+    // 新規追加・サイズ管理ありの場合のみ、初期数量入力欄の値を読み取る（0または未入力のサイズはAPI呼び出し自体を省略する）
+    const initialSizeQtys = [];
+    if(!state.editingItemId && hasSize){
+      [['S','itmInitQtyS'],['M','itmInitQtyM'],['L','itmInitQtyL'],['LL','itmInitQtyLL']].forEach(function(pair){
+        const raw = document.getElementById(pair[1]).value;
+        const n = Number(raw);
+        if(raw !== '' && !isNaN(n) && n > 0) initialSizeQtys.push({ size: pair[0], quantity: Math.floor(n) });
+      });
+    }
+
     const btn = document.getElementById('itemModalSaveBtn');
     function doSave(){
       withButtonBusy(btn, '保存中…', async function(){
@@ -1733,6 +1777,12 @@
           });
         }
         if(!res.ok){ errEl.textContent = apiErrorMessage(res); toast(apiErrorMessage(res)); return; }
+        if(!state.editingItemId && initialSizeQtys.length > 0){
+          const newItemId = res.data.itemId;
+          await Promise.all(initialSizeQtys.map(function(s){
+            return apiCall('inventory', 'update', { item: { itemId: newItemId, size: s.size, quantity: s.quantity } });
+          }));
+        }
         await reloadItemMasterAndInventory();
         toast(state.editingItemId ? 'アイテムを更新しました' : 'アイテムを追加しました');
         closeItemModal();
@@ -2196,8 +2246,7 @@
     }).join('');
     return '<div class="item-card">' +
       '<div class="item-card-title">' +
-        '<span class="cat-badge ' + catBadgeClass(it.category) + '">' + escapeHtml(it.category) + '</span>' +
-        '<span class="gender-badge">' + escapeHtml(it.gender) + '</span>' +
+        catGenderBadgesHtml(it) +
         '<strong>' + escapeHtml(it.name) + '</strong>' +
       '</div>' +
       '<div class="item-card-type">' + escapeHtml(it.itemType) + '</div>' +
