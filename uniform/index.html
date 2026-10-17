@@ -1458,22 +1458,29 @@
     });
   }
 
-  /** ログイン直後に一括取得する。 */
+  /** ログイン直後に一括取得する。
+   * 2026-10-17修正: 以前はitemMaster/inventory/delivery/consumption/stocktake/return/settingsの
+   * 7件を`Promise.all`で並列発行していたが、「処理中…」が常に表示される・毎回ではなくたまに
+   * 失敗するとの報告を受けて調査したところ、Apps Script実行ログ上で7件中1件だけが詳細不明のまま
+   * 「失敗しました」（0秒）になっているのを確認した。GAS側の同時実行数の制約が疑わしいため、
+   * サーバー側に新設した`bootstrap`リソースで全データを1回の呼び出しにまとめ、並列実行数を7→1に
+   * 削減した（根本原因の完全な特定はできていないが、症状を構造的に避けられる設計にした）。 */
   async function loadAllData(){
-    const [im, inv, dl, cs, st, rt, se] = await Promise.all([
-      apiCall('itemMaster', 'list'), apiCall('inventory', 'list'), apiCall('delivery', 'list'), apiCall('consumption', 'list'),
-      apiCall('stocktake', 'list'), apiCall('return', 'list'), apiCall('settings', 'get')
-    ]);
-    let hasError = false;
-    if(im.ok) ITEM_MASTER = im.data.map(mapItemMasterRow); else hasError = true;
-    if(inv.ok) INVENTORY_ROWS = inv.data; else hasError = true;
+    const res = await apiCall('bootstrap', 'list');
+    if(!res.ok){
+      toast(apiErrorMessage(res));
+      updateNavDots();
+      return;
+    }
+    const d = res.data;
+    ITEM_MASTER = d.itemMaster.map(mapItemMasterRow);
+    INVENTORY_ROWS = d.inventory;
     rebuildInventoryMap();
-    if(dl.ok) DELIVERIES = dl.data.map(mapDeliveryRow); else hasError = true;
-    if(cs.ok) CONSUMPTIONS = cs.data.map(mapConsumptionRow); else hasError = true;
-    if(st.ok) STOCKTAKE_LOGS = st.data; else hasError = true;
-    if(rt.ok) RETURN_LOGS = rt.data; else hasError = true;
-    if(se.ok) SETTINGS = se.data; else hasError = true;
-    if(hasError) toast('データの取得に一部失敗しました');
+    DELIVERIES = d.deliveries.map(mapDeliveryRow);
+    CONSUMPTIONS = d.consumption.map(mapConsumptionRow);
+    STOCKTAKE_LOGS = d.stocktake;
+    RETURN_LOGS = d.returns;
+    SETTINGS = d.settings;
     updateNavDots();
   }
   /** アイテムマスタ追加・編集（サイズ管理の有無変更時はInventoryも作り直されるため両方再取得）後に呼ぶ。 */
