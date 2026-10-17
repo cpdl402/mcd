@@ -546,6 +546,9 @@
     background:var(--surface-2); color:var(--text-primary); font-size:26px; font-weight:800;
     text-align:center; font-variant-numeric:tabular-nums; caret-color:transparent;
   }
+  /* 2026-10-17新設: 数量入力はすべてタップでテンキーモーダルを開く方式に統一した。直接キー入力はできない
+     （readonly）ため、タップ可能であることが伝わるよう中央揃え・太字・pointerカーソルにしている。 */
+  .qty-tap-input{text-align:center; font-weight:700; cursor:pointer; font-variant-numeric:tabular-nums; caret-color:transparent;}
   .tenkey-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0 4px;}
   .tenkey-btn{
     padding:16px 0; border-radius:12px; border:1px solid var(--border); background:var(--surface-2);
@@ -764,7 +767,7 @@
       <p class="stock-hint" id="cnsStockHint"></p>
       <div class="field">
         <label>数量<span class="req">必須</span></label>
-        <input type="number" id="cnsQty" min="1" inputmode="numeric" placeholder="例）1">
+        <input type="text" class="qty-tap-input" id="cnsQty" readonly placeholder="タップして入力" onclick="openSimpleQtyPicker('cnsQty','数量を入力',1)">
       </div>
       <div class="field">
         <label>用途<span class="req">必須</span></label>
@@ -854,7 +857,7 @@
       </div>
       <div class="field">
         <label>数量<span class="req">必須</span></label>
-        <input type="number" id="retQty" min="1" inputmode="numeric" placeholder="例）1">
+        <input type="text" class="qty-tap-input" id="retQty" readonly placeholder="タップして入力" onclick="openSimpleQtyPicker('retQty','数量を入力',1)">
       </div>
       <div class="checkbox-field">
         <input type="checkbox" id="retCleaned" onchange="onReturnCleanedChange()">
@@ -1080,6 +1083,40 @@
   </div>
 </div>
 
+<!-- 数量入力の汎用テンキーモーダル（2026-10-17新設。「数量入力はモーダルテンキーで統一する」との方針により、
+     使用記録・返却・納品登録・検品・個別配布・アイテム追加時の初期数量など、在庫数量の数値入力をすべてこのモーダル
+     経由に統一した（在庫画面の補正用#qtyModal・棚卸し用#stocktakeQtyModalは、API呼び出しや一時保持の仕方が
+     それぞれ異なるため既存のまま。このモーダルはopenQtyPicker()の呼び出し元にコールバックで値を返すだけの
+     汎用部品）。 -->
+<div class="modal-overlay" id="qtyPickerModal">
+  <div class="modal center" style="max-width:360px;">
+    <h2 id="qtyPickerTitle">数量を入力</h2>
+    <p id="qtyPickerCurrent" class="hint" style="margin:-8px 0 14px; display:none;"></p>
+    <div class="field">
+      <input type="text" id="qtyPickerInput" class="qty-display" inputmode="none" readonly>
+    </div>
+    <div class="tenkey-grid" id="qtyPickerTenkey">
+      <button type="button" class="tenkey-btn" data-key="1">1</button>
+      <button type="button" class="tenkey-btn" data-key="2">2</button>
+      <button type="button" class="tenkey-btn" data-key="3">3</button>
+      <button type="button" class="tenkey-btn" data-key="4">4</button>
+      <button type="button" class="tenkey-btn" data-key="5">5</button>
+      <button type="button" class="tenkey-btn" data-key="6">6</button>
+      <button type="button" class="tenkey-btn" data-key="7">7</button>
+      <button type="button" class="tenkey-btn" data-key="8">8</button>
+      <button type="button" class="tenkey-btn" data-key="9">9</button>
+      <button type="button" class="tenkey-btn tenkey-clear" data-key="clear">全消去</button>
+      <button type="button" class="tenkey-btn" data-key="0">0</button>
+      <button type="button" class="tenkey-btn tenkey-back" data-key="back">⌫</button>
+    </div>
+    <p class="error-text" id="qtyPickerError"></p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeQtyPickerModal()">キャンセル</button>
+      <button class="btn primary" id="qtyPickerSaveBtn" onclick="submitQtyPicker()">入力する</button>
+    </div>
+  </div>
+</div>
+
 <!-- 棚卸し：実数入力モーダル（2026-10-17新設。テンキーで入力し、この場ではAPIを呼ばずその場の表示だけ更新する。確定は画面下部の「棚卸しを確定する」でまとめて送信） -->
 <div class="modal-overlay" id="stocktakeQtyModal">
   <div class="modal center" style="max-width:360px;">
@@ -1182,12 +1219,12 @@
     <div class="field" id="itmInitialSizesWrap" style="display:none;">
       <label>初期在庫数量（任意・あとから補正できます）</label>
       <div class="field-row">
-        <div class="field"><label>S</label><input type="number" id="itmInitQtyS" min="0" inputmode="numeric" placeholder="0"></div>
-        <div class="field"><label>M</label><input type="number" id="itmInitQtyM" min="0" inputmode="numeric" placeholder="0"></div>
+        <div class="field"><label>S</label><input type="text" class="qty-tap-input" id="itmInitQtyS" readonly placeholder="0" onclick="openSimpleQtyPicker('itmInitQtyS','Sの初期数量を入力',0)"></div>
+        <div class="field"><label>M</label><input type="text" class="qty-tap-input" id="itmInitQtyM" readonly placeholder="0" onclick="openSimpleQtyPicker('itmInitQtyM','Mの初期数量を入力',0)"></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>L</label><input type="number" id="itmInitQtyL" min="0" inputmode="numeric" placeholder="0"></div>
-        <div class="field"><label>LL</label><input type="number" id="itmInitQtyLL" min="0" inputmode="numeric" placeholder="0"></div>
+        <div class="field"><label>L</label><input type="text" class="qty-tap-input" id="itmInitQtyL" readonly placeholder="0" onclick="openSimpleQtyPicker('itmInitQtyL','Lの初期数量を入力',0)"></div>
+        <div class="field"><label>LL</label><input type="text" class="qty-tap-input" id="itmInitQtyLL" readonly placeholder="0" onclick="openSimpleQtyPicker('itmInitQtyLL','LLの初期数量を入力',0)"></div>
       </div>
     </div>
     <p class="error-text" id="itemModalError"></p>
@@ -1260,9 +1297,18 @@
   // 回避する。GAS Webアプリ側はOPTIONSを処理できないため、GETとPOSTを分けていた従来方式を廃止した）
   const API_URL = 'https://script.google.com/macros/s/AKfycbwqLEZbk5XSpTBvjk0Sjp1sWEqXT0R43qeWewWDr0FZuCYg7nzkh7rI8c25cbTvxtbpMg/exec';
 
+  // 2026-10-17修正: 「ページを更新するとログイン画面に行くがすぐ自動ログインされてしまう」との報告を受け、
+  // M-Crew（シフト管理）と同じ設計に変更した。実際の送信用パスワードはこのページの表示中だけ保持する
+  // JS変数（currentPin）とし、リロードすれば必ずログイン画面からパスワードの入力（ボタン押下）を
+  // 要求するようにした。localStorageのPIN_KEYは「前回入力したパスワードの入力欄プリフィル」専用
+  // （M-Crewの`sb_pass`と同じ考え方）で、これだけでは自動ログインはしない。
   const PIN_KEY = 'uniform-pin';
-  function getStoredPin(){ try{ return sessionStorage.getItem(PIN_KEY) || ''; }catch(e){ return ''; } }
-  function isUnlocked(){ return !!getStoredPin(); }
+  let currentPin = '';
+  function getStoredPin(){ return currentPin; }
+  function isUnlocked(){ return !!currentPin; }
+  function getRememberedPin(){ try{ return localStorage.getItem(PIN_KEY) || ''; }catch(e){ return ''; } }
+  function rememberPin(pin){ try{ localStorage.setItem(PIN_KEY, pin); }catch(e){ /* noop */ } }
+  function forgetRememberedPin(){ try{ localStorage.removeItem(PIN_KEY); }catch(e){ /* noop */ } }
 
   let pendingCalls = 0, loadingShowTimer = null;
   function beginLoading(){
@@ -1333,7 +1379,8 @@
         pinInput.classList.add('input-error');
         return;
       }
-      try{ sessionStorage.setItem(PIN_KEY, pin); }catch(e){ /* noop */ }
+      currentPin = pin;
+      rememberPin(pin);
       await loadAllData();
       navigate('home');
     });
@@ -1634,7 +1681,9 @@
   };
   window.handleLogout = function(){
     closeSidebar();
-    try{ sessionStorage.removeItem(PIN_KEY); }catch(e){ /* noop */ }
+    currentPin = '';
+    forgetRememberedPin();
+    document.getElementById('loginPin').value = '';
     navigate('login');
   };
   // 2026-10: 履歴タブをボトムナビから外し、サイドバーの低頻度操作の並びに移設した
@@ -1658,11 +1707,12 @@
   };
 
   document.addEventListener('DOMContentLoaded', function(){
-    if(isUnlocked()){
-      loadAllData().then(function(){ navigate('home'); });
-    } else {
-      navigate('login');
-    }
+    // 2026-10-17修正: リロード時に以前のパスワードで自動ログインしていたのをやめ、必ずログイン画面を
+    // 表示して明示的な入力（ボタン押下）を求めるようにした。前回入力したパスワードは入力欄に
+    // プリフィルするだけ（M-Crewと同じ設計）で、自動ログインの判断材料には使わない。
+    const remembered = getRememberedPin();
+    if(remembered){ document.getElementById('loginPin').value = remembered; }
+    navigate('login');
   });
 
   /* ============================================================
@@ -1921,6 +1971,70 @@
       closeQtyModal();
       toast('在庫数量を更新しました');
       refreshInventory();
+    });
+  };
+
+  // ---- 数量入力の汎用テンキーモーダル（2026-10-17新設） ----
+  // openQtyPicker({title, currentLabel, initialValue, min, onConfirm(value)}) を呼ぶと開く。
+  // 「保存」でonConfirmにその場の整数値を渡すだけで、API呼び出しや状態更新は呼び出し元の責任とする
+  // （在庫補正用の#qtyModal・棚卸し用の#stocktakeQtyModalとは異なり、この部品自体は何も確定しない）。
+  let qtyPickerState = { value: '0', min: 0, onConfirm: null };
+  window.openQtyPicker = function(opts){
+    opts = opts || {};
+    qtyPickerState.min = (opts.min === undefined || opts.min === null) ? 0 : opts.min;
+    qtyPickerState.onConfirm = opts.onConfirm || null;
+    document.getElementById('qtyPickerTitle').textContent = opts.title || '数量を入力';
+    const currentEl = document.getElementById('qtyPickerCurrent');
+    if(opts.currentLabel){ currentEl.textContent = opts.currentLabel; currentEl.style.display = ''; }
+    else { currentEl.textContent = ''; currentEl.style.display = 'none'; }
+    const initial = (opts.initialValue === undefined || opts.initialValue === null || isNaN(opts.initialValue))
+      ? String(qtyPickerState.min) : String(opts.initialValue);
+    qtyPickerState.value = initial;
+    document.getElementById('qtyPickerInput').value = initial;
+    document.getElementById('qtyPickerError').textContent = '';
+    document.getElementById('qtyPickerModal').classList.add('active');
+  };
+  window.closeQtyPickerModal = function(){ document.getElementById('qtyPickerModal').classList.remove('active'); };
+  document.getElementById('qtyPickerTenkey').addEventListener('click', function(ev){
+    const btn = ev.target.closest('.tenkey-btn');
+    if(!btn) return;
+    const key = btn.dataset.key;
+    let v = qtyPickerState.value || '0';
+    if(key === 'clear'){
+      v = '0';
+    } else if(key === 'back'){
+      v = v.length > 1 ? v.slice(0, -1) : '0';
+    } else {
+      v = (v === '0') ? key : (v.length < QTY_MAX_DIGITS ? v + key : v);
+    }
+    qtyPickerState.value = v;
+    document.getElementById('qtyPickerInput').value = v;
+    document.getElementById('qtyPickerError').textContent = '';
+  });
+  window.submitQtyPicker = function(){
+    const errEl = document.getElementById('qtyPickerError');
+    const raw = document.getElementById('qtyPickerInput').value;
+    const n = Number(raw);
+    const min = qtyPickerState.min;
+    if(raw === '' || isNaN(n) || n < min || Math.floor(n) !== n){
+      errEl.textContent = (min > 0 ? min + '以上' : '0以上') + 'の整数を入力してください';
+      return;
+    }
+    errEl.textContent = '';
+    const onConfirm = qtyPickerState.onConfirm;
+    closeQtyPickerModal();
+    if(onConfirm) onConfirm(n);
+  };
+  // 単一のreadonly数量欄（cnsQty・retQty・itmInitQty各サイズ）向けの簡易ラッパー。
+  // 現在の表示値を初期値としてモーダルを開き、確定したらその欄にそのまま書き戻すだけ。
+  window.openSimpleQtyPicker = function(inputId, title, min){
+    const input = document.getElementById(inputId);
+    const current = input.value === '' ? (min || 0) : Number(input.value);
+    openQtyPicker({
+      title: title,
+      min: min || 0,
+      initialValue: current,
+      onConfirm: function(v){ input.value = v; }
     });
   };
 
@@ -2197,6 +2311,15 @@
     const row = state.deliveryFormRows.find(function(r){ return r.rowId === rowId; });
     row[field] = value;
   };
+  window.openDeliveryRowQtyPicker = function(rowId){
+    const row = state.deliveryFormRows.find(function(r){ return r.rowId === rowId; });
+    openQtyPicker({
+      title: '予定数量を入力',
+      min: 1,
+      initialValue: row.plannedQty === '' ? 1 : Number(row.plannedQty),
+      onConfirm: function(v){ onDeliveryRowFieldChange(rowId, 'plannedQty', v); renderDeliveryRows(); }
+    });
+  };
 
   function renderDeliveryRows(){
     const wrap = document.getElementById('deliveryRowsWrap');
@@ -2218,7 +2341,7 @@
         '</div>' +
         '<div class="field-row">' +
           sizeFieldHtml +
-          '<div class="field"><label>予定数量</label><input type="number" min="1" inputmode="numeric" value="' + escapeHtml(row.plannedQty) + '" onchange="onDeliveryRowFieldChange(\'' + row.rowId + '\',\'plannedQty\',this.value)"></div>' +
+          '<div class="field"><label>予定数量</label><input type="text" class="qty-tap-input" readonly placeholder="タップして入力" value="' + escapeHtml(row.plannedQty) + '" onclick="openDeliveryRowQtyPicker(\'' + row.rowId + '\')"></div>' +
         '</div>' +
         '<div class="field"><label>誰用か（任意）</label><input type="text" placeholder="例）新人の佐藤さん用" value="' + escapeHtml(row.assignedNote || '') + '" onchange="onDeliveryRowFieldChange(\'' + row.rowId + '\',\'assignedNote\',this.value)"></div>' +
         '<button class="remove-row-btn" onclick="removeDeliveryRow(\'' + row.rowId + '\')">この行を削除</button>' +
@@ -2280,7 +2403,7 @@
           (line.size ? '<span class="size-tag">' + line.size + '</span>' : '') + '</div>' +
         '<div class="inspect-row-body">' +
           '<span class="planned-label">予定 ' + line.plannedQty + '</span>' +
-          '<input type="number" class="actual-input" id="inspect-input-' + idx + '" min="0" inputmode="numeric" placeholder="実数を入力" oninput="onInspectActualChange(' + idx + ')">' +
+          '<input type="text" class="actual-input qty-tap-input" id="inspect-input-' + idx + '" readonly placeholder="タップして入力" onclick="openInspectQtyPicker(' + idx + ')">' +
         '</div>' +
         (line.assignedNote ? '<div class="assigned-note-tag">誰用か: <strong>' + escapeHtml(line.assignedNote) + '</strong></div>' : '') +
         '<div class="dist-wrap" id="distWrap-' + idx + '"></div>' +
@@ -2303,7 +2426,7 @@
     wrap.innerHTML = rows.map(function(r){
       return '<div class="dist-line">' +
         '<input type="text" class="dist-memo" placeholder="例）佐藤さん用" value="' + escapeHtml(r.memo) + '" oninput="onDistFieldChange(' + idx + ',\'' + r.rowId + '\',\'memo\',this.value)">' +
-        '<input type="number" class="dist-qty" min="1" inputmode="numeric" placeholder="数量" value="' + escapeHtml(r.qty) + '" oninput="onDistFieldChange(' + idx + ',\'' + r.rowId + '\',\'qty\',this.value)">' +
+        '<input type="text" class="dist-qty qty-tap-input" readonly placeholder="数量" value="' + escapeHtml(r.qty) + '" onclick="openDistQtyPicker(' + idx + ',\'' + r.rowId + '\')">' +
         '<button type="button" class="dist-remove-btn" onclick="removeDistRow(' + idx + ',\'' + r.rowId + '\')" aria-label="この個別配布行を削除">✕</button>' +
       '</div>';
     }).join('');
@@ -2324,7 +2447,30 @@
     if(row) row[field] = value;
     updateDistSummary(idx);
   };
+  window.openDistQtyPicker = function(idx, rowId){
+    const row = state.inspectDist[idx].find(function(r){ return r.rowId === rowId; });
+    openQtyPicker({
+      title: '個別配布の数量を入力',
+      min: 1,
+      initialValue: row.qty === '' ? 1 : Number(row.qty),
+      onConfirm: function(v){ onDistFieldChange(idx, rowId, 'qty', v); renderDistRows(idx); }
+    });
+  };
   window.onInspectActualChange = function(idx){ updateDistSummary(idx); };
+  window.openInspectQtyPicker = function(idx){
+    const input = document.getElementById('inspect-input-' + idx);
+    const current = input.value === '' ? 0 : Number(input.value);
+    openQtyPicker({
+      title: '実数を入力',
+      min: 0,
+      initialValue: current,
+      onConfirm: function(v){
+        input.value = v;
+        input.classList.remove('input-error');
+        onInspectActualChange(idx);
+      }
+    });
+  };
   function distTotalForRow(idx){
     return (state.inspectDist[idx] || []).reduce(function(sum, r){
       const q = Number(r.qty);
