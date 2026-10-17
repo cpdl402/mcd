@@ -99,12 +99,23 @@
   .auth-card .field{text-align:left;}
   .auth-card .field label{display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px; font-weight:700;}
   .auth-card .error-text{text-align:left;}
+  /* 2026-10-17修正: 「暗証番号」ではなく「パスワード」として扱う方針に変更したため、
+     テンキー入力を想定した大きな文字間隔・中央揃えのPIN風スタイルから、M-Crew（シフト管理）と
+     同じ普通のパスワード入力欄の見た目に変更した。マスク表示＋表示/非表示切り替え（.pw-wrap/.pw-eye）は
+     M-Crewの実装（ユニフォーム管理/シフト管理.html）と共通の設計。 */
   .pin-input{
     width:100%; padding:13px 12px; border-radius:12px; border:1px solid var(--border);
-    background:var(--surface-1); color:var(--text-primary); font-size:24px; letter-spacing:9px;
-    text-align:center; font-variant-numeric:tabular-nums;
+    background:var(--surface-1); color:var(--text-primary); font-size:15px;
   }
   .pin-input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-weak);}
+  .pw-wrap{position:relative;}
+  .pw-wrap .pin-input{padding-right:42px;}
+  .pw-eye{
+    position:absolute; right:4px; top:50%; transform:translateY(-50%);
+    background:transparent; border:none; padding:7px; border-radius:8px; color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .pw-eye:active{background:var(--surface-2);}
   .input-error{border-color:var(--critical) !important;}
   .error-text{color:var(--critical); font-size:12px; margin:8px 0 0; min-height:16px;}
   .mockup-note{margin-top:16px; padding-top:12px; border-top:1px dashed var(--border); font-size:11px; color:var(--text-muted); text-align:center; line-height:1.6;}
@@ -574,10 +585,13 @@
           <h1 class="auth-title">MUNI</h1>
           <p class="auth-title-sub">UNIFORM MANAGEMENT SYSTEM</p>
         </div>
-        <p class="auth-subtitle">暗証番号を入力してください</p>
+        <p class="auth-subtitle">パスワードを入力してください</p>
         <div class="field">
-          <label>暗証番号</label>
-          <input type="text" class="pin-input" id="loginPin" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="暗証番号を入力">
+          <label>パスワード</label>
+          <div class="pw-wrap">
+            <input type="password" class="pin-input" id="loginPin" autocomplete="current-password" placeholder="パスワードを入力">
+            <button type="button" class="pw-eye" id="loginPinEye" aria-label="パスワードを表示"></button>
+          </div>
         </div>
         <p class="error-text" id="loginError"></p>
         <button class="btn primary" id="loginSubmitBtn" style="width:100%;" onclick="handleUnlock()">開く</button>
@@ -893,7 +907,6 @@
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
         <polyline points="9 22 9 12 15 12 15 22"></polyline>
       </svg>
-      <span class="nav-dot" id="navDotHome"></span>
       <span>ホーム</span>
     </button>
     <button class="nav-btn" data-screen="inventory" onclick="navigate('inventory')" aria-label="在庫">
@@ -963,7 +976,7 @@
     </button>
   </div>
   <hr class="sidebar-divider">
-  <p class="sidebar-note">ログアウトすると、再度暗証番号の入力が必要になります。</p>
+  <p class="sidebar-note">ログアウトすると、再度パスワードの入力が必要になります。</p>
   <button class="btn ghost" style="width:100%;" onclick="handleLogout()">ログアウト</button>
 </div>
 
@@ -1295,7 +1308,7 @@
     }
   }
   function apiErrorMessage(res){
-    if(res && res.error === 'INVALID_PIN') return '暗証番号が正しくありません';
+    if(res && res.error === 'INVALID_PIN') return 'パスワードが正しくありません';
     return (res && res.error) || '通信に失敗しました';
   }
 
@@ -1307,7 +1320,7 @@
     const pinInput = document.getElementById('loginPin');
     const pin = pinInput.value.trim();
     if(!pin){
-      errEl.textContent = '暗証番号を入力してください';
+      errEl.textContent = 'パスワードを入力してください';
       pinInput.classList.add('input-error');
       return;
     }
@@ -1325,6 +1338,22 @@
       navigate('home');
     });
   };
+  // 2026-10-17新設: 「入力が見えたら変」とのフィードバックを受け、暗証番号用のテンキー入力（type="text"で
+  // 平文表示）からパスワード入力（type="password"でマスク表示＋表示/非表示切り替え）に変更した。
+  // M-Crew（シフト管理/シフト管理.html）の#passEyeと共通の設計（SVGアイコン・トグル処理とも同じ）。
+  (function(){
+    const EYE_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+    const EYE_OFF_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.77 21.77 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+    const eyeBtn = document.getElementById('loginPinEye');
+    eyeBtn.innerHTML = EYE_SVG;
+    eyeBtn.onclick = function(){
+      const pinInput = document.getElementById('loginPin');
+      const show = pinInput.type === 'password';
+      pinInput.type = show ? 'text' : 'password';
+      eyeBtn.innerHTML = show ? EYE_OFF_SVG : EYE_SVG;
+      eyeBtn.setAttribute('aria-label', show ? 'パスワードを隠す' : 'パスワードを表示');
+    };
+  })();
 
   /* ============================================================
    * 1. マスタ・在庫・納品・使用記録データ
@@ -1722,12 +1751,14 @@
     badgeEl.style.display = '';
     updateNavDots();
   }
-  // フッターアイコンは数字を出さず、未完了タスク（未検品の納品／棚卸しの期限通知）があることだけを点で示す
+  // フッターアイコンは数字を出さず、未完了タスク（未検品の納品）があることだけを点で示す。
+  // 2026-10-17: ホームアイコンへの点灯は「光らせる必要は多分ない」とのフィードバックを受けて削除し、
+  // 実際に対応すべき画面（納品）のアイコンだけに点を出すようにした。棚卸しの期限通知はホーム画面の
+  // 通知カード・サイドバーの棚卸しバッジ（#sidebarStocktakeBadge）で十分に気づけるため、
+  // フッターへの重複表示はしない。
   function updateNavDots(){
     const pendingDelivery = DELIVERIES.filter(function(d){ return d.status === '未検品'; }).length > 0;
-    const stocktakeActive = !!computeStocktakeNoticeState();
     document.getElementById('navDotDelivery').classList.toggle('show', pendingDelivery);
-    document.getElementById('navDotHome').classList.toggle('show', pendingDelivery || stocktakeActive);
   }
 
   /* ============================================================
