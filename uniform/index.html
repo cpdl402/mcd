@@ -509,26 +509,10 @@
   }
   .toast.show{opacity:0.95;}
 
-  /* ==== レスポンシブナビ（PC幅900px以上：サイドバー常時表示／900px未満：従来のボトムナビ＋ハンバーガー） ====
-     情報密度・カード構成などレイアウト自体は変えず、ナビゲーションの出し方のみを分岐する。
-     （他の全ルールより後に置くことで、同specificityのサイドバー関連ルールを確実に上書きする） */
-  @media (min-width:900px){
-    .hamburger-btn{display:none;}
-    .bottom-nav{display:none !important;}
-    .sidebar-backdrop{display:none !important;}
-    .sidebar-nav-group{display:flex;}
-    .sidebar-nav-divider{display:block;}
-    #sidebar{
-      position:fixed; left:0; top:0; bottom:0; transform:none; width:264px; max-width:264px;
-      box-shadow:none; border-right:1px solid var(--border); border-radius:0;
-    }
-    #sidebar .sidebar-close{display:none;}
-    body.no-chrome #sidebar{display:none;}
-    body:not(.no-chrome){padding-bottom:0;}
-    .app-shell{margin:0 0 0 264px;}
-    body.no-chrome .app-shell{margin:0 auto;}
-    .fab{right:32px;}
-  }
+  /* 2026-10のレスポンシブナビ（PC幅900px以上で常時表示サイドバーに切り替える）機能は、
+     「ページの中身が小さく左に寄って美しくない」「メニューはハンバーガーで閉じれるM-Crewのような
+     表示がいい」という2026-10-17のフィードバックを受けて撤回した。ハンバーガー＋スライドインの
+     サイドバー（M-Crewと同じ方式）＋ボトムナビを、画面幅を問わず共通の挙動に戻している。 */
 </style>
 </head>
 <body>
@@ -1534,20 +1518,24 @@
   // 自由記述した任意の文字列を使える。「追加済みか」は引き続きINVENTORY[itemId]にそのサイズの
   // キーが存在するかどうかで判定する（追加専用のマスタは持たない）。並び順は、SIZE_ORDERに載って
   // いる定番サイズはその並び順を優先し、それ以外の自由記述サイズは五十音/アルファベット順で後ろに続ける。
+  function sizeCompare_(a, b){
+    const ai = SIZE_ORDER.indexOf(a), bi = SIZE_ORDER.indexOf(b);
+    if(ai !== -1 && bi !== -1) return ai - bi;
+    if(ai !== -1) return -1;
+    if(bi !== -1) return 1;
+    return a.localeCompare(b, 'ja');
+  }
   function addedExtraSizes(itemId){
     const inv = INVENTORY[itemId] || {};
     const keys = Object.keys(inv).filter(function(s){ return BASE_SIZES.indexOf(s) === -1 && s !== ''; });
-    return keys.sort(function(a, b){
-      const ai = SIZE_ORDER.indexOf(a), bi = SIZE_ORDER.indexOf(b);
-      if(ai !== -1 && bi !== -1) return ai - bi;
-      if(ai !== -1) return -1;
-      if(bi !== -1) return 1;
-      return a.localeCompare(b, 'ja');
-    });
+    return keys.sort(sizeCompare_);
   }
-  // 基本サイズ（S/M/L/LL）は常に表示し、それ以外は追加済みの分だけ表示する
+  // 基本サイズ（S/M/L/LL）は常に表示し、それ以外は追加済みの分だけ表示する。
+  // 表示順は「基本サイズを先頭に固定」ではなく、基本＋追加済みサイズをまとめてSIZE_ORDER通りに
+  // 並べ直す（2026-10-17修正。以前はBASE_SIZESを無条件で先頭に連結していたため、SSを追加すると
+  // 本来3SとSの間にあるべきなのにS/M/L/LLの後ろに来てしまう不具合があった）
   function displaySizesForItem(itemId){
-    return BASE_SIZES.concat(addedExtraSizes(itemId));
+    return BASE_SIZES.concat(addedExtraSizes(itemId)).sort(sizeCompare_);
   }
   function addSizeButtonHtml(itemId){
     return '<button type="button" class="add-size-btn" onclick="openAddSizeModal(\'' + itemId + '\')">＋ サイズを追加</button>';
