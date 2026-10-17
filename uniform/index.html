@@ -181,6 +181,25 @@
     font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;
   }
   .term-note{background:var(--surface-1); border-radius:10px; padding:9px 10px; font-size:11.5px; color:var(--text-secondary); line-height:1.6;}
+
+  /* ==== 棚卸し期限通知（2026-10-17新設。ホーム画面。期限5日前から表示し、期限超過で強調表示に切り替わる） ==== */
+  .stocktake-notice{
+    display:flex; align-items:center; gap:10px; background:var(--accent-weak); border:1px solid var(--accent);
+    color:var(--accent-ink); border-radius:var(--radius); padding:12px 14px; margin-bottom:16px; cursor:pointer;
+  }
+  .stocktake-notice:active{transform:scale(0.99);}
+  .stocktake-notice svg{flex:none;}
+  .stocktake-notice .title{font-size:13px; font-weight:800;}
+  .stocktake-notice .desc{font-size:11.5px; margin-top:1px; opacity:0.85;}
+  .stocktake-notice.overdue{
+    background:var(--critical); color:#fff; border-color:transparent; padding:16px; gap:12px;
+    box-shadow:0 8px 18px rgba(214,72,76,0.35);
+  }
+  .stocktake-notice.overdue .title{font-size:15.5px;}
+  .stocktake-notice.overdue .desc{font-size:12.5px; opacity:0.92;}
+  .stocktake-notice.overdue svg{width:26px; height:26px;}
+  .stocktake-deadline-row{display:flex; align-items:center; gap:6px; cursor:pointer; margin:-6px 0 14px;}
+  .stocktake-deadline-row .link-text{color:var(--brand); font-weight:800; font-size:11.5px; margin-left:4px;}
   /* 使い方ガイドモーダル（#guideModal）はonboard-cardと同じ文字サイズ・行間にするため、
      汎用の`.modal p`より詳細度の高いセレクタで上書きする */
   #guideModal p{font-size:12px; color:var(--text-secondary); margin:0 0 10px; line-height:1.6;}
@@ -200,10 +219,13 @@
   .nav-card .title{font-size:14.5px; font-weight:800;}
   .nav-card .desc{font-size:11.5px; color:var(--text-muted); margin-top:1px;}
   .nav-card .chev{flex:none; color:var(--text-muted);}
-  .nav-card .badge-num{
+  .badge-num{
     flex:none; background:var(--accent); color:var(--accent-ink); font-size:11px; font-weight:800;
-    border-radius:999px; padding:2px 8px; margin-right:2px;
+    border-radius:999px; padding:2px 8px;
   }
+  .nav-card .badge-num{margin-right:2px;}
+  /* 2026-10-17新設: サイドバーの各ボタンでも未完了タスク数バッジを使えるようにした（棚卸しの期限通知など） */
+  .sidebar-menu-btn .badge-num{margin-left:auto;}
 
   /* ==== フィルタ ==== */
   .filter-chip-row{display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:10px; -webkit-overflow-scrolling:touch;}
@@ -416,10 +438,17 @@
     max-width:560px; margin:0 auto;
   }
   .nav-btn{
+    position:relative;
     flex:1; background:none; border:none; padding:10px 0 8px; cursor:pointer;
     color:var(--text-muted); display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10px; font-weight:700;
   }
   .nav-btn.active{color:var(--brand);}
+  /* 2026-10-17新設: フッターアイコンは数字バッジではなく、小さな点で「通知がある」ことだけを示す */
+  .nav-dot{
+    position:absolute; top:6px; left:calc(50% + 7px); width:8px; height:8px; border-radius:50%;
+    background:var(--accent); border:1.5px solid var(--surface-1); display:none;
+  }
+  .nav-dot.show{display:block;}
 
   /* ==== ヘッダー左側（ハンバーガー＋タイトル） ==== */
   .header-left{display:flex; align-items:center; gap:10px; min-width:0;}
@@ -584,6 +613,15 @@
           <li><span class="step-num">4</span><span>スタッフに支給・交換したら「使用記録」をつける（在庫が減る）</span></li>
         </ol>
         <p class="term-note">※「クルー／MGR／GEL」は、服の対象となるスタッフの区分（カテゴリ）です。絞り込みフィルタとして使います。</p>
+      </div>
+
+      <!-- 2026-10-17新設: 棚卸しの期限（サイドバー「棚卸し」画面で設定）が近い、または過ぎている場合のみ表示する -->
+      <div class="stocktake-notice" id="stocktakeNotice" style="display:none;" onclick="navigate('stocktake')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <div class="texts">
+          <div class="title" id="stocktakeNoticeTitle"></div>
+          <div class="desc" id="stocktakeNoticeDesc"></div>
+        </div>
       </div>
 
       <div class="stat-grid">
@@ -771,6 +809,7 @@
     </div>
     <div style="padding:14px 16px 0;">
       <p class="flow-note">前回棚卸し: <strong id="stocktakeLastDate">―</strong>。<strong>実数を入力した行だけ</strong>、その数でそのまま在庫が上書きされます（未入力の行はスキップされ、在庫は変わりません）。</p>
+      <p class="hint stocktake-deadline-row" onclick="openStocktakeDeadlineModal()">期限: <strong id="stocktakeDeadlineText">未設定</strong><span class="link-text">変更</span></p>
       <div id="stocktakeList"></div>
       <p class="error-text" id="stocktakeError"></p>
       <div class="sticky-bar">
@@ -846,12 +885,15 @@
 
   <button class="fab" id="fab" onclick="handleFabClick()">＋</button>
 
-  <nav class="bottom-nav" id="bottomNav">
+  <!-- 2026-10-17修正: JSのnavigate()が実行されるまで（リロード直後の自動ログイン待ちの間など）ログイン画面にフッターが見えてしまっていたため、
+       FABと同じ「デフォルトは非表示、JSが明示的に表示する」方式にした（navigate()のstyle.display=''でこのinline styleが上書きされる） -->
+  <nav class="bottom-nav" id="bottomNav" style="display:none;">
     <button class="nav-btn active" data-screen="home" onclick="navigate('home')" aria-label="ホーム">
       <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
         <polyline points="9 22 9 12 15 12 15 22"></polyline>
       </svg>
+      <span class="nav-dot" id="navDotHome"></span>
       <span>ホーム</span>
     </button>
     <button class="nav-btn" data-screen="inventory" onclick="navigate('inventory')" aria-label="在庫">
@@ -860,6 +902,7 @@
     </button>
     <button class="nav-btn" data-screen="delivery" onclick="navigate('delivery')" aria-label="納品">
       <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+      <span class="nav-dot" id="navDotDelivery"></span>
       <span>納品</span>
     </button>
     <button class="nav-btn" data-screen="consumption" onclick="navigate('consumption')" aria-label="使用記録（支給・交換・紛失）">
@@ -904,6 +947,7 @@
     <button type="button" class="sidebar-menu-btn" onclick="openStocktakeFromSidebar()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M9 12l2 2 4-4"></path></svg>
       <span>棚卸し</span>
+      <span class="badge-num" id="sidebarStocktakeBadge" style="display:none;">1</span>
     </button>
     <button type="button" class="sidebar-menu-btn" onclick="openReturnFromSidebar()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>
@@ -1050,6 +1094,23 @@
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeStocktakeQtyModal()">キャンセル</button>
       <button class="btn primary" id="stocktakeQtyModalSaveBtn" onclick="submitStocktakeQtyModal()">入力する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 棚卸し：期限設定モーダル（2026-10-17新設） -->
+<div class="modal-overlay" id="stocktakeDeadlineModal">
+  <div class="modal center" style="max-width:360px;">
+    <h2>棚卸しの期限を設定</h2>
+    <p class="hint" style="margin:-8px 0 14px;">毎月この日までに棚卸しを行う、という目安日です。期限の5日前からホーム画面に通知が表示され、過ぎると大きく強調表示されます。</p>
+    <div class="field">
+      <label>毎月<span class="req">1〜28</span></label>
+      <input type="number" id="stocktakeDeadlineInput" min="1" max="28" inputmode="numeric" placeholder="例）25">
+    </div>
+    <p class="error-text" id="stocktakeDeadlineModalError"></p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="stocktakeDeadlineClearBtn" onclick="clearStocktakeDeadline()">設定しない</button>
+      <button class="btn primary" id="stocktakeDeadlineSaveBtn" onclick="submitStocktakeDeadline()">保存</button>
     </div>
   </div>
 </div>
@@ -1289,8 +1350,9 @@
   let INVENTORY = {};       // 在庫store: hasSizeアイテムは{size:qty}オブジェクト、そうでなければ数値
   let DELIVERIES = [];      // [{id,date,status,memo,createdAt,details,inspections,distributions}]
   let CONSUMPTIONS = [];    // [{id,itemId,size,qty,reason,memo,createdAt}]
-  let STOCKTAKE_LOGS = [];  // [{id,itemId,size,previousQty,actualQty,diff,createdAt}]（2026-10新設）
+  let STOCKTAKE_LOGS = [];  // [{id,itemId,size,previousQty,actualQty,diff,createdAt,performedBy}]（2026-10新設）
   let RETURN_LOGS = [];     // [{id,itemId,size,qty,cleaned,exception,note,createdAt}]（2026-10新設）
+  let SETTINGS = { stocktakeDeadlineDay: null }; // 店舗共通設定（2026-10-17新設。PropertiesServiceに保存）
 
   function toBool(v){ return v === true || v === 'true' || v === 'TRUE' || v === 1 || v === '1'; }
   function mapItemMasterRow(r){
@@ -1322,9 +1384,9 @@
 
   /** ログイン直後に一括取得する。 */
   async function loadAllData(){
-    const [im, inv, dl, cs, st, rt] = await Promise.all([
+    const [im, inv, dl, cs, st, rt, se] = await Promise.all([
       apiCall('itemMaster', 'list'), apiCall('inventory', 'list'), apiCall('delivery', 'list'), apiCall('consumption', 'list'),
-      apiCall('stocktake', 'list'), apiCall('return', 'list')
+      apiCall('stocktake', 'list'), apiCall('return', 'list'), apiCall('settings', 'get')
     ]);
     let hasError = false;
     if(im.ok) ITEM_MASTER = im.data.map(mapItemMasterRow); else hasError = true;
@@ -1334,7 +1396,9 @@
     if(cs.ok) CONSUMPTIONS = cs.data.map(mapConsumptionRow); else hasError = true;
     if(st.ok) STOCKTAKE_LOGS = st.data; else hasError = true;
     if(rt.ok) RETURN_LOGS = rt.data; else hasError = true;
+    if(se.ok) SETTINGS = se.data; else hasError = true;
     if(hasError) toast('データの取得に一部失敗しました');
+    updateNavDots();
   }
   /** アイテムマスタ追加・編集（サイズ管理の有無変更時はInventoryも作り直されるため両方再取得）後に呼ぶ。 */
   async function reloadItemMasterAndInventory(){
@@ -1355,6 +1419,7 @@
     const dl = await apiCall('delivery', 'list');
     if(dl.ok) DELIVERIES = dl.data.map(mapDeliveryRow);
     else toast('データの再取得に失敗しました');
+    updateNavDots();
   }
   /** 使用記録の登録後に呼ぶ。 */
   async function reloadConsumptions(){
@@ -1367,6 +1432,7 @@
     const st = await apiCall('stocktake', 'list');
     if(st.ok) STOCKTAKE_LOGS = st.data;
     else toast('データの再取得に失敗しました');
+    updateNavDots();
   }
   /** 返却登録後に呼ぶ。 */
   async function reloadReturnLogs(){
@@ -1606,6 +1672,62 @@
     document.getElementById('homePendingTile').style.display = pending > 0 ? '' : 'none';
     const badge = document.getElementById('homeNavPendingBadge');
     if(pending > 0){ badge.style.display = ''; badge.textContent = pending; } else { badge.style.display = 'none'; }
+    updateStocktakeNotice();
+  }
+
+  /* ---- 棚卸し期限通知（2026-10-17新設）----
+   * 「棚卸しを毎月何日までと設定すると5日前からホーム画面に通知が表示され、期限を過ぎると大きく通知が
+   * 表示されるようになる」との要望を受けて実装。期限（SETTINGS.stocktakeDeadlineDay、毎月の日付・
+   * 1〜28に限定して月末付近の月をまたぐ計算を避けている）の5日前〜当日は通常の通知、期限超過後は
+   * 大きく強調した通知（.overdue）に切り替える。STOCKTAKE_LOGSに今月分の実施記録が1件でもあれば、
+   * 今月はもう実施済みとみなして通知を出さない（毎月のリマインドなので、やるべきことが済んだら消える）。 */
+  function computeStocktakeNoticeState(){
+    const day = SETTINGS.stocktakeDeadlineDay;
+    if(!day) return null;
+    const now = new Date();
+    const doneThisMonth = STOCKTAKE_LOGS.some(function(log){
+      const d = new Date(log.createdAt);
+      return !isNaN(d) && d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    });
+    if(doneThisMonth) return null;
+    const deadline = new Date(now.getFullYear(), now.getMonth(), day);
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const daysUntil = Math.round((deadline - todayStart) / (24 * 60 * 60 * 1000));
+    if(daysUntil > 5) return null;
+    return { daysUntil: daysUntil, overdue: daysUntil < 0, deadline: deadline };
+  }
+  function updateStocktakeNotice(){
+    const st = computeStocktakeNoticeState();
+    const noticeEl = document.getElementById('stocktakeNotice');
+    const badgeEl = document.getElementById('sidebarStocktakeBadge');
+    if(!st){
+      noticeEl.style.display = 'none';
+      badgeEl.style.display = 'none';
+      updateNavDots();
+      return;
+    }
+    const dateLabel = (st.deadline.getMonth() + 1) + '/' + st.deadline.getDate();
+    noticeEl.style.display = '';
+    noticeEl.classList.toggle('overdue', st.overdue);
+    if(st.overdue){
+      document.getElementById('stocktakeNoticeTitle').textContent = '棚卸しの期限を過ぎています';
+      document.getElementById('stocktakeNoticeDesc').textContent = '期限（' + dateLabel + '）から' + Math.abs(st.daysUntil) + '日経過しています。早めに実施してください。';
+    } else if(st.daysUntil === 0){
+      document.getElementById('stocktakeNoticeTitle').textContent = '棚卸しの期限は今日です';
+      document.getElementById('stocktakeNoticeDesc').textContent = '期限: ' + dateLabel;
+    } else {
+      document.getElementById('stocktakeNoticeTitle').textContent = '棚卸しの期限が近づいています';
+      document.getElementById('stocktakeNoticeDesc').textContent = '期限: ' + dateLabel + '（あと' + st.daysUntil + '日）';
+    }
+    badgeEl.style.display = '';
+    updateNavDots();
+  }
+  // フッターアイコンは数字を出さず、未完了タスク（未検品の納品／棚卸しの期限通知）があることだけを点で示す
+  function updateNavDots(){
+    const pendingDelivery = DELIVERIES.filter(function(d){ return d.status === '未検品'; }).length > 0;
+    const stocktakeActive = !!computeStocktakeNoticeState();
+    document.getElementById('navDotDelivery').classList.toggle('show', pendingDelivery);
+    document.getElementById('navDotHome').classList.toggle('show', pendingDelivery || stocktakeActive);
   }
 
   /* ============================================================
@@ -2434,7 +2556,49 @@
       ? STOCKTAKE_LOGS.slice().sort(function(a,b){ return String(b.createdAt).localeCompare(String(a.createdAt)); })[0]
       : null;
     document.getElementById('stocktakeLastDate').textContent = last ? fmtDateOnly(last.createdAt) : 'まだ実施されていません';
+    refreshStocktakeDeadlineRow();
   }
+  // ---- 棚卸し：期限設定（2026-10-17新設。店舗共通の設定のためPropertiesServiceに保存） ----
+  function refreshStocktakeDeadlineRow(){
+    const day = SETTINGS.stocktakeDeadlineDay;
+    document.getElementById('stocktakeDeadlineText').textContent = day ? ('毎月' + day + '日') : '未設定';
+  }
+  window.openStocktakeDeadlineModal = function(){
+    document.getElementById('stocktakeDeadlineInput').value = SETTINGS.stocktakeDeadlineDay || '';
+    document.getElementById('stocktakeDeadlineModalError').textContent = '';
+    document.getElementById('stocktakeDeadlineModal').classList.add('active');
+  };
+  window.closeStocktakeDeadlineModal = function(){ document.getElementById('stocktakeDeadlineModal').classList.remove('active'); };
+  window.submitStocktakeDeadline = function(){
+    const errEl = document.getElementById('stocktakeDeadlineModalError');
+    const raw = document.getElementById('stocktakeDeadlineInput').value;
+    const day = Number(raw);
+    if(raw === '' || isNaN(day) || day < 1 || day > 28 || Math.floor(day) !== day){
+      errEl.textContent = '1〜28の整数で入力してください';
+      return;
+    }
+    errEl.textContent = '';
+    withButtonBusy(document.getElementById('stocktakeDeadlineSaveBtn'), '保存中…', async function(){
+      const res = await apiCall('settings', 'update', { settings: { stocktakeDeadlineDay: day } });
+      if(!res.ok){ errEl.textContent = apiErrorMessage(res); toast(apiErrorMessage(res)); return; }
+      SETTINGS = res.data;
+      closeStocktakeDeadlineModal();
+      toast('棚卸しの期限を設定しました');
+      refreshStocktakeDeadlineRow();
+      updateStocktakeNotice();
+    });
+  };
+  window.clearStocktakeDeadline = function(){
+    withButtonBusy(document.getElementById('stocktakeDeadlineClearBtn'), '解除中…', async function(){
+      const res = await apiCall('settings', 'update', { settings: { stocktakeDeadlineDay: null } });
+      if(!res.ok){ toast(apiErrorMessage(res)); return; }
+      SETTINGS = res.data;
+      closeStocktakeDeadlineModal();
+      toast('棚卸しの期限設定を解除しました');
+      refreshStocktakeDeadlineRow();
+      updateStocktakeNotice();
+    });
+  };
   // ---- 棚卸し：実数入力モーダル（テンキー。確定するまでAPIは呼ばない） ----
   window.openStocktakeQtyModal = function(itemId, size){
     state.editingStocktakeQty = { itemId: itemId, size: size };
