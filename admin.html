@@ -215,6 +215,7 @@
   table.lines .reflect-pending { background:#fff3cf; color:#8a6a12; }
   table.lines .reflect-done { background:#e4f6ef; color:#1f6f5c; }
   table.lines .log-sub { font-size:10px; color:var(--sub); margin-top:3px; white-space:nowrap; }
+  table.lines td.op-cell { white-space:nowrap; }
   .pending-row { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--line); font-size:12px; }
   .pending-row .pending-text { flex:1; }
   .pending-row button { font-size:11px; padding:4px 9px; background:transparent; color:var(--warn); border:1px solid var(--line); }
@@ -230,6 +231,24 @@
                               color:#1f6f5c; border:1px solid var(--line); font-weight:600; }
   table.lines .ap-approve { font-size:10px; padding:2px 7px; border-radius:6px; background:transparent;
                              color:#1f6f5c; border:1px solid var(--line); font-weight:600; }
+  /* PC幅では横スクロールが出ないよう、列幅を固定しテキストを折り返す（2026-10-18追加）。
+     スマホ幅は従来通りnowrap+横スクロール（`.tablewrap`のoverflow-x:auto）のままにしてある。
+     「まとめて挿入」のプレビュー表は列数が違う（6列）ため、.lines-main（募集一覧本体、8列）だけを対象にする。 */
+  @media (min-width:900px) {
+    table.lines.lines-main { white-space:normal; table-layout:fixed; }
+    table.lines.lines-main td { word-break:break-word; }
+    table.lines.lines-main .log-sub { white-space:normal; }
+    table.lines.lines-main .ap-list { min-width:0; }
+    table.lines.lines-main th:nth-child(1), table.lines.lines-main td:nth-child(1) { width:9%; }
+    table.lines.lines-main th:nth-child(2), table.lines.lines-main td:nth-child(2) { width:9%; }
+    table.lines.lines-main th:nth-child(3), table.lines.lines-main td:nth-child(3) { width:24%; }
+    table.lines.lines-main th:nth-child(4), table.lines.lines-main td:nth-child(4) { width:7%; }
+    table.lines.lines-main th:nth-child(5), table.lines.lines-main td:nth-child(5) { width:13%; }
+    table.lines.lines-main th:nth-child(6), table.lines.lines-main td:nth-child(6) { width:11%; }
+    table.lines.lines-main th:nth-child(7), table.lines.lines-main td:nth-child(7) { width:17%; }
+    table.lines.lines-main th:nth-child(8), table.lines.lines-main td:nth-child(8) { width:10%; }
+    table.lines.lines-main td.op-cell { white-space:normal; }
+  }
   .msg { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:#2a2410; color:#fff;
          padding:10px 16px; border-radius:10px; font-size:14px; opacity:0; transition:opacity .2s; pointer-events:none;
          max-width:calc(100% - 32px); z-index:5; }
@@ -909,7 +928,7 @@
 
     var wrap = el('div', 'tablewrap');
     var table = document.createElement('table');
-    table.className = 'lines';
+    table.className = 'lines lines-main';
     var thead = document.createElement('thead');
     thead.innerHTML = '<tr><th>日付</th><th>時間</th><th>クルー氏名</th><th>種別</th><th>内容</th><th>反映</th><th>備考</th><th>操作</th></tr>';
     table.appendChild(thead);
@@ -967,7 +986,7 @@
       tr.appendChild(td_(l.note || ''));
 
       var opTd = document.createElement('td');
-      opTd.style.whiteSpace = 'nowrap';
+      opTd.className = 'op-cell';
       var editBtn = el('button', 'ghost', '編集');
       editBtn.style.marginRight = '4px';
       editBtn.onclick = function () { openEditLineModal_(l); };
