@@ -50,7 +50,11 @@
   }
   body.no-chrome{ padding-bottom:0; }
   a,button,input,select,textarea{font-family:inherit;}
-  .app-shell{max-width:560px; margin:0 auto; min-height:100vh; position:relative;}
+  /* 2026-10-18: min-height:100vhだけだとモバイルブラウザ（特にアドレスバー表示中）で
+     実際の表示領域より算出値が大きくなり、ページ全体が「わずかにスクロールできてしまう」
+     不具合が出ていた。100svh（アドレスバー等のUIが出ている状態の実表示領域）を
+     フォールバックとして後ろに追加し、対応ブラウザではそちらを優先させる。 */
+  .app-shell{max-width:560px; margin:0 auto; min-height:100vh; min-height:100svh; position:relative;}
   .num{font-variant-numeric:tabular-nums;}
 
   /* ==== ヘッダー ==== */
@@ -71,7 +75,7 @@
   .auth-wrap{
     position:relative; overflow:hidden;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    min-height:100vh; padding:32px 20px; text-align:center;
+    min-height:100vh; min-height:100svh; padding:32px 20px; text-align:center;
     background:radial-gradient(circle at 50% -8%, var(--accent-weak) 0%, var(--surface-0) 58%);
   }
   .auth-wrap::before{
