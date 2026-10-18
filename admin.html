@@ -303,6 +303,7 @@
 
     <button class="sidebar-btn" id="openPwChangeBtn" style="width:100%; margin-top:8px;">パスワードを変更</button>
     <button class="sidebar-btn" id="openAccountsBtn" style="width:100%; margin-top:8px;" hidden>アカウント管理</button>
+    <button class="sidebar-btn" id="openRosterBtn" style="width:100%; margin-top:8px;">交渉編集</button>
     <button class="sidebar-btn" id="exportImageBtn" style="width:100%; margin-top:8px;">この週を画像で保存</button>
     <button class="ghost" id="logoutBtn" style="width:100%; margin-top:8px;">ログアウト</button>
   </div>
@@ -331,6 +332,29 @@
       </div>
       <label class="chk-row"><input type="checkbox" id="acctNewCanManage"> アカウント管理権限を付与する</label>
       <button type="button" id="acctAddBtn" style="width:100%;">追加する</button>
+    </div>
+  </div>
+
+  <div class="wrap" id="rosterView" hidden>
+    <button type="button" class="ghost" id="rosterBackBtn" style="margin-bottom:12px;">← 募集一覧へ戻る</button>
+    <h2>交渉編集</h2>
+    <p class="nego-view-head">交渉集計の「新規／延ばし」で選べる候補者を追加・削除します（スタッフ名簿シートと同じデータです）。</p>
+    <div id="rosterList"></div>
+    <div class="accounts-add-form">
+      <div class="fld-title">候補者を追加</div>
+      <div class="grid2">
+        <label class="fld">氏名（シフト表と同じ表記）<input type="text" id="rosterNewName"></label>
+        <label class="fld">区分
+          <select id="rosterNewCategory">
+            <option value="">（未設定）</option>
+            <option value="FC">FC</option>
+            <option value="OP">OP</option>
+            <option value="デリバリー">デリバリー</option>
+            <option value="その他">その他</option>
+          </select>
+        </label>
+      </div>
+      <button type="button" id="rosterAddBtn" style="width:100%;">追加する</button>
     </div>
   </div>
 </div>
@@ -495,6 +519,9 @@
     'デリバリー': { bg: '#fff3cf', ink: '#8a6a12' },
     'その他': { bg: '#eee7d6', ink: '#6b6248' }
   };
+  // 募集人数が全て埋まっているラインは画像上で存在感を薄くするためのグレー配色（2026-10-18追加）
+  var FILLED_COLOR = { bg: '#eceae3', ink: '#a8a292' };
+  var FILLED_TEXT = '#9c9684';
   function negoReplyLabel(r) { return r === '無理' ? '無理' : r === 'IN' ? 'IN可能' : r === '未定' ? '未定' : '未回答'; }
   function switchView(v) {
     VIEW = v;
@@ -503,10 +530,13 @@
     $('linesView').hidden = v !== 'lines';
     $('negoView').hidden = v !== 'nego';
     $('accountsView').hidden = v !== 'accounts';
+    $('rosterView').hidden = v !== 'roster';
     if (v === 'lines') { render(); }
     else if (v === 'nego') { if (!NEGO) loadNego(); else renderNego(); }
     else if (v === 'accounts') {
       call('adminAccountsList', null, function (data) { renderAccountsList_(data.accounts); });
+    } else if (v === 'roster') {
+      call('adminRosterList', null, function (data) { renderRosterList_(data.roster); });
     }
   }
   function loadNego() {
@@ -959,10 +989,12 @@
       var crewLines = wrapText_(mctx, crewParts.join('、'), cols[4].w - 16);
       var what = (l.what && l.what.indexOf('搬入') >= 0) ? l.what : '';
       var cat = l.category || 'その他';
+      var filled = full.length >= l.need;
       return {
         cells: [l.label, l.start + '〜' + l.end, cat, what],
         crewLines: crewLines,
-        color: CAT_COLORS[cat] || CAT_COLORS['その他'],
+        color: filled ? FILLED_COLOR : (CAT_COLORS[cat] || CAT_COLORS['その他']),
+        filled: filled,
         h: Math.max(lineH + rowPad, crewLines.length * lineH + rowPad)
       };
     });
@@ -1003,12 +1035,12 @@
       var cx = padX;
       r.cells.forEach(function (text, ci) {
         if (ci === 2) { ctx.font = 'bold 13px sans-serif'; ctx.fillStyle = r.color.ink; }
-        else { ctx.font = '13px sans-serif'; ctx.fillStyle = '#2a2410'; }
+        else { ctx.font = '13px sans-serif'; ctx.fillStyle = r.filled ? FILLED_TEXT : '#2a2410'; }
         ctx.fillText(text, cx + 8, y + r.h / 2 + 4);
         cx += cols[ci].w;
       });
       ctx.font = '13px sans-serif';
-      ctx.fillStyle = '#2a2410';
+      ctx.fillStyle = r.filled ? FILLED_TEXT : '#2a2410';
       r.crewLines.forEach(function (line, li) {
         var ly = y + rowPad / 2 + lineH * (li + 1) - 3;
         ctx.fillText(line, cx + 8, ly);
@@ -1352,6 +1384,47 @@
       renderAccountsList_(data.accounts);
       toast('パスワードをリセットしました');
       $('acctResetOverlay').hidden = true;
+    });
+  };
+
+  // ---- 交渉編集（2026-10-18追加。交渉集計の「新規／延ばし」で選べる候補者＝スタッフ名簿をアプリ内から編集する） ----
+  function renderRosterList_(roster) {
+    var box = $('rosterList');
+    box.innerHTML = '';
+    if (!roster.length) { box.appendChild(el('p', 'nego-view-head', '候補者がまだ登録されていません。')); return; }
+    roster.forEach(function (r) {
+      var row = el('div', 'account-row');
+      row.appendChild(el('span', 'account-id', r.name));
+      if (r.category) row.appendChild(el('span', 'nego-row-cat cat-' + r.category, r.category));
+      var actions = el('div', 'account-actions');
+      var delBtn = el('button', 'ghost', '削除');
+      delBtn.onclick = function () {
+        if (!confirm(r.name + 'さんを交渉編集の候補者リストから削除しますか？')) return;
+        call('adminRosterDelete', { name: r.name }, function (data) {
+          renderRosterList_(data.roster);
+          if (NEGO) NEGO.roster = data.roster;
+          toast('削除しました');
+        });
+      };
+      actions.appendChild(delBtn);
+      row.appendChild(actions);
+      box.appendChild(row);
+    });
+  }
+  $('openRosterBtn').onclick = function () {
+    closeSidebar();
+    switchView('roster');
+  };
+  $('rosterBackBtn').onclick = function () { switchView('lines'); };
+  $('rosterAddBtn').onclick = function () {
+    var name = $('rosterNewName').value.trim();
+    var category = $('rosterNewCategory').value;
+    if (!name) { toast('氏名を入力してください'); return; }
+    call('adminRosterAdd', { name: name, category: category }, function (data) {
+      renderRosterList_(data.roster);
+      if (NEGO) NEGO.roster = data.roster;
+      $('rosterNewName').value = ''; $('rosterNewCategory').value = '';
+      toast('追加しました');
     });
   };
 
