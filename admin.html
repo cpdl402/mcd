@@ -136,6 +136,11 @@
   .weekbtn { flex:0 0 auto; font-size:13px; padding:8px 14px; border-radius:999px; border:1px solid var(--line);
              background:#fff; color:var(--sub); font-weight:700; white-space:nowrap; }
   .weekbtn.on { background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .publish-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+  .publish-status { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; }
+  .publish-status.pub-on { background:#e4f6ef; color:#1f6f5c; }
+  .publish-status.pub-off { background:#f1f1f1; color:#777; }
+  .publish-status.pub-mixed { background:#fff3cf; color:#8a6a12; }
   h1 { font-size:20px; margin:8px 0 4px; }
   h2 { font-size:15px; margin:24px 0 10px; }
   .notice { color:var(--sub); font-size:14px; margin:0 0 16px; }
@@ -926,6 +931,24 @@
     var lines = DATA.lines.filter(function (l) { return !WEEK_KEY || ymd(mondayOf(l.date)) === WEEK_KEY; });
     if (!lines.length) { list.appendChild(el('p', 'empty', 'この週の募集ラインがありません')); return; }
 
+    if (WEEK_KEY) {
+      var allPub = lines.every(function (l) { return l.published; });
+      var nonePub = lines.every(function (l) { return !l.published; });
+      var pubBar = el('div', 'publish-bar');
+      pubBar.appendChild(el('span', 'publish-status' + (allPub ? ' pub-on' : nonePub ? ' pub-off' : ' pub-mixed'),
+        'この週: ' + (allPub ? '公開中' : nonePub ? '非公開' : '一部のみ公開')));
+      var pubBtn = el('button', 'ghost', allPub ? 'この週を非公開にする' : 'この週を公開する');
+      pubBtn.type = 'button';
+      pubBtn.onclick = function () {
+        var next = !allPub;
+        call('adminSetWeekPublished', { weekStart: WEEK_KEY, published: next }, function (data) {
+          DATA = Object.assign({}, DATA, data); render(); toast(next ? 'この週を公開しました' : 'この週を非公開にしました');
+        });
+      };
+      pubBar.appendChild(pubBtn);
+      list.appendChild(pubBar);
+    }
+
     var wrap = el('div', 'tablewrap');
     var table = document.createElement('table');
     table.className = 'lines lines-main';
@@ -944,6 +967,7 @@
 
       var dateTd = document.createElement('td');
       dateTd.appendChild(el('div', null, l.label));
+      if (!l.published) dateTd.appendChild(el('div', 'log-sub', '非公開'));
       if (l.addedBy) dateTd.appendChild(el('div', 'log-sub', '追加:' + l.addedBy));
       tr.appendChild(dateTd);
       tr.appendChild(td_(l.start + '〜' + l.end));
