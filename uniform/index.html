@@ -9,18 +9,18 @@
   :root{
     /* 2026-10（暖色化）: M-Crew（シフト管理）のクリーム×焦げ茶トーンを参考に、ベース背景・文字色を暖色系に寄せた。
        ブランドアクセント（スチールブルー）・注意喚起アンバー・良好/エラー色・カテゴリ色は従来どおり維持。 */
-    --surface-0:#faf3df; --surface-1:#fffcf2; --surface-2:#fffdf8;
+    --surface-0:#FBF7EA; --surface-1:#FFFDF6; --surface-2:#FFFFFF;
     --text-primary:#2a2410; --text-secondary:#6b5f3e; --text-muted:#8a7f5a;
     --gridline:#f0e4b8; --border:rgba(42,36,16,0.12);
-    --brand:#2f6690; --brand-ink:#ffffff; --brand-weak:#dbe8f0;
-    --accent:#e0892c; --accent-ink:#2e1c00; --accent-weak:#fbe6cc;
+    --brand:#F2B600; --brand-ink:#241900; --brand-weak:#FFF3C4; --brand-strong:#8A6500;
+    --accent:#D43211; --accent-ink:#1A0F00; --accent-weak:#FBE3D1;
     --good:#2f8f5b; --good-weak:#dcf0e5;
     --critical:#d6484c; --critical-weak:#fbdede;
     --cat-crew:#2f6690; --cat-mgr:#6952a3; --cat-gel:#1f8a80; --cat-common:#5c5338;
-    --cat-mgr-weak:#e8e1f6; --cat-gel-weak:#d9f0ec;
+    --cat-crew-weak:#DBE8F0; --cat-mgr-weak:#e8e1f6; --cat-gel-weak:#d9f0ec;
     --dist:#b4366f; --dist-weak:#f7dcea;
     --stocktake:#5a7a2e; --stocktake-weak:#e4ecd2;
-    --return:#a3581f; --return-weak:#f5e2c9;
+    --return:#9A5424; --return-weak:#f5e2c9;
     --radius:16px;
     color-scheme: light dark;
   }
@@ -29,15 +29,15 @@
       --surface-0:#1c1710; --surface-1:#241e14; --surface-2:#2c2418;
       --text-primary:#f5ecd1; --text-secondary:#cbbd93; --text-muted:#9c8f68;
       --gridline:#3a3122; --border:rgba(255,245,214,0.09);
-      --brand:#6fa8cf; --brand-ink:#0d1419; --brand-weak:#213a4a;
-      --accent:#f0a048; --accent-ink:#2a1700; --accent-weak:#4a3014;
+      --brand:#E0B340; --brand-ink:#0d1419; --brand-weak:#4A3C14; --brand-strong:#E0B340;
+      --accent:#EF5739; --accent-ink:#241200; --accent-weak:#4A2A12;
       --good:#58b784; --good-weak:#1d3a2b;
       --critical:#e6696c; --critical-weak:#4a2022;
       --cat-crew:#6fa8cf; --cat-mgr:#a594d1; --cat-gel:#4fb7ac; --cat-common:#c9bb8e;
-      --cat-mgr-weak:#332a52; --cat-gel-weak:#163834;
+      --cat-crew-weak:#213A4A; --cat-mgr-weak:#332a52; --cat-gel-weak:#163834;
       --dist:#e58bb3; --dist-weak:#4a2338;
       --stocktake:#9bc46a; --stocktake-weak:#2c3a1c;
-      --return:#e0a05a; --return-weak:#4a2f14;
+      --return:#CB8752; --return-weak:#4a2f14;
     }
   }
   *{box-sizing:border-box;}
@@ -76,12 +76,12 @@
     position:relative; overflow:hidden;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     min-height:100vh; min-height:100svh; padding:32px 20px; text-align:center;
-    background:radial-gradient(circle at 50% -8%, var(--accent-weak) 0%, var(--surface-0) 58%);
+    background:radial-gradient(circle at 50% -8%, var(--brand-weak) 0%, var(--surface-0) 58%);
   }
   .auth-wrap::before{
     content:''; position:absolute; left:-30%; bottom:-60%; z-index:0;
     width:160%; height:130%; border-radius:46%;
-    background:linear-gradient(120deg, var(--accent-weak), var(--accent));
+    background:linear-gradient(120deg, var(--brand-weak), var(--brand));
     opacity:0.28; pointer-events:none;
   }
   .auth-card{
@@ -94,7 +94,7 @@
   .auth-logo-card{
     width:116px; height:116px; border-radius:26px; background:#ffffff; padding:12px;
     display:flex; align-items:center; justify-content:center; margin-bottom:4px;
-    box-shadow:0 10px 26px rgba(224,137,44,0.38);
+    box-shadow:0 10px 26px rgba(138,101,0,0.30);
   }
   .auth-logo-card img{width:100%; height:100%; object-fit:contain; display:block;}
   .auth-title{font-size:26px; font-weight:800; margin:0; letter-spacing:0.5px;}
@@ -111,7 +111,7 @@
     width:100%; padding:13px 12px; border-radius:12px; border:1px solid var(--border);
     background:var(--surface-1); color:var(--text-primary); font-size:15px;
   }
-  .pin-input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-weak);}
+  .pin-input:focus{outline:none; border-color:var(--brand-strong); box-shadow:0 0 0 3px var(--brand-weak);}
   .pw-wrap{position:relative;}
   .pw-wrap .pin-input{padding-right:42px;}
   .pw-eye{
@@ -123,7 +123,6 @@
   .input-error{border-color:var(--critical) !important;}
   .error-text{color:var(--critical); font-size:12px; margin:8px 0 0; min-height:16px;}
   .mockup-note{margin-top:16px; padding-top:12px; border-top:1px dashed var(--border); font-size:11px; color:var(--text-muted); text-align:center; line-height:1.6;}
-  #screen-login .btn.primary{background:var(--accent); color:var(--accent-ink); box-shadow:0 10px 20px rgba(224,137,44,0.35); border-radius:999px;}
 
   /* ==== 共通ボタン ==== */
   .btn{flex:1; padding:14px; border-radius:12px; border:none; font-size:15px; font-weight:700; cursor:pointer;}
@@ -174,7 +173,7 @@
     background:var(--brand-weak); color:var(--text-primary); border-radius:12px;
     padding:10px 12px; font-size:12px; line-height:1.65; margin-bottom:14px;
   }
-  .flow-note strong{color:var(--brand);}
+  .flow-note strong{color:var(--brand-strong);}
   .warn-note{
     background:var(--accent-weak); color:var(--text-primary); border-radius:12px;
     padding:11px 12px; font-size:12.5px; line-height:1.65; margin-bottom:14px; display:flex; gap:8px; align-items:flex-start;
@@ -214,7 +213,7 @@
   .stocktake-notice.overdue .desc{font-size:12.5px; opacity:0.92;}
   .stocktake-notice.overdue svg{width:26px; height:26px;}
   .stocktake-deadline-row{display:flex; align-items:center; gap:6px; cursor:pointer; margin:-6px 0 14px;}
-  .stocktake-deadline-row .link-text{color:var(--brand); font-weight:800; font-size:11.5px; margin-left:4px;}
+  .stocktake-deadline-row .link-text{color:var(--brand-strong); font-weight:800; font-size:11.5px; margin-left:4px;}
   /* 使い方ガイドモーダル（#guideModal）はonboard-cardと同じ文字サイズ・行間にするため、
      汎用の`.modal p`より詳細度の高いセレクタで上書きする */
   #guideModal p{font-size:12px; color:var(--text-secondary); margin:0 0 10px; line-height:1.6;}
@@ -227,7 +226,7 @@
   }
   .nav-card:active{transform:scale(0.99);}
   .nav-card .icon-wrap{
-    flex:none; width:42px; height:42px; border-radius:12px; background:var(--brand-weak); color:var(--brand);
+    flex:none; width:42px; height:42px; border-radius:12px; background:var(--brand-weak); color:var(--brand-strong);
     display:flex; align-items:center; justify-content:center;
   }
   .nav-card .texts{flex:1; min-width:0;}
@@ -278,34 +277,19 @@
 
   /* カテゴリバッジ：M-Crewの種別チップ（--fc-bg/--fc-ink等）と同じ「背景色＋インク色のペア」で色分けする */
   .cat-badge{display:inline-block; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px;}
-  .cat-badge.cat-crew{background:var(--brand-weak); color:var(--cat-crew);}
+  .cat-badge.cat-crew{background:var(--cat-crew-weak); color:var(--cat-crew);}
   .cat-badge.cat-mgr{background:var(--cat-mgr-weak); color:var(--cat-mgr);}
   .cat-badge.cat-gel{background:var(--cat-gel-weak); color:var(--cat-gel);}
   .cat-badge.cat-common{background:var(--gridline); color:var(--cat-common);}
   .gender-badge{display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:var(--gridline); color:var(--text-secondary);}
 
   .size-chip-row{display:flex; gap:6px; flex-wrap:wrap;}
-  .size-chip{
-    flex:none; min-width:46px; padding:6px 4px; border-radius:10px; border:1px solid var(--border);
-    background:var(--surface-1); color:var(--text-primary); font-size:11px; font-weight:700; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:2px;
-  }
-  .size-chip .qv{font-size:13px; font-weight:800;}
-  .size-chip.zero{opacity:0.45;}
-  .size-chip:active{transform:scale(0.95);}
   .add-size-btn{
     margin-top:10px; width:100%; padding:9px; border-radius:10px; border:1.5px dashed var(--border);
-    background:transparent; color:var(--brand); font-weight:700; font-size:12px; cursor:pointer;
+    background:transparent; color:var(--brand-strong); font-weight:700; font-size:12px; cursor:pointer;
   }
   .add-size-btn:active{transform:scale(0.98);}
 
-  .noSize-qty-row{
-    display:flex; align-items:center; justify-content:space-between; background:var(--surface-1);
-    border-radius:11px; padding:10px 12px; cursor:pointer;
-  }
-  .noSize-qty-row .qty-value{font-size:18px; font-weight:800;}
-  .noSize-qty-row .edit-hint{font-size:11px; color:var(--text-muted);}
-  .noSize-qty-row:active{transform:scale(0.99);}
 
   /* ==== アイテム管理モーダル（サイドバー導線） ==== */
   .item-manage-row{
@@ -341,7 +325,7 @@
   .remove-row-btn{flex:none; background:none; border:none; color:var(--critical); font-size:12px; font-weight:700; cursor:pointer; padding:0 2px;}
   .add-row-btn{
     width:100%; padding:11px; border-radius:11px; border:1.5px dashed var(--border);
-    background:transparent; color:var(--brand); font-weight:700; font-size:13.5px; cursor:pointer; margin-bottom:14px;
+    background:transparent; color:var(--brand-strong); font-weight:700; font-size:13.5px; cursor:pointer; margin-bottom:14px;
   }
 
   /* ==== 検品 ==== */
@@ -415,7 +399,7 @@
   .history-icon{
     flex:none; width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center;
   }
-  .history-icon.type-delivery{background:var(--brand-weak); color:var(--brand);}
+  .history-icon.type-delivery{background:var(--brand-weak); color:var(--brand-strong);}
   .history-icon.type-inspection{background:rgba(31,138,128,0.14); color:var(--cat-gel);}
   .history-icon.type-distribution{background:var(--dist-weak); color:var(--dist);}
   .history-icon.type-consumption{background:var(--accent-weak); color:var(--accent-ink);}
@@ -425,7 +409,7 @@
   .history-title{font-size:13.5px; font-weight:700; line-height:1.4;}
   .history-sub{font-size:11.5px; color:var(--text-muted); margin-top:2px;}
   .type-badge{display:inline-block; font-size:9.5px; font-weight:800; padding:1px 7px; border-radius:999px; margin-right:5px; vertical-align:1px;}
-  .type-badge.type-delivery{background:var(--brand-weak); color:var(--brand);}
+  .type-badge.type-delivery{background:var(--brand-weak); color:var(--brand-strong);}
   .type-badge.type-inspection{background:rgba(31,138,128,0.14); color:var(--cat-gel);}
   .type-badge.type-distribution{background:var(--dist-weak); color:var(--dist);}
   .type-badge.type-consumption{background:var(--accent-weak); color:var(--accent-ink);}
@@ -441,7 +425,7 @@
   .fab{
     position:fixed; right:calc(50% - 280px + 18px); bottom:calc(84px + env(safe-area-inset-bottom));
     width:58px; height:58px; border-radius:50%; background:var(--brand); color:var(--brand-ink);
-    border:none; font-size:28px; box-shadow:0 6px 16px rgba(47,102,144,0.4); cursor:pointer; z-index:6;
+    border:none; font-size:28px; box-shadow:0 6px 16px rgba(138,101,0,0.4); cursor:pointer; z-index:6;
     display:none;
   }
   .fab.show{display:flex; align-items:center; justify-content:center;}
@@ -459,7 +443,7 @@
     flex:1; background:none; border:none; padding:10px 0 8px; cursor:pointer;
     color:var(--text-muted); display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10px; font-weight:700;
   }
-  .nav-btn.active{color:var(--brand);}
+  .nav-btn.active{color:var(--brand-strong);}
   /* 2026-10-17新設: フッターアイコンは数字バッジではなく、小さな点で「通知がある」ことだけを示す */
   .nav-dot{
     position:absolute; top:6px; left:calc(50% + 7px); width:8px; height:8px; border-radius:50%;
@@ -490,13 +474,13 @@
     color:var(--text-primary); font-size:14px; font-weight:700;
   }
   .sidebar-menu-btn:active{background:var(--surface-1);}
-  .sidebar-menu-btn svg{flex:none; color:var(--brand);}
+  .sidebar-menu-btn svg{flex:none; color:var(--brand-strong);}
   .sidebar-divider{border:none; border-top:1px solid var(--border); margin:2px 0 16px;}
 
   /* ==== PC幅サイドバーナビ（900px以上のみ表示。ホーム/在庫/納品/使用の4タブをサイドバーに集約する） ==== */
   .sidebar-nav-group{display:none; flex-direction:column; gap:2px; margin-bottom:2px;}
-  .sidebar-nav-btn.active{background:var(--brand-weak); color:var(--brand);}
-  .sidebar-nav-btn.active svg{color:var(--brand);}
+  .sidebar-nav-btn.active{background:var(--brand-weak); color:var(--brand-strong);}
+  .sidebar-nav-btn.active svg{color:var(--brand-strong);}
   .sidebar-nav-divider{display:none;}
 
   /* ==== 読み込み中バッジ／ボタンスピナー（Coding段階のGAS通信に備えた応答待ちフィードバック） ==== */
@@ -537,7 +521,7 @@
   .field{margin-bottom:14px;}
   .field.hidden{display:none;}
   .field label{display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px; font-weight:700;}
-  .field label .req{color:var(--brand); margin-left:2px;}
+  .field label .req{color:var(--brand-strong); margin-left:2px;}
   .field input[type=text], .field input[type=number], .field input[type=date],
   .field select, .field textarea{
     width:100%; padding:12px 12px; border-radius:11px; border:1px solid var(--border);
@@ -583,6 +567,58 @@
      「ページの中身が小さく左に寄って美しくない」「メニューはハンバーガーで閉じれるM-Crewのような
      表示がいい」という2026-10-17のフィードバックを受けて撤回した。ハンバーガー＋スライドインの
      サイドバー（M-Crewと同じ方式）＋ボトムナビを、画面幅を問わず共通の挙動に戻している。 */
+
+  /* ==== 新品/中古ステータス（サイズチップのグループ化。在庫・棚卸し画面で共用） ==== */
+  .size-chip-group{
+    flex:none; border:1px solid var(--border); border-radius:10px; background:var(--surface-1);
+    padding:6px; display:flex; flex-direction:column; align-items:center; gap:4px; min-width:90px;
+  }
+  .size-chip-group .size-chip-label{font-size:11px; font-weight:800; color:var(--text-secondary);}
+  .size-chip-conditions{display:flex; gap:4px;}
+  .cond-btn{
+    flex:none; min-width:38px; padding:4px 3px; border-radius:8px; border:none;
+    background:var(--surface-2); color:var(--text-primary); font-size:10px; font-weight:700; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:1px;
+  }
+  .cond-btn .cond-tag{font-size:9px; color:var(--text-muted); font-weight:700;}
+  .cond-btn .qv{font-size:13px; font-weight:800;}
+  .cond-btn.zero{opacity:0.45;}
+  .cond-btn:active{transform:scale(0.92);}
+  /* サイズなしアイテムの1行表示も、新品/中古を横2分割したタップ可能なボタンに分ける */
+  .noSize-cond-row{display:flex; gap:8px;}
+  .noSize-cond-half{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; background:var(--surface-1);
+    border:none; border-radius:11px; padding:10px 8px; cursor:pointer;
+  }
+  .noSize-cond-half .cond-tag{font-size:11px; color:var(--text-muted); font-weight:700;}
+  .noSize-cond-half .qty-value{font-size:18px; font-weight:800;}
+  .noSize-cond-half.zero{opacity:0.45;}
+  .noSize-cond-half:active{transform:scale(0.98);}
+
+  /* ==== レスポンシブ（タブレット／PC帯。ナビの出し方自体はスマホ幅と変更しない。
+     一覧系カード（在庫・棚卸し・アイテム管理）だけ列数を増やす） ==== */
+  @media (min-width:600px){
+    .app-shell{max-width:720px;}
+    .fab{right:calc(50% - 360px + 18px);}
+    .bottom-nav{max-width:720px;}
+    #inventoryList, #stocktakeList, #itemManageList{
+      display:grid; grid-template-columns:repeat(2,1fr); gap:10px; align-items:start;
+    }
+    #inventoryList .item-card, #stocktakeList .item-card, #itemManageList .item-manage-row{margin-bottom:0;}
+  }
+  @media (min-width:1024px){
+    .app-shell{max-width:960px;}
+    .fab{right:calc(50% - 480px + 18px);}
+    .bottom-nav{max-width:960px;}
+    #inventoryList, #stocktakeList, #itemManageList{
+      grid-template-columns:repeat(3,1fr);
+    }
+    /* 単一カラムのまま維持するリスト（履歴・納品・使用記録・返却の直近記録）は、
+       間延びを避けるため内側だけ中央寄せの最大幅を設ける */
+    #historyList, #deliveryList, #cnsRecentList, #retRecentList{
+      max-width:640px; margin:0 auto;
+    }
+  }
 </style>
 </head>
 <body>
@@ -745,7 +781,7 @@
       </div>
       <p class="warn-note">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        <span>各アイテムの「実数」に、<strong>実際に数えた数</strong>をそのまま入力してください。予定数との差があっても構いません。入力した数が<strong>そのまま在庫数として記録されます</strong>（今の在庫に足し算されるわけではありません）。特定のスタッフに渡す分がある場合は、各行の「＋ 個別配布を追加」からその分だけ切り出せます（個別配布分は在庫に反映されません）。</span>
+        <span>各アイテムの「実数」に、<strong>実際に数えた数</strong>をそのまま入力してください。予定数との差があっても構いません。入力した数が<strong>そのまま在庫数として記録されます</strong>（今の在庫に足し算されるわけではありません）。特定のスタッフに渡す分がある場合は、各行の「＋ 個別配布を追加」からその分だけ切り出せます（個別配布分は在庫に反映されません）。なお、検品で入庫する数量はすべて新品として記録されます。</span>
       </p>
       <div id="inspectRows"></div>
       <p class="error-text" id="inspectError"></p>
@@ -774,6 +810,13 @@
       <div class="field hidden" id="cnsSizeField">
         <label>サイズ<span class="req">必須</span></label>
         <select id="cnsSize" onchange="onConsumptionSizeChange()"></select>
+      </div>
+      <div class="field">
+        <label>状態<span class="req">必須</span></label>
+        <div class="segmented" id="cnsConditionSeg">
+          <button class="segmented-btn" data-condition="新品" onclick="selectCnsCondition('新品')">新品</button>
+          <button class="segmented-btn" data-condition="中古" onclick="selectCnsCondition('中古')">中古</button>
+        </div>
       </div>
       <p class="stock-hint" id="cnsStockHint"></p>
       <div class="field">
@@ -857,7 +900,7 @@
       </div>
     </div>
     <div style="padding:14px 16px 0;">
-      <p class="flow-note">クリーニング済みの服を返却すると、その分だけ在庫が<strong>増えます</strong>（検品・棚卸しの上書きとは異なり、今の在庫数量に加算されます）。</p>
+      <p class="flow-note">クリーニング済みの服を返却すると、その分だけ在庫が<strong>増えます</strong>（検品・棚卸しの上書きとは異なり、今の在庫数量に加算されます）。返却した服はすべて中古として記録されます。</p>
       <div class="field">
         <label>アイテム<span class="req">必須</span></label>
         <select id="retItem" onchange="onReturnItemChange()"></select>
@@ -1433,8 +1476,10 @@
   const REASONS = ['新規支給','交換','紛失','その他'];
 
   let ITEM_MASTER = [];     // [{id,name,category,gender,itemType,hasSize}]
-  let INVENTORY_ROWS = [];  // サーバーから取得した生のInventory行（inventoryId,itemId,size,quantity,updatedAt）
-  let INVENTORY = {};       // 在庫store: hasSizeアイテムは{size:qty}オブジェクト、そうでなければ数値
+  let INVENTORY_ROWS = [];  // サーバーから取得した生のInventory行（inventoryId,itemId,size,condition,quantity,updatedAt）
+  // 在庫store（2026-10新品/中古ステータス追加）: hasSizeアイテムは{size:{新品:qty,中古:qty}}オブジェクト、
+  // そうでなければ{新品:qty,中古:qty}オブジェクト（旧: サイズ=>数値、または数値そのもの、だったのを変更）。
+  let INVENTORY = {};
   let DELIVERIES = [];      // [{id,date,status,memo,createdAt,details,inspections,distributions}]
   let CONSUMPTIONS = [];    // [{id,itemId,size,qty,reason,memo,createdAt}]
   let STOCKTAKE_LOGS = [];  // [{id,itemId,size,previousQty,actualQty,diff,createdAt,performedBy}]（2026-10新設）
@@ -1456,16 +1501,21 @@
     };
   }
   function mapConsumptionRow(r){
-    return { id:r.consumptionId, itemId:r.itemId, size:r.size, qty:Number(r.qty)||0, reason:r.reason, memo:r.memo, createdAt:r.createdAt };
+    return { id:r.consumptionId, itemId:r.itemId, size:r.size, condition:r.condition||'', qty:Number(r.qty)||0, reason:r.reason, memo:r.memo, createdAt:r.createdAt };
   }
   function rebuildInventoryMap(){
     INVENTORY = {};
-    ITEM_MASTER.forEach(function(it){ INVENTORY[it.id] = it.hasSize ? {} : 0; });
+    ITEM_MASTER.forEach(function(it){ INVENTORY[it.id] = it.hasSize ? {} : { '新品': 0, '中古': 0 }; });
     INVENTORY_ROWS.forEach(function(row){
       const it = findItem(row.itemId);
       if(!it) return;
-      if(it.hasSize) INVENTORY[row.itemId][row.size] = Number(row.quantity) || 0;
-      else INVENTORY[row.itemId] = Number(row.quantity) || 0;
+      const condition = row.condition === '中古' ? '中古' : '新品';
+      if(it.hasSize){
+        if(!INVENTORY[row.itemId][row.size]) INVENTORY[row.itemId][row.size] = { '新品': 0, '中古': 0 };
+        INVENTORY[row.itemId][row.size][condition] = Number(row.quantity) || 0;
+      } else {
+        INVENTORY[row.itemId][condition] = Number(row.quantity) || 0;
+      }
     });
   }
 
@@ -1550,6 +1600,7 @@
     inspectDistSeq: 0,
     addingSizeItemId: null,
     cnsReason: null,
+    cnsCondition: null, // 使用記録：選択中の新品/中古（2026-10新設。常に必須）
     historyTab: '',
     confirmCallback: null,
     // 2026-10-17新設: 棚卸しのテンキー入力モーダル用（入力中はAPIを呼ばず、確定時にまとめて送信する）
@@ -1583,17 +1634,26 @@
     const d = new Date(iso);
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
-  function getQty(itemId, size){
+  // condition（'新品'/'中古'）を指定するとその状態の数量だけ、省略すると新品+中古の合計を返す。
+  function getQty(itemId, size, condition){
     const it = findItem(itemId);
     if(!it) return 0;
-    if(it.hasSize) return INVENTORY[itemId][size] || 0;
-    return INVENTORY[itemId] || 0;
+    const bucket = it.hasSize ? (INVENTORY[itemId][size] || {}) : (INVENTORY[itemId] || {});
+    if(condition) return bucket[condition] || 0;
+    return (bucket['新品'] || 0) + (bucket['中古'] || 0);
   }
   function totalQtyAll(){
     let sum = 0;
     ITEM_MASTER.forEach(function(it){
-      if(it.hasSize){ Object.keys(INVENTORY[it.id]).forEach(function(s){ sum += INVENTORY[it.id][s]; }); }
-      else { sum += INVENTORY[it.id]; }
+      if(it.hasSize){
+        Object.keys(INVENTORY[it.id]).forEach(function(s){
+          const b = INVENTORY[it.id][s];
+          sum += (b['新品'] || 0) + (b['中古'] || 0);
+        });
+      } else {
+        const b = INVENTORY[it.id] || {};
+        sum += (b['新品'] || 0) + (b['中古'] || 0);
+      }
     });
     return sum;
   }
@@ -1914,21 +1974,38 @@
     return '<button type="button" class="add-size-btn" onclick="openAddSizeModal(\'' + itemId + '\')">＋ サイズを追加</button>';
   }
 
+  // 新品/中古の2つのタップ可能な小ボタンを持つ、サイズ単位のグループチップ（在庫・棚卸し画面で共用）
+  function sizeChipGroupHtml(itemId, size){
+    const nw = getQty(itemId, size, '新品');
+    const used = getQty(itemId, size, '中古');
+    return '<div class="size-chip-group">' +
+      '<div class="size-chip-label">' + escapeHtml(size) + '</div>' +
+      '<div class="size-chip-conditions">' +
+        '<button class="cond-btn ' + (nw === 0 ? 'zero' : '') + '" onclick="openQtyModal(\'' + itemId + '\',\'' + size + '\',\'新品\')">' +
+          '<span class="cond-tag">新品</span><span class="qv num">' + nw + '</span></button>' +
+        '<button class="cond-btn used ' + (used === 0 ? 'zero' : '') + '" onclick="openQtyModal(\'' + itemId + '\',\'' + size + '\',\'中古\')">' +
+          '<span class="cond-tag">中古</span><span class="qv num">' + used + '</span></button>' +
+      '</div>' +
+    '</div>';
+  }
+  // サイズなしアイテムの1行表示も、新品/中古を横2分割したタップ可能な表示・補正UIにする
+  function noSizeConditionRowHtml(itemId){
+    const nw = getQty(itemId, '', '新品');
+    const used = getQty(itemId, '', '中古');
+    return '<div class="noSize-cond-row">' +
+      '<button class="noSize-cond-half ' + (nw === 0 ? 'zero' : '') + '" onclick="openQtyModal(\'' + itemId + '\',\'\',\'新品\')">' +
+        '<span class="cond-tag">新品</span><span class="qty-value num">' + nw + '</span></button>' +
+      '<button class="noSize-cond-half used ' + (used === 0 ? 'zero' : '') + '" onclick="openQtyModal(\'' + itemId + '\',\'\',\'中古\')">' +
+        '<span class="cond-tag">中古</span><span class="qty-value num">' + used + '</span></button>' +
+    '</div>';
+  }
   function itemCardHtml(it){
     let body;
     if(it.hasSize){
       const sizes = displaySizesForItem(it.id);
-      body = '<div class="size-chip-row">' + sizes.map(function(s){
-        const q = getQty(it.id, s);
-        return '<button class="size-chip ' + (q === 0 ? 'zero' : '') + '" onclick="openQtyModal(\'' + it.id + '\',\'' + s + '\')">' +
-          '<span>' + s + '</span><span class="qv num">' + q + '</span></button>';
-      }).join('') + '</div>' + addSizeButtonHtml(it.id);
+      body = '<div class="size-chip-row">' + sizes.map(function(s){ return sizeChipGroupHtml(it.id, s); }).join('') + '</div>' + addSizeButtonHtml(it.id);
     } else {
-      const q = getQty(it.id, '');
-      body = '<div class="noSize-qty-row" onclick="openQtyModal(\'' + it.id + '\',\'\')">' +
-        '<span>在庫数量</span>' +
-        '<span class="qty-value num">' + q + '</span>' +
-        '<span class="edit-hint">タップで補正</span></div>';
+      body = noSizeConditionRowHtml(it.id);
     }
     return '<div class="item-card">' +
       '<div class="item-card-title">' +
@@ -1944,12 +2021,12 @@
   // テンキー入力中の文字列はここに保持し、qtyModalInputは表示専用（readonly）として同期する。
   // 最大4桁（9999）まで。先頭が「0」のときに数字を押すと置き換える（先頭ゼロの連続を防ぐ）。
   const QTY_MAX_DIGITS = 4;
-  window.openQtyModal = function(itemId, size){
-    state.editingQty = { itemId: itemId, size: size };
+  window.openQtyModal = function(itemId, size, condition){
+    state.editingQty = { itemId: itemId, size: size, condition: condition };
     const it = findItem(itemId);
-    const q = getQty(itemId, size);
+    const q = getQty(itemId, size, condition);
     document.getElementById('qtyModalTitle').textContent =
-      '数量を補正：' + it.name + (size ? '（' + size + '）' : '');
+      '数量を補正：' + it.name + (size ? '（' + size + '・' + condition + '）' : '（' + condition + '）');
     document.getElementById('qtyModalCurrent').textContent = '現在の在庫数量: ' + q;
     state.qtyTenkeyValue = String(q);
     document.getElementById('qtyModalInput').value = state.qtyTenkeyValue;
@@ -1981,9 +2058,9 @@
       return;
     }
     errEl.textContent = '';
-    const { itemId, size } = state.editingQty;
+    const { itemId, size, condition } = state.editingQty;
     withButtonBusy(document.getElementById('qtyModalSaveBtn'), '保存中…', async function(){
-      const res = await apiCall('inventory', 'update', { item: { itemId: itemId, size: size, quantity: Number(raw) } });
+      const res = await apiCall('inventory', 'update', { item: { itemId: itemId, size: size, condition: condition, quantity: Number(raw) } });
       if(!res.ok){ errEl.textContent = apiErrorMessage(res); toast(apiErrorMessage(res)); return; }
       await reloadInventory();
       closeQtyModal();
@@ -2186,7 +2263,7 @@
         if(!state.editingItemId && initialSizeQtys.length > 0){
           const newItemId = res.data.itemId;
           await Promise.all(initialSizeQtys.map(function(s){
-            return apiCall('inventory', 'update', { item: { itemId: newItemId, size: s.size, quantity: s.quantity } });
+            return apiCall('inventory', 'update', { item: { itemId: newItemId, size: s.size, condition: '新品', quantity: s.quantity } });
           }));
         }
         await reloadItemMasterAndInventory();
@@ -2601,7 +2678,9 @@
     document.getElementById('cnsMemo').value = '';
     document.getElementById('cnsError').textContent = '';
     state.cnsReason = null;
+    state.cnsCondition = null;
     document.querySelectorAll('#cnsReasonSeg .segmented-btn').forEach(function(b){ b.classList.remove('on'); });
+    document.querySelectorAll('#cnsConditionSeg .segmented-btn').forEach(function(b){ b.classList.remove('on'); });
     renderRecentConsumptions();
   }
 
@@ -2609,24 +2688,42 @@
     const itemId = document.getElementById('cnsItem').value;
     const sizeField = document.getElementById('cnsSizeField');
     const hint = document.getElementById('cnsStockHint');
-    if(!itemId){ sizeField.classList.add('hidden'); hint.textContent = ''; return; }
+    // アイテムを変更したら状態（新品/中古）の選択はリセットする（在庫の絞り込みが状態に依存するため）
+    state.cnsCondition = null;
+    document.querySelectorAll('#cnsConditionSeg .segmented-btn').forEach(function(b){ b.classList.remove('on'); });
+    hint.textContent = ''; hint.classList.remove('zero');
+    if(!itemId){ sizeField.classList.add('hidden'); return; }
     const it = findItem(itemId);
     if(it.hasSize){
       sizeField.classList.remove('hidden');
+      document.getElementById('cnsSize').innerHTML = '<option value="">先に状態（新品/中古）を選択してください</option>';
+    } else {
+      sizeField.classList.add('hidden');
+    }
+  };
+  window.selectCnsCondition = function(condition){
+    state.cnsCondition = condition;
+    document.querySelectorAll('#cnsConditionSeg .segmented-btn').forEach(function(b){
+      b.classList.toggle('on', b.dataset.condition === condition);
+    });
+    const itemId = document.getElementById('cnsItem').value;
+    const hint = document.getElementById('cnsStockHint');
+    if(!itemId){ hint.textContent = ''; return; }
+    const it = findItem(itemId);
+    if(it.hasSize){
       const sizeSel = document.getElementById('cnsSize');
-      const availableSizes = displaySizesForItem(itemId).filter(function(s){ return getQty(itemId, s) > 0; });
+      const availableSizes = displaySizesForItem(itemId).filter(function(s){ return getQty(itemId, s, condition) > 0; });
       if(availableSizes.length === 0){
         sizeSel.innerHTML = '<option value="">在庫のあるサイズがありません</option>';
         hint.textContent = ''; hint.classList.remove('zero');
       } else {
         sizeSel.innerHTML = '<option value="">選択してください</option>' + availableSizes.map(function(s){
-          return '<option value="' + s + '">' + s + '（在庫' + getQty(itemId, s) + '）</option>';
+          return '<option value="' + s + '">' + s + '（在庫' + getQty(itemId, s, condition) + '）</option>';
         }).join('');
         hint.textContent = '';
       }
     } else {
-      sizeField.classList.add('hidden');
-      const q = getQty(itemId, '');
+      const q = getQty(itemId, '', condition);
       hint.textContent = '在庫: ' + q;
       hint.classList.toggle('zero', q === 0);
     }
@@ -2635,8 +2732,8 @@
     const itemId = document.getElementById('cnsItem').value;
     const size = document.getElementById('cnsSize').value;
     const hint = document.getElementById('cnsStockHint');
-    if(!itemId || !size){ hint.textContent = ''; return; }
-    const q = getQty(itemId, size);
+    if(!itemId || !size || !state.cnsCondition){ hint.textContent = ''; return; }
+    const q = getQty(itemId, size, state.cnsCondition);
     hint.textContent = '在庫: ' + q;
     hint.classList.toggle('zero', q === 0);
   };
@@ -2655,17 +2752,18 @@
     const it = findItem(itemId);
     const size = it.hasSize ? document.getElementById('cnsSize').value : '';
     if(it.hasSize && !size){ errEl.textContent = 'サイズを選択してください'; return; }
+    if(!state.cnsCondition){ errEl.textContent = '状態（新品/中古）を選択してください'; return; }
     const qtyRaw = document.getElementById('cnsQty').value;
     const qty = Number(qtyRaw);
     if(!qtyRaw || isNaN(qty) || qty <= 0 || Math.floor(qty) !== qty){ errEl.textContent = '数量は1以上の整数を入力してください'; return; }
-    const stock = getQty(itemId, size);
+    const stock = getQty(itemId, size, state.cnsCondition);
     if(qty > stock){ errEl.textContent = '在庫数量（' + stock + '）を超えて記録することはできません'; return; }
     if(!state.cnsReason){ errEl.textContent = '用途を選択してください'; return; }
     errEl.textContent = '';
 
     withButtonBusy(document.getElementById('submitConsumptionBtn'), '記録中…', async function(){
       const res = await apiCall('consumption', 'consumeStock', {
-        item: { itemId: itemId, size: size, qty: qty, reason: state.cnsReason, memo: document.getElementById('cnsMemo').value.trim() }
+        item: { itemId: itemId, size: size, condition: state.cnsCondition, qty: qty, reason: state.cnsReason, memo: document.getElementById('cnsMemo').value.trim() }
       });
       if(!res.ok){ errEl.textContent = apiErrorMessage(res); toast(apiErrorMessage(res)); return; }
       await Promise.all([reloadConsumptions(), reloadInventory()]);
@@ -2706,23 +2804,37 @@
   function trackedSizesForItem(itemId){
     return Object.keys(INVENTORY[itemId] || {}).sort(sizeCompare_);
   }
-  function stocktakeChipHtml(itemId, size){
-    const key = itemId + '|' + size;
+  // 在庫画面と同じ.size-chip-group/.cond-btn方式を流用し、新品/中古それぞれ別キーで一時保持する
+  function stocktakeCondBtnHtml(itemId, size, condition){
+    const key = itemId + '|' + size + '|' + condition;
     const entered = state.stocktakeCounts.hasOwnProperty(key);
-    const cur = getQty(itemId, size);
-    return '<button type="button" class="size-chip ' + (entered ? '' : 'zero') + '" onclick="openStocktakeQtyModal(\'' + itemId + '\',\'' + size + '\')">' +
-      '<span>' + escapeHtml(size) + '</span>' +
-      '<span class="qv num">' + (entered ? state.stocktakeCounts[key] : '現在' + cur) + '</span>' +
+    const cur = getQty(itemId, size, condition);
+    return '<button type="button" class="cond-btn' + (condition === '中古' ? ' used' : '') + (entered ? '' : ' zero') + '" onclick="openStocktakeQtyModal(\'' + itemId + '\',\'' + size + '\',\'' + condition + '\')">' +
+      '<span class="cond-tag">' + condition + '</span>' +
+      '<span class="qv num">' + (entered ? state.stocktakeCounts[key] : cur) + '</span>' +
     '</button>';
   }
-  function stocktakeNoSizeRowHtml(itemId){
-    const key = itemId + '|';
+  function stocktakeSizeGroupHtml(itemId, size){
+    return '<div class="size-chip-group">' +
+      '<div class="size-chip-label">' + escapeHtml(size) + '</div>' +
+      '<div class="size-chip-conditions">' +
+        stocktakeCondBtnHtml(itemId, size, '新品') +
+        stocktakeCondBtnHtml(itemId, size, '中古') +
+      '</div>' +
+    '</div>';
+  }
+  function stocktakeNoSizeCondHalfHtml(itemId, condition){
+    const key = itemId + '|' + '' + '|' + condition;
     const entered = state.stocktakeCounts.hasOwnProperty(key);
-    const cur = getQty(itemId, '');
-    return '<div class="noSize-qty-row" onclick="openStocktakeQtyModal(\'' + itemId + '\',\'\')">' +
-      '<span>在庫数量</span>' +
-      '<span class="qty-value num">' + (entered ? state.stocktakeCounts[key] : '現在' + cur) + '</span>' +
-      '<span class="edit-hint">タップで実数を入力</span></div>';
+    const cur = getQty(itemId, '', condition);
+    return '<button type="button" class="noSize-cond-half' + (condition === '中古' ? ' used' : '') + (entered ? '' : ' zero') + '" onclick="openStocktakeQtyModal(\'' + itemId + '\',\'\',\'' + condition + '\')">' +
+      '<span class="cond-tag">' + condition + '</span><span class="qty-value num">' + (entered ? state.stocktakeCounts[key] : cur) + '</span></button>';
+  }
+  function stocktakeNoSizeConditionRowHtml(itemId){
+    return '<div class="noSize-cond-row">' +
+      stocktakeNoSizeCondHalfHtml(itemId, '新品') +
+      stocktakeNoSizeCondHalfHtml(itemId, '中古') +
+    '</div>';
   }
   function stocktakeItemHtml(it){
     let body;
@@ -2730,10 +2842,10 @@
       const sizes = trackedSizesForItem(it.id);
       body = (sizes.length === 0
         ? '<p class="hint" style="margin:4px 0 8px;">まだ在庫サイズが登録されていません。「＋ サイズを追加」から追加してください。</p>'
-        : '<div class="size-chip-row">' + sizes.map(function(s){ return stocktakeChipHtml(it.id, s); }).join('') + '</div>'
+        : '<div class="size-chip-row">' + sizes.map(function(s){ return stocktakeSizeGroupHtml(it.id, s); }).join('') + '</div>'
       ) + addSizeButtonHtml(it.id);
     } else {
-      body = stocktakeNoSizeRowHtml(it.id);
+      body = stocktakeNoSizeConditionRowHtml(it.id);
     }
     return '<div class="item-card">' +
       '<div class="item-card-title">' +
@@ -2795,12 +2907,12 @@
     });
   };
   // ---- 棚卸し：実数入力モーダル（テンキー。確定するまでAPIは呼ばない） ----
-  window.openStocktakeQtyModal = function(itemId, size){
-    state.editingStocktakeQty = { itemId: itemId, size: size };
+  window.openStocktakeQtyModal = function(itemId, size, condition){
+    state.editingStocktakeQty = { itemId: itemId, size: size, condition: condition };
     const it = findItem(itemId);
-    const key = itemId + '|' + size;
-    const cur = getQty(itemId, size);
-    document.getElementById('stocktakeQtyModalTitle').textContent = '実数を入力：' + it.name + (size ? '（' + size + '）' : '');
+    const key = itemId + '|' + size + '|' + condition;
+    const cur = getQty(itemId, size, condition);
+    document.getElementById('stocktakeQtyModalTitle').textContent = '実数を入力：' + it.name + (size ? '（' + size + '・' + condition + '）' : '（' + condition + '）');
     document.getElementById('stocktakeQtyModalCurrent').textContent = '現在の在庫数量: ' + cur;
     const existing = state.stocktakeCounts.hasOwnProperty(key) ? String(state.stocktakeCounts[key]) : '0';
     state.stocktakeTenkeyValue = existing;
@@ -2833,8 +2945,8 @@
       return;
     }
     errEl.textContent = '';
-    const { itemId, size } = state.editingStocktakeQty;
-    state.stocktakeCounts[itemId + '|' + size] = Number(raw);
+    const { itemId, size, condition } = state.editingStocktakeQty;
+    state.stocktakeCounts[itemId + '|' + size + '|' + condition] = Number(raw);
     closeStocktakeQtyModal();
     refreshStocktakeScreen();
   };
@@ -2845,9 +2957,11 @@
     ITEM_MASTER.forEach(function(it){
       const sizes = it.hasSize ? trackedSizesForItem(it.id) : [''];
       sizes.forEach(function(s){
-        const key = it.id + '|' + s;
-        if(!state.stocktakeCounts.hasOwnProperty(key)) return;
-        lines.push({ itemId: it.id, size: s, actualQty: state.stocktakeCounts[key] });
+        ['新品','中古'].forEach(function(cond){
+          const key = it.id + '|' + s + '|' + cond;
+          if(!state.stocktakeCounts.hasOwnProperty(key)) return;
+          lines.push({ itemId: it.id, size: s, condition: cond, actualQty: state.stocktakeCounts[key] });
+        });
       });
     });
     if(lines.length === 0){ errEl.textContent = '少なくとも1件は実数を入力してください'; toast(errEl.textContent); return; }
@@ -3001,7 +3115,7 @@
         return {
           type: 'inspection', ts: e.ts,
           title: '検品：' + (it ? it.name : '') + (e.size ? '（' + e.size + '）' : '') + '　予定' + e.plannedQty + '→実測' + e.actualQty,
-          sub: fmtDateTime(e.ts), diff: e.diff, diffText: diffText
+          sub: fmtDateTime(e.ts) + '　・　新品として入庫', diff: e.diff, diffText: diffText
         };
       }
       if(e.type === 'distribution'){
@@ -3018,7 +3132,7 @@
         return {
           type: 'stocktake', ts: e.ts,
           title: '棚卸し：' + (it ? it.name : '') + (e.size ? '（' + e.size + '）' : '') + '　前回' + e.previousQty + '→実数' + e.actualQty,
-          sub: fmtDateTime(e.ts) + (e.performedBy ? '　・　実施者: ' + e.performedBy : ''), diff: e.diff, diffText: diffText
+          sub: fmtDateTime(e.ts) + (e.condition ? '　・　' + e.condition : '') + (e.performedBy ? '　・　実施者: ' + e.performedBy : ''), diff: e.diff, diffText: diffText
         };
       }
       if(e.type === 'return'){
@@ -3027,7 +3141,7 @@
         return {
           type: 'return', ts: e.ts,
           title: '返却：' + (it ? it.name : '') + (e.size ? '（' + e.size + '）' : '') + ' ×' + e.qty,
-          sub: fmtDateTime(e.ts) + '　・　' + statusLabel + (e.note ? '　・　' + e.note : ''),
+          sub: fmtDateTime(e.ts) + '　・　中古として加算　・　' + statusLabel + (e.note ? '　・　' + e.note : ''),
           exception: e.exception
         };
       }
@@ -3035,7 +3149,7 @@
       return {
         type: 'consumption', ts: e.ts,
         title: '使用：' + (it ? it.name : '') + (e.size ? '（' + e.size + '）' : '') + ' ×' + e.qty + '（' + e.reason + '）',
-        sub: fmtDateTime(e.ts) + (e.memo ? '　・　' + e.memo : '')
+        sub: fmtDateTime(e.ts) + (e.condition ? '　・　' + e.condition : '') + (e.memo ? '　・　' + e.memo : '')
       };
     });
   }
