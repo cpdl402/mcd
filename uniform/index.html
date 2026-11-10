@@ -10,37 +10,49 @@
     /* 2026-10（暖色化）: M-Crew（シフト管理）のクリーム×焦げ茶トーンを参考に、ベース背景・文字色を暖色系に寄せた。
        2026-11-10: ブランド色をM-Crewベースの赤（--brand）に変更。--brandは主操作・選択状態、--criticalは
        エラー・削除・期限超過、--accentは注意喚起（未検品・差異など）に使い分ける。カテゴリ色は従来どおり。 */
-    --surface-0:#faf3df; --surface-1:#fffcf2; --surface-2:#fffdf8;
-    --text-primary:#2a2410; --text-secondary:#6b5f3e; --text-muted:#8a7f5a;
+    --surface-0:#faf3df; --surface-1:#fffcf2; --surface-2:#fffdf8; --surface-3:#fffdf8;
+    --text-primary:#2a2410; --text-secondary:#6b5f3e; --text-muted:#7A6F4E;
     --gridline:#f0e4b8; --border:rgba(42,36,16,0.12);
-    --brand:#E3001B; --brand-ink:#FFFFFF; --brand-weak:#FBE1DE;
-    --accent:#E0892C; --accent-ink:#241200; --accent-weak:#FBE9CE;
-    --good:#2f8f5b; --good-weak:#dcf0e5;
-    --critical:#C0392B; --critical-ink:#FFFFFF; --critical-weak:#F5E0DB;
+    /* 色の使い分け: 塗り=--X、塗りの上の文字=--X-ink、本文や薄い背景(-weak)の上の文字・アイコン=--X-text */
+    --brand:#E3001B; --brand-ink:#FFFFFF; --brand-weak:#FBE1DE; --brand-text:#C20017;
+    --accent:#E0892C; --accent-ink:#241200; --accent-weak:#FBE9CE; --accent-text:#8A4B0C;
+    --good:#2f8f5b; --good-weak:#dcf0e5; --good-text:#267249;
+    --critical:#C0392B; --critical-ink:#FFFFFF; --critical-weak:#F5E0DB; --critical-text:#B2342A;
     --cat-crew:#2f6690; --cat-mgr:#6952a3; --cat-gel:#1f8a80; --cat-common:#5c5338;
-    --cat-crew-weak:#DBE8F0; --cat-mgr-weak:#e8e1f6; --cat-gel-weak:#d9f0ec;
-    --dist:#b4366f; --dist-weak:#f7dcea;
-    --stocktake:#5a7a2e; --stocktake-weak:#e4ecd2;
+    --cat-crew-weak:#DBE8F0; --cat-mgr-weak:#e8e1f6; --cat-gel-weak:#d9f0ec; --cat-gel-text:#197169;
+    /* -text: 薄い背景の上でも4.5:1以上になるよう、ライトだけ同じ色相のまま明度を下げた文字用の色 */
+    --dist:#b4366f; --dist-weak:#f7dcea; --dist-text:#AA3369;
+    --stocktake:#5a7a2e; --stocktake-weak:#e4ecd2; --stocktake-text:#506D29;
     --return:#7A4A2E; --return-weak:#f5e2c9;
+    --scrim:rgba(42,30,10,0.42); --scrim-stacked:rgba(42,30,10,0.2);
+    --info-bg:var(--surface-1); --info-border:var(--border);
+    --shadow:rgba(42,30,10,0.14); --shadow-strong:rgba(42,30,10,0.22);
+    --fab-shadow:rgba(227,0,27,0.35); --logo-glow:rgba(227,0,27,0.28);
     --radius:16px;
     color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --surface-0:#1c1710; --surface-1:#241e14; --surface-2:#2c2418;
-      --text-primary:#f5ecd1; --text-secondary:#cbbd93; --text-muted:#9c8f68;
-      --gridline:#3a3122; --border:rgba(255,245,214,0.09);
-      --brand:#FF6B57; --brand-ink:#2A0905; --brand-weak:#3C1714;
-      --accent:#F0A94D; --accent-ink:#2A1600; --accent-weak:#4A3414;
-      --good:#58b784; --good-weak:#1d3a2b;
-      --critical:#E0796A; --critical-ink:#2A0905; --critical-weak:#452019;
+      --surface-0:#151311; --surface-1:#1D1A17; --surface-2:#26221E; --surface-3:#2F2A25;
+      --text-primary:#F2ECE2; --text-secondary:#C4B9A8; --text-muted:#9C9182;
+      --gridline:#36302A; --border:rgba(255,240,220,0.11);
+      --brand:#D21F2C; --brand-ink:#FFFFFF; --brand-weak:#3A1B19; --brand-text:#FF8A7E;
+      --accent:#F0A94D; --accent-ink:#231400; --accent-weak:#3A2A12; --accent-text:#F2B35E;
+      --good:#6CC495; --good-weak:#173326; --good-text:#6CC495;
+      --critical:#B83A2E; --critical-ink:#FFFFFF; --critical-weak:#3D1E1A; --critical-text:#F2988B;
       --cat-crew:#6fa8cf; --cat-mgr:#a594d1; --cat-gel:#4fb7ac; --cat-common:#c9bb8e;
-      --cat-crew-weak:#213A4A; --cat-mgr-weak:#332a52; --cat-gel-weak:#163834;
-      --dist:#e58bb3; --dist-weak:#4a2338;
-      --stocktake:#9bc46a; --stocktake-weak:#2c3a1c;
+      --cat-crew-weak:#213A4A; --cat-mgr-weak:#332a52; --cat-gel-weak:#163834; --cat-gel-text:#4fb7ac;
+      --dist:#e58bb3; --dist-weak:#4a2338; --dist-text:#e58bb3;
+      --stocktake:#9bc46a; --stocktake-weak:#2c3a1c; --stocktake-text:#9bc46a;
       --return:#C99268; --return-weak:#4a2f14;
+      --scrim:rgba(0,0,0,0.62); --scrim-stacked:rgba(0,0,0,0.3);
+      --info-bg:#1F1C19; --info-border:var(--border);
+      --shadow:rgba(0,0,0,0.4); --shadow-strong:rgba(0,0,0,0.5);
+      --fab-shadow:rgba(0,0,0,0.45); --logo-glow:rgba(0,0,0,0.4);
     }
   }
+  /* hidden属性を付けた要素は、クラス側のdisplay指定より必ず優先して非表示にする（M-Crewと同じ） */
+  [hidden]{display:none !important;}
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -66,9 +78,12 @@
   }
   .app-header h1{font-size:17px; margin:0; font-weight:800;}
   .app-header .sub{font-size:11.5px; color:var(--text-muted); margin-top:2px;}
+  .appbar-word{font-size:20px; font-weight:800; letter-spacing:0.5px; color:var(--text-primary);}
+  .header-right{display:flex; align-items:center; gap:8px; flex:none;}
 
   .screen{display:none; padding:16px 16px 28px;}
   .screen.active{display:block;}
+  #screen-login{padding:0;}
 
   /* ==== ログイン（PINゲート） ==== */
   /* M-Crewのgate-screen/gate-card/gate-brand構造に合わせ、ロゴ・ブランド名・入力欄・ボタンを
@@ -89,13 +104,18 @@
     position:relative; z-index:1; text-align:center;
     width:100%; max-width:340px; background:var(--surface-2); border:1px solid var(--border);
     border-radius:22px; padding:30px 24px 26px;
-    box-shadow:0 20px 48px rgba(20,30,40,0.14);
+    box-shadow:0 20px 48px var(--shadow);
   }
   .auth-brand{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; margin-bottom:2px;}
+  /* ロゴ画像が白地前提のため、台紙だけは意図的に白固定にしている */
   .auth-logo-card{
     width:116px; height:116px; border-radius:26px; background:#ffffff; padding:12px;
     display:flex; align-items:center; justify-content:center; margin-bottom:4px;
-    box-shadow:0 10px 26px rgba(227,0,27,0.28);
+    box-shadow:0 10px 26px var(--logo-glow);
+  }
+  @media (prefers-color-scheme: dark){
+    .auth-wrap::before{opacity:0.1;}
+    .auth-logo-card{width:96px; height:96px; border-radius:22px; padding:10px; box-shadow:0 0 0 1px var(--border), 0 6px 16px var(--logo-glow);}
   }
   .auth-logo-card img{width:100%; height:100%; object-fit:contain; display:block;}
   .auth-title{font-size:26px; font-weight:800; margin:0; letter-spacing:0.5px;}
@@ -122,14 +142,14 @@
   }
   .pw-eye:active{background:var(--surface-2);}
   .input-error{border-color:var(--critical) !important;}
-  .error-text{color:var(--critical); font-size:12px; margin:8px 0 0; min-height:16px;}
+  .error-text{color:var(--critical-text); font-size:12px; margin:8px 0 10px; min-height:16px;}
   .mockup-note{margin-top:16px; padding-top:12px; border-top:1px dashed var(--border); font-size:11px; color:var(--text-muted); text-align:center; line-height:1.6;}
 
   /* ==== 共通ボタン ==== */
   .btn{flex:1; padding:14px; border-radius:12px; border:none; font-size:15px; font-weight:700; cursor:pointer;}
   .btn.primary{background:var(--brand); color:var(--brand-ink);}
   .btn.primary:disabled{opacity:0.45; cursor:default;}
-  .btn.danger{background:transparent; color:var(--critical); border:1px solid var(--critical);}
+  .btn.danger{background:transparent; color:var(--critical-text); border:1px solid var(--critical);}
   .btn.ghost{background:var(--surface-2); color:var(--text-primary); border:1px solid var(--border);}
   .btn:active{transform:scale(0.98);}
   .btn-row{display:flex; gap:10px; margin-top:6px;}
@@ -140,6 +160,22 @@
     display:flex; align-items:center; justify-content:center; flex:none;
   }
   .icon-btn:active{transform:scale(0.95);}
+  /* 見た目より広い44×44pxのタップ領域を::afterで確保する */
+  .hamburger-btn, .bell-btn, .help-btn, .jump-btn{position:relative;}
+  .hamburger-btn::after, .bell-btn::after, .help-btn::after, .jump-btn::after{
+    content:''; position:absolute; left:50%; top:50%; width:max(44px, 100%); height:44px; transform:translate(-50%,-50%);
+  }
+  .bell-dot{
+    position:absolute; top:6px; right:7px; width:9px; height:9px; border-radius:50%;
+    background:var(--brand); box-shadow:0 0 0 2px var(--surface-2); display:none;
+  }
+  .bell-dot.show{display:block;}
+  .help-btn{width:34px; height:34px; border-radius:50%; background:transparent; color:var(--text-secondary);}
+  .jump-btn{
+    flex:none; height:34px; padding:0 12px; border-radius:999px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--text-primary); font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+  .jump-btn:active{transform:scale(0.96);}
   .back-btn{width:auto; padding:0 14px; margin-bottom:14px; font-size:14px; white-space:nowrap;}
   .mini-icon-btn{
     background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px; flex:none;
@@ -147,39 +183,36 @@
   }
   .mini-icon-btn:active{opacity:0.6;}
 
-  /* ==== ホーム：サマリー ==== */
-  .home-greet{font-size:13px; color:var(--text-secondary); margin-bottom:14px;}
-  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;}
-  .stat-tile{
-    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius);
-    padding:14px; grid-column:span 1;
+  /* ==== ホーム（日付・時刻／お知らせ／最近の更新） ==== */
+  .home-clock{padding:4px 2px 6px;}
+  .home-date{font-size:14px; font-weight:700; color:var(--text-secondary);}
+  .home-time{font-size:48px; font-weight:800; line-height:1.05; letter-spacing:0.5px; font-variant-numeric:tabular-nums;}
+  .home-alert{
+    display:flex; align-items:center; gap:10px; border-radius:14px; padding:12px 12px 12px 14px; margin-bottom:8px; cursor:pointer;
+    background:var(--info-bg); border:1px solid var(--info-border); color:var(--text-primary);
   }
-  .stat-tile.wide{grid-column:span 2; display:flex; align-items:center; justify-content:space-between;}
-  .stat-tile .label{font-size:11.5px; color:var(--text-muted); font-weight:700; margin-bottom:4px;}
-  .stat-tile .value{font-size:26px; font-weight:800; line-height:1.1;}
-  .stat-tile .value small{font-size:13px; font-weight:700; color:var(--text-muted); margin-left:2px;}
-  .stat-tile.alert{background:var(--accent-weak); border-color:transparent;}
-  .stat-tile.alert .value{color:var(--accent-ink);}
-  .stat-tile.alert .label{color:var(--accent-ink); opacity:0.75;}
-  @media (prefers-color-scheme: dark){
-    .stat-tile.alert .value, .stat-tile.alert .label{color:var(--accent-ink);}
-  }
+  .home-alert:active{transform:scale(0.99);}
+  .home-alert.warn{background:var(--accent-weak); border-color:transparent;}
+  .home-alert-icon{flex:none; display:flex; color:var(--text-secondary);}
+  .home-alert.warn .home-alert-icon{color:var(--accent-text);}
+  .home-alert-texts{flex:1; min-width:0;}
+  .home-alert-title{font-size:13.5px; font-weight:800;}
+  .home-alert-sub{font-size:11.5px; color:var(--text-secondary); margin-top:2px; line-height:1.5;}
+  .home-alert .chev{flex:none; color:var(--text-muted);}
+  .home-none{font-size:12.5px; color:var(--text-muted); margin:0 0 4px;}
+  .link-btn{background:none; border:none; padding:6px 0 6px 10px; color:var(--brand-text); font-size:12px; font-weight:700; cursor:pointer;}
+  .home-last-st{font-size:12px; color:var(--text-secondary); margin:-4px 0 10px;}
+  .history-time{flex:none; font-size:11px; color:var(--text-muted); white-space:nowrap; margin-left:6px; padding-top:2px;}
 
   .section-title{font-size:13px; font-weight:700; color:var(--text-secondary); margin:20px 0 10px; display:flex; align-items:center; justify-content:space-between;}
   .hint{font-size:12px; color:var(--text-muted);}
   .empty-hint{text-align:center; padding:32px 0; color:var(--text-muted); font-size:13px; line-height:1.7;}
 
-  /* ==== ガイド・補足説明（分かりやすさ改善） ==== */
-  .flow-note{
-    background:var(--brand-weak); color:var(--text-primary); border-radius:12px;
-    padding:10px 12px; font-size:12px; line-height:1.65; margin-bottom:14px;
-  }
-  .flow-note strong{color:var(--brand);}
-  .warn-note{
-    background:var(--accent-weak); color:var(--text-primary); border-radius:12px;
-    padding:11px 12px; font-size:12.5px; line-height:1.65; margin-bottom:14px; display:flex; gap:8px; align-items:flex-start;
-  }
-  .warn-note svg{flex:none; color:var(--accent-ink); margin-top:2px;}
+  /* ==== 補足の一行・確定パネル ==== */
+  .action-note{font-size:11.5px; color:var(--text-muted); margin:0 0 6px; line-height:1.5;}
+  .checkbox-sub{font-size:11.5px; color:var(--text-muted); margin:-10px 0 14px 26px; line-height:1.5;}
+  .submit-panel{margin-top:18px; padding:14px 0 24px; border-top:1.5px dashed var(--border);}
+  .submit-panel-summary{font-size:13px; font-weight:700; margin-bottom:4px;}
   .tap-hint{font-size:11px; color:var(--text-muted); margin-top:8px; display:flex; align-items:center; justify-content:flex-end; gap:3px;}
 
   .step-list{display:flex; flex-direction:column; gap:8px; margin:0 0 12px; padding:0; list-style:none;}
@@ -190,50 +223,59 @@
   }
   .term-note{background:var(--surface-1); border-radius:10px; padding:9px 10px; font-size:11.5px; color:var(--text-secondary); line-height:1.6;}
 
-  /* ==== 棚卸し期限通知（2026-10-17新設。ホーム画面。期限5日前から表示し、期限超過で強調表示に切り替わる） ==== */
-  .stocktake-notice{
-    display:flex; align-items:center; gap:10px; background:var(--accent-weak); border:1px solid var(--accent);
-    color:var(--accent-ink); border-radius:var(--radius); padding:12px 14px; margin-bottom:16px; cursor:pointer;
+  /* ==== Inventoryのステータスカード（Inventory画面とベルのお知らせシートで共用） ==== */
+  .st-card{background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; margin-bottom:14px;}
+  .st-card.st-done{background:var(--good-weak);}
+  .st-card.st-soon, .st-card.st-today{background:var(--accent-weak); border-color:var(--accent);}
+  .st-card.st-overdue{background:var(--critical-weak); border-color:var(--critical);}
+  .st-card-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;}
+  .st-card-title{font-size:14.5px; font-weight:800;}
+  .st-label{flex:none; font-size:11px; font-weight:800; padding:3px 10px; border-radius:999px; color:var(--text-muted); border:1px solid var(--border);}
+  .st-done .st-label{color:var(--good-text); border-color:var(--good);}
+  .st-soon .st-label, .st-today .st-label{background:var(--accent); color:var(--accent-ink); border-color:transparent;}
+  .st-overdue .st-label{background:var(--critical); color:var(--critical-ink); border-color:transparent;}
+  .st-row{display:flex; align-items:center; gap:8px; min-height:30px; font-size:12.5px;}
+  .st-key{flex:none; width:76px; color:var(--text-muted); font-weight:700;}
+  .st-val{flex:1; min-width:0; color:var(--text-primary);}
+  .st-edit-btn{
+    flex:none; min-width:56px; height:44px; margin:-4px 0; padding:0 12px; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface-1); color:var(--brand-text); font-size:12.5px; font-weight:700; cursor:pointer;
   }
-  .stocktake-notice:active{transform:scale(0.99);}
-  .stocktake-notice svg{flex:none;}
-  .stocktake-notice .title{font-size:13px; font-weight:800;}
-  .stocktake-notice .desc{font-size:11.5px; margin-top:1px; opacity:0.85;}
-  .stocktake-notice.overdue{
-    background:var(--critical); color:var(--critical-ink); border-color:transparent; padding:16px; gap:12px;
-    box-shadow:0 8px 18px rgba(192,57,43,0.35);
-  }
-  .stocktake-notice.overdue .title{font-size:15.5px;}
-  .stocktake-notice.overdue .desc{font-size:12.5px; opacity:0.92;}
-  .stocktake-notice.overdue svg{width:26px; height:26px;}
-  .stocktake-deadline-row{display:flex; align-items:center; gap:6px; cursor:pointer; margin:-6px 0 14px;}
-  .stocktake-deadline-row .link-text{color:var(--brand); font-weight:800; font-size:11.5px; margin-left:4px;}
-  /* 使い方ガイドモーダル（#guideModal）は汎用の`.modal p`より小さい文字サイズ・行間にするため、
-     詳細度の高いセレクタで上書きする */
-  #guideModal p{font-size:12px; color:var(--text-secondary); margin:0 0 10px; line-height:1.6;}
-  #guideModal .term-note{font-size:11.5px;}
+  .notice-empty{font-size:13px; color:var(--text-secondary); margin:0 0 6px;}
 
-  .nav-card-grid{display:flex; flex-direction:column; gap:10px;}
-  .nav-card{
-    display:flex; align-items:center; gap:12px; background:var(--surface-2); border:1px solid var(--border);
-    border-radius:var(--radius); padding:14px; cursor:pointer;
+  /* ==== 使い方ガイド ==== */
+  #guideModal p{font-size:12px; color:var(--text-secondary); margin:0 0 10px; line-height:1.6;}
+  #guideModal .term-note{font-size:11.5px; margin-bottom:14px;}
+  #guideModal .term-note ul{margin:4px 0 0; padding-left:18px;}
+  .guide-h{font-size:13px; font-weight:800; margin:14px 0 8px; color:var(--text-primary);}
+  .guide-sec{margin-bottom:8px;}
+  .guide-sec > summary{
+    list-style:none; min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:10px 14px; background:var(--surface-1); border:1px solid var(--border); border-radius:12px;
+    color:var(--text-primary); font-size:13px; font-weight:700; cursor:pointer; transition:background-color .3s;
   }
-  .nav-card:active{transform:scale(0.99);}
-  .nav-card .icon-wrap{
-    flex:none; width:42px; height:42px; border-radius:12px; background:var(--brand-weak); color:var(--brand);
-    display:flex; align-items:center; justify-content:center;
+  .guide-sec > summary::-webkit-details-marker{display:none;}
+  .guide-sec > summary::after{
+    content:''; flex:none; width:7px; height:7px; margin-right:4px;
+    border-right:2px solid var(--text-muted); border-bottom:2px solid var(--text-muted);
+    transform:rotate(-45deg); transition:transform .15s;
   }
-  .nav-card .texts{flex:1; min-width:0;}
-  .nav-card .title{font-size:14.5px; font-weight:800;}
-  .nav-card .desc{font-size:11.5px; color:var(--text-muted); margin-top:1px;}
-  .nav-card .chev{flex:none; color:var(--text-muted);}
+  .guide-sec[open] > summary{color:var(--brand-text);}
+  .guide-sec[open] > summary::after{transform:rotate(45deg);}
+  .guide-sec.flash > summary{background:var(--brand-weak);}
+  .guide-body{padding:10px 6px 6px; font-size:12px; color:var(--text-secondary); line-height:1.6;}
+  #guideModal .guide-body p{margin:0 0 6px;}
+  .guide-body ul{margin:4px 0 4px; padding-left:18px;}
+  .guide-body li{margin-bottom:4px;}
+  .guide-body strong{color:var(--text-primary); font-weight:700;}
+
   .badge-num{
     flex:none; background:var(--accent); color:var(--accent-ink); font-size:11px; font-weight:800;
     border-radius:999px; padding:2px 8px;
   }
-  .nav-card .badge-num{margin-right:2px;}
-  /* 2026-10-17新設: サイドバーの各ボタンでも未完了タスク数バッジを使えるようにした（棚卸しの期限通知など） */
+  .badge-num.critical{background:var(--critical); color:var(--critical-ink);}
   .sidebar-menu-btn .badge-num{margin-left:auto;}
+
 
   /* ==== フィルタ ==== */
   .filter-chip-row{display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:10px; -webkit-overflow-scrolling:touch;}
@@ -260,8 +302,6 @@
     border-radius:999px; background:var(--accent); color:var(--accent-ink); font-size:10px; font-weight:800;
     display:flex; align-items:center; justify-content:center; line-height:1;
   }
-  /* 2026-10-17修正: loading-badgeと同じ[hidden]詳細度バグの対象だったため合わせて修正 */
-  .filter-badge[hidden]{display:none;}
 
   /* ==== アイテムカード／在庫 ==== */
   .item-card{background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:13px; margin-bottom:10px;}
@@ -273,14 +313,14 @@
   .cat-badge{display:inline-block; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px;}
   .cat-badge.cat-crew{background:var(--cat-crew-weak); color:var(--cat-crew);}
   .cat-badge.cat-mgr{background:var(--cat-mgr-weak); color:var(--cat-mgr);}
-  .cat-badge.cat-gel{background:var(--cat-gel-weak); color:var(--cat-gel);}
+  .cat-badge.cat-gel{background:var(--cat-gel-weak); color:var(--cat-gel-text);}
   .cat-badge.cat-common{background:var(--gridline); color:var(--cat-common);}
   .gender-badge{display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:var(--gridline); color:var(--text-secondary);}
 
   .size-chip-row{display:flex; gap:6px; flex-wrap:wrap;}
   .add-size-btn{
     margin-top:10px; width:100%; padding:9px; border-radius:10px; border:1.5px dashed var(--border);
-    background:transparent; color:var(--brand); font-weight:700; font-size:12px; cursor:pointer;
+    background:transparent; color:var(--brand-text); font-weight:700; font-size:12px; cursor:pointer;
   }
   .add-size-btn:active{transform:scale(0.98);}
 
@@ -303,23 +343,23 @@
   .delivery-card-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
   .delivery-date{font-size:15px; font-weight:800;}
   .status-badge{display:inline-block; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:999px;}
-  .status-badge.pending{background:var(--accent-weak); color:var(--accent-ink);}
-  .status-badge.done{background:var(--good-weak); color:var(--good);}
+  .status-badge.pending{background:var(--accent-weak); color:var(--accent-text);}
+  .status-badge.done{background:var(--good-weak); color:var(--good-text);}
   .delivery-summary{font-size:12.5px; color:var(--text-secondary);}
   .delivery-memo{font-size:11.5px; color:var(--text-muted); margin-top:3px;}
   /* 2026-10-17新設: 検品前の納品はキャンセルできるようにした */
   .delivery-card-bottom{display:flex; align-items:center; justify-content:space-between; margin-top:8px;}
   .delivery-card-bottom .tap-hint{margin-top:0;}
-  .delivery-cancel-btn{background:none; border:none; color:var(--critical); font-size:11.5px; font-weight:700; padding:4px 2px; cursor:pointer;}
+  .delivery-cancel-btn{background:none; border:none; color:var(--critical-text); font-size:11.5px; font-weight:700; padding:4px 2px; cursor:pointer;}
 
   .delivery-row-form{background:var(--surface-1); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px;}
   .delivery-row-form .field-row{display:flex; gap:8px;}
   .delivery-row-form .field{flex:1; margin-bottom:10px;}
   .delivery-row-form .field:last-child{margin-bottom:0;}
-  .remove-row-btn{flex:none; background:none; border:none; color:var(--critical); font-size:12px; font-weight:700; cursor:pointer; padding:0 2px;}
+  .remove-row-btn{flex:none; background:none; border:none; color:var(--critical-text); font-size:12px; font-weight:700; cursor:pointer; padding:0 2px;}
   .add-row-btn{
     width:100%; padding:11px; border-radius:11px; border:1.5px dashed var(--border);
-    background:transparent; color:var(--brand); font-weight:700; font-size:13.5px; cursor:pointer; margin-bottom:14px;
+    background:transparent; color:var(--brand-text); font-weight:700; font-size:13.5px; cursor:pointer; margin-bottom:14px;
   }
 
   /* ==== 検品 ==== */
@@ -354,25 +394,22 @@
     width:62px; flex:none; padding:9px 6px; border-radius:9px; border:1px solid var(--border);
     background:var(--surface-1); color:var(--text-primary); font-size:13px; text-align:center;
   }
-  .dist-remove-btn{flex:none; background:none; border:none; color:var(--critical); font-size:17px; line-height:1; cursor:pointer; padding:0 2px;}
+  .dist-remove-btn{flex:none; background:none; border:none; color:var(--critical-text); font-size:17px; line-height:1; cursor:pointer; padding:0 2px;}
   .dist-add-btn{
     width:100%; margin-top:2px; padding:9px; border-radius:10px; border:1.5px dashed var(--dist);
-    background:var(--dist-weak); color:var(--dist); font-weight:700; font-size:12px; cursor:pointer;
+    background:var(--dist-weak); color:var(--dist-text); font-weight:700; font-size:12px; cursor:pointer;
   }
   .dist-add-btn:active{transform:scale(0.98);}
   .dist-summary{
     font-size:11.5px; color:var(--text-muted); margin-top:8px; line-height:1.6; min-height:14px;
   }
-  .dist-summary strong{color:var(--dist);}
-
-  .sticky-bar{
-    position:sticky; bottom:calc(14px + env(safe-area-inset-bottom)); margin-top:16px;
-    display:flex; gap:10px; background:var(--surface-0); padding-top:4px;
-  }
+  .dist-summary strong{color:var(--dist-text);}
+  .inspect-topbar{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;}
+  .inspect-topbar .back-btn{margin-bottom:0;}
 
   /* ==== 使用記録（旧称：消化） ==== */
   .stock-hint{font-size:12px; color:var(--text-muted); margin-top:-6px; margin-bottom:12px;}
-  .stock-hint.zero{color:var(--critical);}
+  .stock-hint.zero{color:var(--critical-text);}
   .segmented{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;}
   .segmented-btn{
     padding:12px 4px; border-radius:11px; border:1px solid var(--border); background:var(--surface-2);
@@ -382,9 +419,10 @@
   .recent-list .history-entry{margin-bottom:8px;}
 
   /* ==== 履歴 ==== */
-  .tabs{display:flex; gap:8px; margin-bottom:14px; overflow-x:auto;}
+  .tabs{display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;}
+  .tabs::-webkit-scrollbar{display:none;}
   .tab-btn{
-    flex:1; padding:9px 4px; border-radius:10px; border:1px solid var(--border); background:var(--surface-1);
+    flex:1 0 auto; padding:9px 12px; border-radius:10px; border:1px solid var(--border); background:var(--surface-1);
     color:var(--text-secondary); font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
   }
   .tab-btn.on{background:var(--brand); color:var(--brand-ink); border-color:transparent;}
@@ -393,33 +431,33 @@
   .history-icon{
     flex:none; width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center;
   }
-  .history-icon.type-delivery{background:var(--brand-weak); color:var(--brand);}
-  .history-icon.type-inspection{background:rgba(31,138,128,0.14); color:var(--cat-gel);}
-  .history-icon.type-distribution{background:var(--dist-weak); color:var(--dist);}
-  .history-icon.type-consumption{background:var(--accent-weak); color:var(--accent-ink);}
-  .history-icon.type-stocktake{background:var(--stocktake-weak); color:var(--stocktake);}
+  .history-icon.type-delivery{background:var(--brand-weak); color:var(--brand-text);}
+  .history-icon.type-inspection{background:var(--cat-gel-weak); color:var(--cat-gel-text);}
+  .history-icon.type-distribution{background:var(--dist-weak); color:var(--dist-text);}
+  .history-icon.type-consumption{background:var(--accent-weak); color:var(--accent-text);}
+  .history-icon.type-stocktake{background:var(--stocktake-weak); color:var(--stocktake-text);}
   .history-icon.type-return{background:var(--return-weak); color:var(--return);}
   .history-body{flex:1; min-width:0;}
   .history-title{font-size:13.5px; font-weight:700; line-height:1.4;}
   .history-sub{font-size:11.5px; color:var(--text-muted); margin-top:2px;}
   .type-badge{display:inline-block; font-size:9.5px; font-weight:800; padding:1px 7px; border-radius:999px; margin-right:5px; vertical-align:1px;}
-  .type-badge.type-delivery{background:var(--brand-weak); color:var(--brand);}
-  .type-badge.type-inspection{background:rgba(31,138,128,0.14); color:var(--cat-gel);}
-  .type-badge.type-distribution{background:var(--dist-weak); color:var(--dist);}
-  .type-badge.type-consumption{background:var(--accent-weak); color:var(--accent-ink);}
-  .type-badge.type-stocktake{background:var(--stocktake-weak); color:var(--stocktake);}
+  .type-badge.type-delivery{background:var(--brand-weak); color:var(--brand-text);}
+  .type-badge.type-inspection{background:var(--cat-gel-weak); color:var(--cat-gel-text);}
+  .type-badge.type-distribution{background:var(--dist-weak); color:var(--dist-text);}
+  .type-badge.type-consumption{background:var(--accent-weak); color:var(--accent-text);}
+  .type-badge.type-stocktake{background:var(--stocktake-weak); color:var(--stocktake-text);}
   .type-badge.type-return{background:var(--return-weak); color:var(--return);}
-  .type-badge.type-return-cleaned{background:var(--good-weak); color:var(--good);}
-  .type-badge.type-return-exception{background:var(--critical-weak); color:var(--critical);}
+  .type-badge.type-return-cleaned{background:var(--good-weak); color:var(--good-text);}
+  .type-badge.type-return-exception{background:var(--critical-weak); color:var(--critical-text);}
   .diff-badge{font-size:10.5px; font-weight:800; padding:1px 7px; border-radius:999px; margin-left:4px;}
-  .diff-badge.zero{background:var(--good-weak); color:var(--good);}
-  .diff-badge.nonzero{background:var(--accent-weak); color:var(--accent-ink);}
+  .diff-badge.zero{background:var(--good-weak); color:var(--good-text);}
+  .diff-badge.nonzero{background:var(--accent-weak); color:var(--accent-text);}
 
   /* ==== FAB / ボトムナビ ==== */
   .fab{
     position:fixed; right:calc(50% - 280px + 18px); bottom:calc(84px + env(safe-area-inset-bottom));
     width:58px; height:58px; border-radius:50%; background:var(--brand); color:var(--brand-ink);
-    border:none; font-size:28px; box-shadow:0 6px 16px rgba(227,0,27,0.35); cursor:pointer; z-index:6;
+    border:none; font-size:28px; box-shadow:0 6px 16px var(--fab-shadow); cursor:pointer; z-index:6;
     display:none;
   }
   .fab.show{display:flex; align-items:center; justify-content:center;}
@@ -437,11 +475,11 @@
     flex:1; background:none; border:none; padding:10px 0 8px; cursor:pointer;
     color:var(--text-muted); display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10px; font-weight:700;
   }
-  .nav-btn.active{color:var(--brand);}
+  .nav-btn.active{color:var(--brand-text);}
   /* 2026-10-17新設: フッターアイコンは数字バッジではなく、小さな点で「通知がある」ことだけを示す */
   .nav-dot{
     position:absolute; top:6px; left:calc(50% + 7px); width:8px; height:8px; border-radius:50%;
-    background:var(--accent); border:1.5px solid var(--surface-1); display:none;
+    background:var(--brand); border:1.5px solid var(--surface-1); display:none;
   }
   .nav-dot.show{display:block;}
 
@@ -449,14 +487,14 @@
   .header-left{display:flex; align-items:center; gap:10px; min-width:0;}
 
   /* ==== サイドバー（副次操作の置き場所。M-Crewの「Menu」サイドバーと同じ考え方） ==== */
-  .sidebar-backdrop{display:none; position:fixed; inset:0; background:rgba(10,16,20,0.45); z-index:29;}
+  .sidebar-backdrop{display:none; position:fixed; inset:0; background:var(--scrim); z-index:29;}
   .sidebar-backdrop.active{display:block;}
   .sidebar{
     position:fixed; top:0; left:0; bottom:0; width:280px; max-width:85vw; background:var(--surface-2);
-    z-index:30; box-shadow:4px 0 20px rgba(0,0,0,0.2); padding:18px; overflow-y:auto;
+    z-index:30; box-shadow:none; padding:18px; overflow-y:auto;
     transform:translateX(-100%); transition:transform .25s ease;
   }
-  .sidebar.active{transform:translateX(0);}
+  .sidebar.active{transform:translateX(0); box-shadow:4px 0 20px var(--shadow-strong);}
   .sidebar-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
   .sidebar-title{font-size:16px; font-weight:800;}
   .sidebar-close{background:none; border:none; color:var(--text-primary); font-size:20px; line-height:1; padding:4px 10px; border-radius:8px; cursor:pointer;}
@@ -468,58 +506,60 @@
     color:var(--text-primary); font-size:14px; font-weight:700;
   }
   .sidebar-menu-btn:active{background:var(--surface-1);}
-  .sidebar-menu-btn svg{flex:none; color:var(--brand);}
+  .sidebar-menu-btn svg{flex:none; color:var(--brand-text);}
   .sidebar-divider{border:none; border-top:1px solid var(--border); margin:2px 0 16px;}
 
   /* ==== PC幅サイドバーナビ（900px以上のみ表示。ホーム/在庫/納品/使用の4タブをサイドバーに集約する） ==== */
   .sidebar-nav-group{display:none; flex-direction:column; gap:2px; margin-bottom:2px;}
-  .sidebar-nav-btn.active{background:var(--brand-weak); color:var(--brand);}
-  .sidebar-nav-btn.active svg{color:var(--brand);}
+  .sidebar-nav-btn.active{background:var(--brand-weak); color:var(--brand-text);}
+  .sidebar-nav-btn.active svg{color:var(--brand-text);}
   .sidebar-nav-divider{display:none;}
 
-  /* ==== 読み込み中バッジ／ボタンスピナー（Coding段階のGAS通信に備えた応答待ちフィードバック） ==== */
-  .loading-badge{
-    position:fixed; top:calc(10px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%);
-    background:var(--text-primary); color:var(--surface-1); padding:9px 18px; border-radius:999px;
-    font-size:13px; font-weight:700; display:flex; align-items:center; z-index:25;
-    box-shadow:0 6px 16px rgba(0,0,0,0.25); pointer-events:none;
+  /* ==== 処理中オーバーレイ（通信中は操作を止め、400msを超えたら暗幕と中央のスピナーを出す） ==== */
+  .busy-overlay{display:none; position:fixed; inset:0; z-index:40; background:transparent;}
+  .busy-overlay.is-blocking{display:block;}
+  .busy-overlay.is-visible{display:flex; align-items:center; justify-content:center; background:var(--scrim);}
+  .busy-box{
+    display:none; align-items:center; gap:10px; min-width:150px; justify-content:center;
+    background:var(--surface-3); color:var(--text-primary); border:1px solid var(--border);
+    border-radius:14px; padding:16px 22px; font-size:14px; font-weight:700; box-shadow:0 10px 28px var(--shadow-strong);
   }
-  /* 2026-10-17修正: 「処理中…」が常に表示され続ける不具合の真因。クラス側のdisplay:flexと[hidden]属性の
-     UAスタイル（display:none）はCSS詳細度が同じため、後に書かれたクラス側が勝ってしまい、hidden属性を
-     付けても実際には非表示にならなかった（JS側のbeginLoading/endLoadingやAPIのロック・並列数を
-     いくら直しても解消しなかったのはこれが原因）。詳細度を上げて[hidden]側を確実に勝たせる。 */
-  .loading-badge[hidden]{display:none;}
+  .busy-overlay.is-visible .busy-box{display:flex;}
+  .busy-box .spinner{width:20px; height:20px; margin:0; border-width:2.5px; color:var(--brand-text);}
   @keyframes spin{ to{ transform:rotate(360deg); } }
   .spinner{
     display:inline-block; width:14px; height:14px; margin-right:7px; vertical-align:-2px;
-    /* 色は親要素の文字色（currentColor）に追従させる。primaryボタン（--brand-ink）・ghostボタン（--text-primary）・
-       読み込み中バッジ（--surface-1）のどこに置いてもライト/ダーク両方で見えるようにするため、固定色は持たない */
     border:2px solid currentColor; border-top-color:transparent; border-radius:50%;
     animation:spin .6s linear infinite;
   }
 
   /* ==== モーダル ==== */
   .modal-overlay{
-    display:none; position:fixed; inset:0; background:rgba(10,16,20,0.45); z-index:20;
+    display:none; position:fixed; inset:0; background:var(--scrim); z-index:20;
     align-items:flex-end; justify-content:center;
   }
   .modal-overlay.active{display:flex;}
+  /* 他のモーダルの上に重ねて開くもの（テンキー・確認）。DOM順に依存せず最前面に出す（処理中オーバーレイ40より下） */
+  .modal-overlay.modal-stacked{z-index:24;}
+  body:has(.modal-overlay.active:not(.modal-stacked)) .modal-overlay.modal-stacked{background:var(--scrim-stacked);}
   .modal{
-    background:var(--surface-1); width:100%; max-width:560px; border-radius:20px 20px 0 0;
+    background:var(--surface-3); border-top:1px solid var(--border); width:100%; max-width:560px; border-radius:20px 20px 0 0;
     padding:20px 18px calc(20px + env(safe-area-inset-bottom)); max-height:88vh; overflow-y:auto;
   }
-  .modal.center{border-radius:var(--radius); margin-bottom:auto; margin-top:auto;}
+  .modal.center{border-radius:var(--radius); margin-bottom:auto; margin-top:auto; border:1px solid var(--border);}
   .modal h2{margin:0 0 16px; font-size:16px; font-weight:800;}
   .modal p{font-size:13.5px; color:var(--text-secondary); line-height:1.6;}
   .field{margin-bottom:14px;}
   .field.hidden{display:none;}
   .field label{display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px; font-weight:700;}
-  .field label .req{color:var(--brand); margin-left:2px;}
+  .field label .req{color:var(--text-muted); font-weight:600; font-size:10.5px; margin-left:6px;}
   .field input[type=text], .field input[type=number], .field input[type=date],
   .field select, .field textarea{
     width:100%; padding:12px 12px; border-radius:11px; border:1px solid var(--border);
     background:var(--surface-2); color:var(--text-primary); font-size:15px;
   }
+  .field input:disabled{background:var(--surface-1); color:var(--text-muted); -webkit-text-fill-color:var(--text-muted); opacity:1; cursor:not-allowed;}
+  input[type=checkbox], input[type=radio]{accent-color:var(--brand);}
   .field textarea{resize:vertical; min-height:56px; font-family:inherit;}
   .field-row{display:flex; gap:10px;}
   .field-row .field{flex:1;}
@@ -543,7 +583,7 @@
     color:var(--text-primary); font-size:20px; font-weight:800; cursor:pointer; font-variant-numeric:tabular-nums;
   }
   .tenkey-btn:active{transform:scale(0.95); background:var(--brand-weak);}
-  .tenkey-btn.tenkey-clear{color:var(--critical); font-size:14px;}
+  .tenkey-btn.tenkey-clear{color:var(--critical-text); font-size:14px;}
   .tenkey-btn.tenkey-back{font-size:16px;}
   .detail-table{width:100%; border-collapse:collapse; font-size:12.5px;}
   .detail-table th{text-align:left; color:var(--text-muted); font-weight:700; padding:4px 4px; border-bottom:1px solid var(--gridline);}
@@ -570,7 +610,7 @@
   .size-chip-label{font-size:12px; font-weight:800; color:var(--text-secondary);}
   .size-chip-qty{font-size:18px; font-weight:800;}
   .size-chip-breakdown{font-size:10px; font-weight:700; color:var(--text-muted); white-space:nowrap;}
-  .size-chip.zero{opacity:0.45;}
+  .size-chip.zero{opacity:0.6;}
   .size-chip:active{transform:scale(0.95);}
   .size-chip.no-size{flex:1; flex-direction:row; gap:10px; min-height:48px; padding:8px 14px;}
   .size-chip.no-size .size-chip-qty{font-size:20px;}
@@ -645,62 +685,25 @@
         <button class="icon-btn hamburger-btn" onclick="openSidebar()" aria-label="メニュー">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <div><h1>ユニフォーム管理</h1><div class="sub">在庫・納品・使用記録の一元管理</div></div>
+        <span class="appbar-word">MUNI</span>
       </div>
+      <button type="button" class="icon-btn bell-btn" id="noticeBtn" aria-label="お知らせ" onclick="openNoticeModal()">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span class="bell-dot" id="noticeDot"></span>
+      </button>
     </div>
     <div style="padding:16px 16px 0;">
-      <div class="home-greet" id="homeGreet"></div>
-
-      <!-- 2026-10-17新設: 棚卸しの期限（サイドバー「棚卸し」画面で設定）が近い、または過ぎている場合のみ表示する -->
-      <div class="stocktake-notice" id="stocktakeNotice" style="display:none;" onclick="navigate('stocktake')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        <div class="texts">
-          <div class="title" id="stocktakeNoticeTitle"></div>
-          <div class="desc" id="stocktakeNoticeDesc"></div>
-        </div>
+      <div class="home-clock">
+        <div class="home-date" id="homeDate"></div>
+        <div class="home-time" id="homeTime"></div>
       </div>
 
-      <div class="stat-grid">
-        <div class="stat-tile"><div class="label">登録アイテム数</div><div class="value num" id="homeItemCount">0</div></div>
-        <div class="stat-tile"><div class="label">総在庫数量</div><div class="value num" id="homeTotalQty">0<small>点</small></div></div>
-        <div class="stat-tile wide alert" id="homePendingTile" onclick="navigate('delivery')">
-          <div><div class="label">未検品の納品（数のチェック待ち）</div><div class="value num" id="homePendingCount">0<small>件</small></div></div>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </div>
-      </div>
+      <div class="section-title">お知らせ</div>
+      <div id="homeAlerts"></div>
 
-      <div class="section-title">機能</div>
-      <div class="nav-card-grid">
-        <div class="nav-card" onclick="navigate('inventory')">
-          <div class="icon-wrap">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-          </div>
-          <div class="texts"><div class="title">在庫</div><div class="desc">どの服が何着あるか確認・修正する</div></div>
-          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </div>
-        <div class="nav-card" onclick="navigate('delivery')">
-          <div class="icon-wrap">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
-          </div>
-          <div class="texts"><div class="title">納品</div><div class="desc">届いた服の登録と、数のチェック（検品）</div></div>
-          <span class="badge-num" id="homeNavPendingBadge" style="display:none;"></span>
-          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </div>
-        <div class="nav-card" onclick="navigate('consumption')">
-          <div class="icon-wrap">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-          </div>
-          <div class="texts"><div class="title">使用記録</div><div class="desc">支給・交換・紛失で服を渡したら記録（在庫が減る）</div></div>
-          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </div>
-        <div class="nav-card" onclick="navigate('history')">
-          <div class="icon-wrap">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          </div>
-          <div class="texts"><div class="title">履歴</div><div class="desc">納品・検品・使用記録をまとめて見る記録簿</div></div>
-          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </div>
-      </div>
+      <div class="section-title">最近の更新<button type="button" class="link-btn" onclick="navigate('history')">すべて見る ›</button></div>
+      <div class="home-last-st" id="homeLastStocktake"></div>
+      <div class="recent-list" id="homeRecent"></div>
     </div>
   </section>
 
@@ -713,9 +716,9 @@
         </button>
         <div><h1>在庫</h1><div class="sub">どの服が何着あるか確認・修正</div></div>
       </div>
+      <button type="button" class="icon-btn help-btn" aria-label="この画面の使い方" onclick="openGuideModal('inventory')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
     </div>
     <div style="padding:14px 16px 0;">
-      <p class="flow-note">数量のチップや行を<strong>タップすると、その場で在庫数を直接書き換えられます</strong>（手直し用）。新品／中古はタップ後の画面で選べます。サイズ管理ありのアイテムは基本サイズ（S/M/L/LL）を常に表示し、3S・SS・3L・6Lなどは各アイテムの「＋ サイズを追加」から必要な分だけ追加できます。新しい服の種類（アイテム）の追加・編集は、左上のメニュー（≡）の「アイテム管理」から行えます。</p>
       <div class="search-filter-row">
         <input type="search" id="invSearchInput" class="search-input" placeholder="アイテム名で検索" oninput="refreshInventory()">
         <button type="button" class="icon-btn filter-btn" id="invFilterBtn" onclick="openInventoryFilterModal()" aria-label="フィルター">
@@ -736,9 +739,9 @@
         </button>
         <div><h1>納品</h1><div class="sub">届いた服の登録と数のチェック</div></div>
       </div>
+      <button type="button" class="icon-btn help-btn" aria-label="この画面の使い方" onclick="openGuideModal('delivery')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
     </div>
     <div style="padding:14px 16px 0;" id="deliveryListWrap">
-      <p class="flow-note"><strong>① 納品登録</strong>（右下「＋」から届いた予定を登録）→ <strong>② 検品</strong>（実際の数を数えて入力）→ <strong>③ 在庫に反映</strong>、という順で使います。</p>
       <div id="deliveryList"></div>
     </div>
   </section>
@@ -746,18 +749,19 @@
   <!-- ================= 検品（納品タブ内サブ画面） ================= -->
   <section class="screen" id="screen-inspection">
     <div style="padding:16px 16px 0;">
-      <button class="icon-btn back-btn" onclick="navigate('delivery')">‹ 納品一覧へ</button>
+      <div class="inspect-topbar">
+        <button class="icon-btn back-btn" onclick="navigate('delivery')">‹ 納品一覧へ</button>
+        <button type="button" class="icon-btn help-btn" aria-label="この画面の使い方" onclick="openGuideModal('delivery')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
+      </div>
       <div class="inspect-head">
         <div class="d" id="inspectDate"></div>
         <div class="m" id="inspectMemo"></div>
       </div>
-      <p class="warn-note">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        <span>各アイテムの「実数」に、<strong>実際に数えた数</strong>をそのまま入力してください。予定数との差があっても構いません。入力した数が<strong>そのまま在庫数として記録されます</strong>（今の在庫に足し算されるわけではありません）。特定のスタッフに渡す分がある場合は、各行の「＋ 個別配布を追加」からその分だけ切り出せます（個別配布分は在庫に反映されません）。なお、検品で入庫する数量はすべて新品として記録されます。</span>
-      </p>
       <div id="inspectRows"></div>
-      <p class="error-text" id="inspectError"></p>
-      <div class="sticky-bar">
+      <div class="submit-panel">
+        <div class="submit-panel-summary num" id="inspectSubmitSummary"></div>
+        <p class="action-note">届いた数を入力すると、新品の在庫に足されます（個別配布分は除く）</p>
+        <p class="error-text" id="inspectError"></p>
         <button class="btn primary" id="submitInspectionBtn" style="width:100%;" onclick="submitInspection()">検品を確定する</button>
       </div>
     </div>
@@ -770,11 +774,11 @@
         <button class="icon-btn hamburger-btn" onclick="openSidebar()" aria-label="メニュー">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <div><h1>使用記録</h1><div class="sub">支給・交換・紛失・その他の記録</div></div>
+        <div><h1>使用記録</h1><div class="sub">渡した・交換した・失くした服を記録</div></div>
       </div>
+      <button type="button" class="icon-btn help-btn" aria-label="この画面の使い方" onclick="openGuideModal('consumption')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
     </div>
     <div style="padding:14px 16px 0;">
-      <p class="flow-note">スタッフに服を<strong>渡した・交換した・失くした</strong>ときに記録します。記録すると、その分だけ在庫数が自動で減ります。</p>
       <div class="field">
         <label>アイテム<span class="req">必須</span></label>
         <select id="cnsItem" onchange="onConsumptionItemChange()"></select>
@@ -823,8 +827,9 @@
         <button class="icon-btn hamburger-btn" onclick="openSidebar()" aria-label="メニュー">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <div><h1>履歴</h1><div class="sub">納品・検品・使用記録のすべて</div></div>
+        <div><h1>履歴</h1><div class="sub">入出庫・Inventoryの記録をまとめて表示</div></div>
       </div>
+      <button type="button" class="icon-btn help-btn" aria-label="この画面の使い方" onclick="openGuideModal('history')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
     </div>
     <div style="padding:14px 16px 0;">
       <div class="tabs" id="historyTabs">
@@ -833,30 +838,35 @@
         <button class="tab-btn" data-type="inspection" onclick="selectHistoryTab('inspection')">検品</button>
         <button class="tab-btn" data-type="distribution" onclick="selectHistoryTab('distribution')">個別配布</button>
         <button class="tab-btn" data-type="consumption" onclick="selectHistoryTab('consumption')">使用</button>
-        <button class="tab-btn" data-type="stocktake" onclick="selectHistoryTab('stocktake')">棚卸し</button>
+        <button class="tab-btn" data-type="stocktake" onclick="selectHistoryTab('stocktake')">Inventory</button>
         <button class="tab-btn" data-type="return" onclick="selectHistoryTab('return')">返却</button>
       </div>
       <div id="historyList"></div>
     </div>
   </section>
 
-  <!-- ================= 棚卸し（2026-10新設。月1運用想定、サイドバーから遷移） ================= -->
+  <!-- ================= Inventory（棚卸し。月1運用想定、サイドバーから遷移） ================= -->
   <section class="screen" id="screen-stocktake">
     <div class="app-header">
       <div class="header-left">
         <button class="icon-btn hamburger-btn" onclick="openSidebar()" aria-label="メニュー">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <div><h1>棚卸し</h1><div class="sub">月1回、実数を数えて在庫を一括更新</div></div>
+        <h1>Inventory</h1>
+      </div>
+      <div class="header-right">
+        <button type="button" class="jump-btn" id="stocktakeJumpBtn" hidden onclick="scrollToStocktakeSubmit()">入力<span class="num" id="stocktakeJumpCount">0</span>件 ↓</button>
+        <button type="button" class="icon-btn help-btn" aria-label="この画面の使い方" onclick="openGuideModal('stocktake')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
       </div>
     </div>
     <div style="padding:14px 16px 0;">
-      <p class="flow-note">前回棚卸し: <strong id="stocktakeLastDate">―</strong>。<strong>実数を入力した行だけ</strong>、その数でそのまま在庫が上書きされます（未入力の行はスキップされ、在庫は変わりません）。</p>
-      <p class="hint stocktake-deadline-row" onclick="openStocktakeDeadlineModal()">期限: <strong id="stocktakeDeadlineText">未設定</strong><span class="link-text">変更</span></p>
+      <div id="stocktakeStatusCard"></div>
       <div id="stocktakeList"></div>
-      <p class="error-text" id="stocktakeError"></p>
-      <div class="sticky-bar">
-        <button class="btn primary" id="submitStocktakeBtn" style="width:100%;" onclick="submitStocktake()">棚卸しを確定する</button>
+      <div class="submit-panel" id="stocktakeSubmitPanel">
+        <div class="submit-panel-summary num" id="stocktakeSubmitSummary">入力済み 0件</div>
+        <p class="action-note">入力した行だけ上書きされます。未入力の行は変わりません</p>
+        <p class="error-text" id="stocktakeError"></p>
+        <button class="btn primary" id="submitStocktakeBtn" style="width:100%;" onclick="submitStocktake()" disabled>Inventoryを確定する</button>
       </div>
     </div>
   </section>
@@ -870,9 +880,9 @@
         </button>
         <div><h1>返却</h1><div class="sub">退職・サイズ交換などで戻った服を記録</div></div>
       </div>
+      <button type="button" class="icon-btn help-btn" aria-label="この画面の使い方" onclick="openGuideModal('return')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
     </div>
     <div style="padding:14px 16px 0;">
-      <p class="flow-note">クリーニング済みの服を返却すると、その分だけ在庫が<strong>増えます</strong>（検品・棚卸しの上書きとは異なり、今の在庫数量に加算されます）。返却した服はすべて中古として記録されます。</p>
       <div class="field">
         <label>アイテム<span class="req">必須</span></label>
         <select id="retItem" onchange="onReturnItemChange()"></select>
@@ -893,15 +903,13 @@
         <input type="checkbox" id="retException" onchange="onReturnExceptionChange()">
         <label for="retException">クリーニングせずそのまま返却する（例外処理）</label>
       </div>
-      <p class="warn-note" id="retExceptionNote" style="display:none;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        <span>例外処理で返却する場合は、理由を<strong>備考に必ず記入</strong>してください。</span>
-      </p>
+      <p class="checkbox-sub">理由を備考に記入してください（必須）</p>
       <div class="field">
         <label>備考<span class="req" id="retNoteReq" style="display:none;">必須</span></label>
         <input type="text" id="retNote" placeholder="例）クリーニング未了、本人了承済み">
       </div>
       <p class="error-text" id="retError"></p>
+      <p class="action-note">中古として在庫に加算されます</p>
       <button class="btn primary" id="submitReturnBtn" style="width:100%; margin-bottom:22px;" onclick="submitReturn()">返却を記録する</button>
 
       <div class="section-title">最近の返却記録</div>
@@ -909,18 +917,18 @@
     </div>
   </section>
 
-  <!-- ================= アイテム管理（2026-10-17: モーダルから棚卸し・返却と同じ独立ページに変更） ================= -->
+  <!-- ================= ユニフォームマスタ（内部名itemmanage。服の種類の追加・編集） ================= -->
   <section class="screen" id="screen-itemmanage">
     <div class="app-header">
       <div class="header-left">
         <button class="icon-btn hamburger-btn" onclick="openSidebar()" aria-label="メニュー">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <div><h1>アイテム管理</h1><div class="sub">服の種類（アイテム）の追加・編集</div></div>
+        <div><h1>ユニフォームマスタ</h1><div class="sub">服の種類（アイテム）の追加・編集</div></div>
       </div>
+      <button type="button" class="icon-btn help-btn" aria-label="この画面の使い方" onclick="openGuideModal('itemmanage')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
     </div>
     <div style="padding:14px 16px 0;">
-      <p class="hint" style="margin:0 0 14px;">服の種類（アイテム）の新規追加・編集ができます。既存アイテムをタップすると編集できます。</p>
       <button type="button" class="add-row-btn" onclick="openItemFromManage(null)">＋ 新しいアイテムを追加</button>
       <div id="itemManageList"></div>
     </div>
@@ -984,12 +992,12 @@
   <div class="sidebar-menu">
     <button type="button" class="sidebar-menu-btn" onclick="openItemManageFromSidebar()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.25H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.83 0l5-5a2 2 0 0 0 0-2.83z"></path><line x1="7" y1="7.5" x2="7.01" y2="7.5"></line></svg>
-      <span>アイテム管理</span>
+      <span>ユニフォームマスタ</span>
     </button>
     <button type="button" class="sidebar-menu-btn" onclick="openStocktakeFromSidebar()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M9 12l2 2 4-4"></path></svg>
-      <span>棚卸し</span>
-      <span class="badge-num" id="sidebarStocktakeBadge" style="display:none;">1</span>
+      <span>Inventory</span>
+      <span class="badge-num" id="sidebarStocktakeBadge" hidden></span>
     </button>
     <button type="button" class="sidebar-menu-btn" onclick="openReturnFromSidebar()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>
@@ -1009,7 +1017,9 @@
   <button class="btn ghost" style="width:100%;" onclick="handleLogout()">ログアウト</button>
 </div>
 
-<div class="loading-badge" id="loadingBadge" hidden><span class="spinner"></span>処理中…</div>
+<div id="busyOverlay" class="busy-overlay" role="status" aria-live="polite">
+  <div class="busy-box"><span class="spinner"></span><span id="busyText">処理中…</span></div>
+</div>
 
 <!-- 在庫フィルターモーダル（2026-10-17新設。従来は在庫画面に常時表示していたカテゴリ/性別/種類フィルタをここに格納し、在庫画面には検索ボックスを置いた） -->
 <div class="modal-overlay" id="inventoryFilterModal">
@@ -1043,20 +1053,140 @@
   </div>
 </div>
 
-<!-- 使い方ガイドモーダル（サイドバー「使い方ガイド」から開く） -->
+<!-- 使い方ガイドモーダル（サイドバー「使い方ガイド」と各画面の「?」ボタンから開く） -->
 <div class="modal-overlay" id="guideModal">
   <div class="modal">
-    <h2>かんたん使い方ガイド</h2>
-    <p>このアプリはユニフォーム（制服）の在庫を4つのステップで管理します。</p>
+    <h2>使い方ガイド</h2>
+    <div class="guide-h">全体の流れ</div>
     <ol class="step-list">
-      <li><span class="step-num">1</span><span>「納品」で、届いたユニフォームを登録する</span></li>
-      <li><span class="step-num">2</span><span>「検品」で、届いた数を実際に数えて入力する</span></li>
-      <li><span class="step-num">3</span><span>数えた数がそのまま「在庫」に反映される</span></li>
-      <li><span class="step-num">4</span><span>スタッフに支給・交換したら「使用記録」をつける（在庫が減る）</span></li>
+      <li><span class="step-num">1</span><span>「納品」で届く予定を登録する</span></li>
+      <li><span class="step-num">2</span><span>「検品」で届いた数を数える（新品として在庫に足される）</span></li>
+      <li><span class="step-num">3</span><span>スタッフに渡したら「使用記録」（在庫が減る）</span></li>
+      <li><span class="step-num">4</span><span>戻ってきた服は「返却」（中古として在庫が増える）</span></li>
+      <li><span class="step-num">5</span><span>月1回「Inventory」で全部を数え直す</span></li>
     </ol>
-    <p class="term-note">※「クルー／MGR／GEL」は、服の対象となるスタッフの区分（カテゴリ）です。絞り込みフィルタとして使います。</p>
-    <div class="modal-actions">
+    <div class="guide-h">在庫の増え方・減り方</div>
+    <div class="term-note">
+      <ul>
+        <li><strong>加算</strong>（今の在庫に足す）: 検品（新品）・返却（中古）</li>
+        <li><strong>上書き</strong>（入力した数がそのまま在庫数になる）: Inventory・在庫画面の数量補正</li>
+        <li><strong>減算</strong>（今の在庫から引く）: 使用記録</li>
+        <li><strong>在庫は変わらない</strong>: 納品登録・個別配布</li>
+      </ul>
+    </div>
+    <div class="guide-h">画面別の説明</div>
+    <details class="guide-sec" name="guide" id="guide-home">
+      <summary>ホーム</summary>
+      <div class="guide-body">
+        <p>今日の日付と時刻、お知らせ、最近の更新が見られます。お知らせには、未検品の納品など対応が必要なことが表示されます。Inventory（月1回の棚卸し）の期限が近づくと、右上のベルに赤い丸が付きます（期限の5日前から）。ベルを押すと期限と状況を確認でき、そのままInventory画面を開けます。</p>
+      </div>
+    </details>
+    <details class="guide-sec" name="guide" id="guide-inventory">
+      <summary>在庫</summary>
+      <div class="guide-body">
+        <p>どの服が、どのサイズで何着あるかを確認する画面です。</p>
+        <ul>
+          <li>サイズのボタンには合計数が表示され、その下に内訳（例: 新8・中3）が出ます。</li>
+          <li>ボタンをタップし、新品か中古かを選んでから数を入力すると、その数で在庫が<strong>上書き</strong>されます。数え間違いを直すための機能です。ふだんの増減は、納品（検品）・使用記録・返却で記録してください。</li>
+          <li>S/M/L/LLは常に表示されます。3S・SS・3L・6Lなどは「＋ サイズを追加」から、必要なアイテムにだけ追加します。</li>
+          <li>名前で検索できます。フィルターでカテゴリ・性別・種類を絞り込めます。</li>
+          <li>新しい服の種類を増やすときは、メニューの「ユニフォームマスタ」から登録します。</li>
+          <li>用語の補足: クルー/MGR/GELは、服の対象となるスタッフの区分です。</li>
+        </ul>
+      </div>
+    </details>
+    <details class="guide-sec" name="guide" id="guide-delivery">
+      <summary>納品・検品</summary>
+      <div class="guide-body">
+        <p>届いた服を、登録→検品→在庫に反映の順に処理します。</p>
+        <ul>
+          <li><strong>納品登録</strong>: 右下の「＋」から、納品日と明細（アイテム、サイズ、予定数）を登録します。「誰用か」には、特定のスタッフ用の分をメモできます。このメモは検品のときに表示されるだけで、在庫には影響しません。</li>
+          <li><strong>検品</strong>: 一覧の「未検品」をタップし、届いた数を数えて入力します。予定数と違っていて構いません。確定すると、入力した数（個別配布分を除く）が<strong>新品の在庫に足されます</strong>。</li>
+          <li><strong>個別配布</strong>: 届いた分のうち特定のスタッフにそのまま渡すものは、行ごとの「＋ 個別配布を追加」で切り出せます。切り出した分は在庫に入らず、履歴にだけ残ります。</li>
+          <li>登録を間違えた場合、検品前ならカードの「キャンセル」で取り消せます。検品済みの納品は取り消せません。</li>
+        </ul>
+      </div>
+    </details>
+    <details class="guide-sec" name="guide" id="guide-consumption">
+      <summary>使用記録</summary>
+      <div class="guide-body">
+        <p>スタッフに服を渡した・交換した・失くしたときに記録します。記録した数だけ在庫が<strong>減ります</strong>。</p>
+        <ul>
+          <li>アイテム→状態（新品/中古）→サイズ→数量→用途の順に選びます。在庫より多い数は記録できません。</li>
+          <li>用途は、新規支給／交換（破損・汚損）／紛失／その他です。</li>
+          <li>スタッフの名前は記録しない運用です。</li>
+        </ul>
+      </div>
+    </details>
+    <details class="guide-sec" name="guide" id="guide-return">
+      <summary>返却</summary>
+      <div class="guide-body">
+        <p>退職やサイズ交換などで戻ってきた服を記録します。記録した数が今の在庫に<strong>加算</strong>され、すべて<strong>中古</strong>として扱われます。</p>
+        <ul>
+          <li>原則として、クリーニング済みの服だけを受け付けます。</li>
+          <li>やむを得ずクリーニングしないまま受け取る場合は「例外処理」にチェックし、理由を備考に書いてください（必須）。</li>
+        </ul>
+      </div>
+    </details>
+    <details class="guide-sec" name="guide" id="guide-stocktake">
+      <summary>Inventory</summary>
+      <div class="guide-body">
+        <p>月に1回、すべての在庫を数え直す作業（棚卸し）です。</p>
+        <ul>
+          <li>サイズのボタンをタップし、新品/中古を選んで、数えた数を入力します。入力済みのものには✓が付きます。</li>
+          <li>確定すると、<strong>入力した行だけ</strong>その数で上書きされます。入力しなかった行の在庫は変わりません。</li>
+          <li>一覧の最後にある確定パネルから確定します。実施者の名前は任意です。</li>
+          <li>毎月の期限日を設定すると、5日前からホーム右上のベルでお知らせします。</li>
+        </ul>
+      </div>
+    </details>
+    <details class="guide-sec" name="guide" id="guide-history">
+      <summary>履歴</summary>
+      <div class="guide-body">
+        <p>納品・検品・個別配布・使用・Inventory・返却の記録を、新しい順に見られます。上のタブで種類を絞り込めます。</p>
+        <ul>
+          <li>検品には予定数との差、Inventoryには前回の数との差が表示されます。</li>
+          <li>個別配布は、在庫に反映されない記録です。</li>
+          <li>履歴から取り消すことはできません。間違えたときは、在庫画面で数量を補正してください。</li>
+        </ul>
+      </div>
+    </details>
+    <details class="guide-sec" name="guide" id="guide-itemmanage">
+      <summary>ユニフォームマスタ</summary>
+      <div class="guide-body">
+        <p>服の種類（アイテム）を追加・編集する画面です。名称、カテゴリ、性別、種類、サイズで管理するかどうかを設定します。</p>
+        <ul>
+          <li>新しく追加するときに限り、S/M/L/LLの初期在庫数を入れられます（新品として登録されます）。</li>
+          <li>登録済みアイテムの在庫数は、在庫画面で補正します。</li>
+        </ul>
+      </div>
+    </details>
+    <details class="guide-sec" id="guide-terms">
+      <summary>用語集</summary>
+      <div class="guide-body">
+        <ul>
+          <li><strong>クルー/MGR/GEL</strong>: 服の対象となるスタッフの区分です。</li>
+          <li><strong>新品/中古</strong>: 検品で入った服は新品、返却で戻った服は中古として数えます。</li>
+          <li><strong>Inventory</strong>: 月1回の棚卸し（すべての在庫を数え直す作業）です。</li>
+          <li><strong>個別配布</strong>: 検品のとき、届いた分から特定のスタッフにそのまま渡す分です。在庫には入りません。</li>
+          <li><strong>誰用かメモ</strong>: 納品登録の明細に書ける、誰のための分かのメモです。検品のときに表示されるだけで、在庫には影響しません。</li>
+        </ul>
+      </div>
+    </details>
+    <div class="modal-actions" style="margin-top:14px;">
       <button class="btn ghost" style="width:100%;" onclick="closeGuideModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- お知らせシート（ホーム右上のベルから開く。Inventoryの期限通知のみ） -->
+<div class="modal-overlay" id="noticeModal">
+  <div class="modal">
+    <h2>お知らせ</h2>
+    <div id="noticeModalBody"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeNoticeModal()">閉じる</button>
+      <button class="btn primary" onclick="openStocktakeFromNotice()">Inventoryを開く</button>
     </div>
   </div>
 </div>
@@ -1100,7 +1230,7 @@
 <div class="modal-overlay" id="addSizeModal">
   <div class="modal center" style="max-width:360px;">
     <h2 id="addSizeModalTitle">サイズを追加</h2>
-    <p class="hint" style="margin:-8px 0 14px;">基本サイズ（S/M/L/LL）以外に、このアイテムで使うサイズを追加します。追加したサイズは数量0のチップとして表示され、タップで数量を補正できます。</p>
+    <p class="hint" style="margin:-8px 0 14px;">基本サイズ（S/M/L/LL）以外で使うサイズを追加します。新品・中古とも数量0で追加されます。</p>
     <div class="field">
       <label>追加するサイズ<span class="req">必須</span></label>
       <input type="text" id="addSizeInput" placeholder="例: 3S、6L、XLなど" maxlength="10">
@@ -1118,7 +1248,7 @@
      経由に統一した（在庫画面の補正用#qtyModal・棚卸し用#stocktakeQtyModalは、API呼び出しや一時保持の仕方が
      それぞれ異なるため既存のまま。このモーダルはopenQtyPicker()の呼び出し元にコールバックで値を返すだけの
      汎用部品）。 -->
-<div class="modal-overlay" id="qtyPickerModal">
+<div class="modal-overlay modal-stacked" id="qtyPickerModal">
   <div class="modal center" style="max-width:360px;">
     <h2 id="qtyPickerTitle">数量を入力</h2>
     <p id="qtyPickerCurrent" class="hint" style="margin:-8px 0 14px; display:none;"></p>
@@ -1147,7 +1277,7 @@
   </div>
 </div>
 
-<!-- 棚卸し：実数入力モーダル（2026-10-17新設。テンキーで入力し、この場ではAPIを呼ばずその場の表示だけ更新する。確定は画面下部の「棚卸しを確定する」でまとめて送信） -->
+<!-- Inventory：実数入力モーダル（テンキーで入力し、この場ではAPIを呼ばずその場の表示だけ更新する。確定は一覧末尾の確定パネルでまとめて送信） -->
 <div class="modal-overlay" id="stocktakeQtyModal">
   <div class="modal center" style="max-width:360px;">
     <h2 id="stocktakeQtyModalTitle">実数を入力</h2>
@@ -1185,8 +1315,8 @@
 <!-- 棚卸し：期限設定モーダル（2026-10-17新設） -->
 <div class="modal-overlay" id="stocktakeDeadlineModal">
   <div class="modal center" style="max-width:360px;">
-    <h2>棚卸しの期限を設定</h2>
-    <p class="hint" style="margin:-8px 0 14px;">毎月この日までに棚卸しを行う、という目安日です。期限の5日前からホーム画面に通知が表示され、過ぎると大きく強調表示されます。</p>
+    <h2>Inventoryの期限を設定</h2>
+    <p class="hint" style="margin:-8px 0 14px;">毎月この日までにInventoryを行う、という目安日です。5日前からホーム画面右上のベルでお知らせします。</p>
     <div class="field">
       <label>毎月<span class="req">1〜28</span></label>
       <input type="number" id="stocktakeDeadlineInput" min="1" max="28" inputmode="numeric" placeholder="例）25">
@@ -1202,8 +1332,8 @@
 <!-- 棚卸し：確定前の実施者入力モーダル（2026-10-17新設） -->
 <div class="modal-overlay" id="stocktakeConfirmModal">
   <div class="modal center" style="max-width:380px;">
-    <h2>棚卸しを確定しますか？</h2>
-    <p class="hint" style="margin:-8px 0 14px;">入力した実数の行だけ、その数でそのまま在庫が上書きされます（未入力の行は変更されません）。</p>
+    <h2>Inventoryを確定しますか？</h2>
+    <p class="hint" style="margin:-8px 0 14px;">入力した行だけ、その数で在庫が上書きされます（未入力の行は変わりません）。</p>
     <div class="field">
       <label>実施者（任意）</label>
       <input type="text" id="stocktakePerformedBy" placeholder="例）山田" maxlength="20">
@@ -1308,7 +1438,7 @@
 </div>
 
 <!-- 汎用確認ダイアログ -->
-<div class="modal-overlay" id="confirmModal">
+<div class="modal-overlay modal-stacked" id="confirmModal">
   <div class="modal center" style="max-width:340px;">
     <h2 id="confirmModalTitle">確認</h2>
     <p id="confirmModalMessage"></p>
@@ -1344,27 +1474,38 @@
   function rememberPin(pin){ try{ localStorage.setItem(PIN_KEY, pin); }catch(e){ /* noop */ } }
   function forgetRememberedPin(){ try{ localStorage.removeItem(PIN_KEY); }catch(e){ /* noop */ } }
 
+  // 処理中オーバーレイ（#busyOverlay）。表示切り替えはhidden属性ではなくクラスで行う（[hidden]とdisplay指定の詳細度問題を避けるため）。
+  // 通信が始まった瞬間に.is-blocking（透明・操作だけ止める）、400ms続いたら.is-visible（暗幕＋中央スピナー）。
   let pendingCalls = 0, loadingShowTimer = null;
-  function beginLoading(){
+  function beginLoading(label){
     pendingCalls++;
-    if(!loadingShowTimer){
-      loadingShowTimer = setTimeout(function(){ document.getElementById('loadingBadge').hidden = false; }, 400);
+    const overlay = document.getElementById('busyOverlay');
+    if(label || pendingCalls === 1) document.getElementById('busyText').textContent = label || '処理中…';
+    if(pendingCalls === 1){
+      overlay.classList.add('is-blocking');
+      loadingShowTimer = setTimeout(function(){ overlay.classList.add('is-visible'); }, 400);
     }
   }
   function endLoading(){
     pendingCalls = Math.max(0, pendingCalls - 1);
     if(pendingCalls === 0){
       clearTimeout(loadingShowTimer); loadingShowTimer = null;
-      document.getElementById('loadingBadge').hidden = true;
+      document.getElementById('busyOverlay').classList.remove('is-blocking', 'is-visible');
     }
+  }
+  async function withLoading(label, fn){
+    beginLoading(label);
+    try{ return await fn(); }
+    finally{ endLoading(); }
   }
 
   /** 読み取り・書き込み共通のAPI呼び出し。pinは全リクエストに必ず付与し、サーバー側で毎回検証される。
-   * 通信がまれに応答なしのまま固まり、画面中央の「処理中…」バッジが消えなくなる不具合の報告
-   * （2026-10-17）を受け、AbortControllerで25秒のタイムアウトを設けた。サーバーが本当に応答しない
-   * 場合でも、必ずエラーとして処理が終わり、バッジ・ボタンのスピナーが元に戻るようにする。 */
-  async function apiCall(resource, action, payload){
-    beginLoading();
+   * 通信がまれに応答なしのまま固まる不具合の報告（2026-10-17）を受け、AbortControllerで25秒の
+   * タイムアウトを設けた。サーバーが応答しない場合でも必ずエラーとして終わり、オーバーレイが外れる。
+   * opts.background=true のときはオーバーレイを出さない（履歴画面の読み込みなど、呼び出し側で表示する）。 */
+  async function apiCall(resource, action, payload, opts){
+    const background = !!(opts && opts.background);
+    if(!background) beginLoading();
     const controller = new AbortController();
     const timeoutId = setTimeout(function(){ controller.abort(); }, 25000);
     try{
@@ -1384,12 +1525,13 @@
       return { ok:false, error: msg };
     }finally{
       clearTimeout(timeoutId);
-      endLoading();
+      if(!background) endLoading();
     }
   }
   function apiErrorMessage(res){
     if(res && res.error === 'INVALID_PIN') return 'パスワードが正しくありません';
-    return (res && res.error) || '通信に失敗しました';
+    // GAS側はthrowしたエラーをString(err)で返すため先頭に「Error: 」が付く。画面にはその部分を出さない。
+    return String((res && res.error) || '通信に失敗しました').replace(/^Error:\s*/, '');
   }
 
   /* ============================================================
@@ -1510,7 +1652,7 @@
     const res = await apiCall('bootstrap', 'list');
     if(!res.ok){
       toast(apiErrorMessage(res));
-      updateNavDots();
+      updateIndicators();
       return;
     }
     const d = res.data;
@@ -1522,7 +1664,7 @@
     STOCKTAKE_LOGS = d.stocktake;
     RETURN_LOGS = d.returns;
     SETTINGS = d.settings;
-    updateNavDots();
+    updateIndicators();
   }
   /** アイテムマスタ追加・編集（サイズ管理の有無変更時はInventoryも作り直されるため両方再取得）後に呼ぶ。 */
   async function reloadItemMasterAndInventory(){
@@ -1543,7 +1685,7 @@
     const dl = await apiCall('delivery', 'list');
     if(dl.ok) DELIVERIES = dl.data.map(mapDeliveryRow);
     else toast('データの再取得に失敗しました');
-    updateNavDots();
+    updateIndicators();
   }
   /** 使用記録の登録後に呼ぶ。 */
   async function reloadConsumptions(){
@@ -1556,7 +1698,7 @@
     const st = await apiCall('stocktake', 'list');
     if(st.ok) STOCKTAKE_LOGS = st.data;
     else toast('データの再取得に失敗しました');
-    updateNavDots();
+    updateIndicators();
   }
   /** 返却登録後に呼ぶ。 */
   async function reloadReturnLogs(){
@@ -1622,21 +1764,6 @@
     if(condition) return bucket[condition] || 0;
     return (bucket['新品'] || 0) + (bucket['中古'] || 0);
   }
-  function totalQtyAll(){
-    let sum = 0;
-    ITEM_MASTER.forEach(function(it){
-      if(it.hasSize){
-        Object.keys(INVENTORY[it.id]).forEach(function(s){
-          const b = INVENTORY[it.id][s];
-          sum += (b['新品'] || 0) + (b['中古'] || 0);
-        });
-      } else {
-        const b = INVENTORY[it.id] || {};
-        sum += (b['新品'] || 0) + (b['中古'] || 0);
-      }
-    });
-    return sum;
-  }
   function catBadgeClass(category){
     return { 'クルー':'cat-crew', 'MGR':'cat-mgr', 'GEL':'cat-gel', '共通':'cat-common' }[category] || 'cat-common';
   }
@@ -1662,19 +1789,19 @@
   };
 
   /* ============================================================
-   * 2.5 応答待ちフィードバック共通ヘルパー（M-Crewのスピナー／読み込みバッジと同じ考え方）
+   * 2.5 応答待ちフィードバック共通ヘルパー
    * ------------------------------------------------------------
-   * withButtonBusy: ボタン押下直後にスピナー表示＋ボタン無効化を行う。fnはPromiseを返す
-   *   非同期関数（fetchベースのAPI呼び出し）を想定し、その完了・失敗を待ってボタンを元に戻す。
-   * beginLoading/endLoading（通信ヘルパーapiGet/apiPost内から呼ばれる）: 通信が400msを超えて
-   *   長引く場合だけ画面上部に読み込み中バッジを表示する（チラつき防止）。
+   * withButtonBusy: ボタンを処理中の文言に変えて無効化し、fn全体をbeginLoading/endLoadingで包む。
+   *   「保存→再取得」のように通信が連続しても、間でカウンタが0に戻らないので表示がちらつかない。
+   *   文言は中央のオーバーレイにも出す。
    * ============================================================ */
   function withButtonBusy(btn, busyLabel, fn){
     if(!btn || btn.disabled) return;
     const original = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>' + escapeHtml(busyLabel);
-    function restore(){ btn.disabled = false; btn.innerHTML = original; }
+    btn.textContent = busyLabel;
+    beginLoading(busyLabel);
+    function restore(){ endLoading(); btn.disabled = false; btn.innerHTML = original; }
     let result;
     try{
       result = fn();
@@ -1682,11 +1809,8 @@
       restore();
       throw e;
     }
-    if(result && typeof result.finally === 'function'){
-      result.finally(restore);
-    } else {
-      restore();
-    }
+    // fnが想定外に失敗しても、表示は戻したうえでエラーはコンソールに残す（未処理のrejectionにしない）
+    Promise.resolve(result).finally(restore).catch(function(e){ console.error(e); });
   }
 
   /* ============================================================
@@ -1713,7 +1837,7 @@
     document.getElementById('bottomNav').style.display = (isAuth || screen === 'inspection') ? 'none' : '';
     document.getElementById('fab').classList.toggle('show', screen === 'delivery');
 
-    if(screen === 'home') refreshHome();
+    if(screen === 'home') refreshHome(); else stopHomeClock();
     if(screen === 'inventory') refreshInventory();
     if(screen === 'delivery') refreshDeliveryList();
     if(screen === 'consumption') refreshConsumptionScreen();
@@ -1730,6 +1854,7 @@
 
   /* ---- サイドバー（副次操作：ログアウト等） ---- */
   window.openSidebar = function(){
+    updateIndicators();
     document.getElementById('sidebar').classList.add('active');
     document.getElementById('sidebarBackdrop').classList.add('active');
   };
@@ -1749,7 +1874,7 @@
     closeSidebar();
     navigate('history');
   };
-  // 2026-10新設: 棚卸し・返却もサイドバーの低頻度操作として追加
+  // 2026-10新設: Inventory（棚卸し）・返却もサイドバーの低頻度操作として追加
   window.openStocktakeFromSidebar = function(){
     closeSidebar();
     navigate('stocktake');
@@ -1758,7 +1883,7 @@
     closeSidebar();
     navigate('return');
   };
-  // 2026-10-17: アイテム管理はモーダルからページ化した（棚卸し・返却と同じ導線）
+  // 2026-10-17: ユニフォームマスタ（itemmanage）はモーダルからページ化した（Inventory・返却と同じ導線）
   window.openItemManageFromSidebar = function(){
     closeSidebar();
     navigate('itemmanage');
@@ -1772,89 +1897,296 @@
     if(remembered){ document.getElementById('loginPin').value = remembered; }
     navigate('login');
   });
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible'){
+      if(state.screen === 'home') refreshHome();
+    } else {
+      stopHomeClock();
+    }
+  });
 
   /* ============================================================
-   * 4. ホーム画面
+   * 4. ホーム画面（日付・時刻／お知らせ／最近の更新）・使い方ガイド・ベル通知
    * ============================================================ */
-  /* ---- 使い方ガイド（サイドバーから開くモーダル。4ステップ説明をいつでも見られるようにする） ---- */
-  window.openGuideModal = function(){
+  /* ---- 使い方ガイド（サイドバーと各画面の「?」から開く。sectionを渡すとその画面の説明を開いて移動する） ---- */
+  window.openGuideModal = function(section){
     closeSidebar();
-    document.getElementById('guideModal').classList.add('active');
+    const overlay = document.getElementById('guideModal');
+    const modal = overlay.querySelector('.modal');
+    overlay.querySelectorAll('details.guide-sec').forEach(function(d){ d.open = false; d.classList.remove('flash'); });
+    overlay.classList.add('active');
+    modal.scrollTop = 0;
+    if(!section) return;
+    const target = document.getElementById('guide-' + section);
+    if(!target) return;
+    target.open = true;
+    requestAnimationFrame(function(){
+      target.scrollIntoView({ block:'start' });
+      target.classList.add('flash');
+      setTimeout(function(){ target.classList.remove('flash'); }, 1000);
+    });
   };
   window.closeGuideModal = function(){
     document.getElementById('guideModal').classList.remove('active');
   };
 
-  function refreshHome(){
-    const today = new Date();
-    document.getElementById('homeGreet').textContent =
-      today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
-    document.getElementById('homeItemCount').textContent = ITEM_MASTER.length;
-    document.getElementById('homeTotalQty').innerHTML = totalQtyAll() + '<small>点</small>';
-    const pending = DELIVERIES.filter(function(d){ return d.status === '未検品'; }).length;
-    document.getElementById('homePendingCount').innerHTML = pending + '<small>件</small>';
-    document.getElementById('homePendingTile').style.display = pending > 0 ? '' : 'none';
-    const badge = document.getElementById('homeNavPendingBadge');
-    if(pending > 0){ badge.style.display = ''; badge.textContent = pending; } else { badge.style.display = 'none'; }
-    updateStocktakeNotice();
+  const WEEKDAYS = ['日','月','火','水','木','金','土'];
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  function startOfDay(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function daysBetween(from, to){ return Math.round((startOfDay(to) - startOfDay(from)) / DAY_MS); }
+  function fmtMD(d){ return (d.getMonth() + 1) + '/' + d.getDate(); }
+  // 'YYYY-MM-DD'（納品日など）を M/D にする。時刻付きのISO文字列でも先頭の日付部分だけを使う
+  function fmtYmdToMD(s){
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || ''));
+    return m ? Number(m[2]) + '/' + Number(m[3]) : String(s || '');
+  }
+  function fmtRelative(iso){
+    const d = new Date(iso);
+    if(isNaN(d)) return '';
+    const diff = daysBetween(d, new Date());
+    const hm = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+    if(diff === 0) return '今日 ' + hm;
+    if(diff === 1) return '昨日 ' + hm;
+    return fmtMD(d);
   }
 
-  /* ---- 棚卸し期限通知（2026-10-17新設）----
-   * 「棚卸しを毎月何日までと設定すると5日前からホーム画面に通知が表示され、期限を過ぎると大きく通知が
-   * 表示されるようになる」との要望を受けて実装。期限（SETTINGS.stocktakeDeadlineDay、毎月の日付・
-   * 1〜28に限定して月末付近の月をまたぐ計算を避けている）の5日前〜当日は通常の通知、期限超過後は
-   * 大きく強調した通知（.overdue）に切り替える。STOCKTAKE_LOGSに今月分の実施記録が1件でもあれば、
-   * 今月はもう実施済みとみなして通知を出さない（毎月のリマインドなので、やるべきことが済んだら消える）。 */
-  function computeStocktakeNoticeState(){
-    const day = SETTINGS.stocktakeDeadlineDay;
-    if(!day) return null;
+  /* ---- 時計（ホーム表示中だけ、毎分0秒に合わせて更新する） ---- */
+  let homeClockTimer = null, homeClockDateKey = '';
+  function renderHomeClock(){
     const now = new Date();
+    document.getElementById('homeDate').textContent = (now.getMonth() + 1) + '月' + now.getDate() + '日（' + WEEKDAYS[now.getDay()] + '）';
+    document.getElementById('homeTime').textContent = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+    homeClockDateKey = now.toDateString();
+  }
+  function scheduleHomeClock(){
+    const now = new Date();
+    const wait = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+    homeClockTimer = setTimeout(function(){
+      if(new Date().toDateString() !== homeClockDateKey){ refreshHome(); return; }
+      renderHomeClock();
+      scheduleHomeClock();
+    }, wait);
+  }
+  function startHomeClock(){
+    stopHomeClock();
+    renderHomeClock();
+    scheduleHomeClock();
+  }
+  function stopHomeClock(){
+    clearTimeout(homeClockTimer);
+    homeClockTimer = null;
+  }
+
+  function refreshHome(){
+    startHomeClock();
+    renderHomeAlerts();
+    renderHomeRecent();
+    updateIndicators();
+  }
+
+  /* ---- お知らせ（業務アラート。手元のデータだけで作る） ---- */
+  const CHEV_SVG = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+  function homeAlertHtml(opts){
+    return '<div class="home-alert' + (opts.warn ? ' warn' : '') + '" onclick="' + opts.onclick + '">' +
+      '<span class="home-alert-icon">' + opts.icon + '</span>' +
+      '<div class="home-alert-texts">' +
+        '<div class="home-alert-title">' + escapeHtml(opts.title) + '</div>' +
+        (opts.sub ? '<div class="home-alert-sub">' + escapeHtml(opts.sub) + '</div>' : '') +
+      '</div>' + CHEV_SVG +
+    '</div>';
+  }
+  function renderHomeAlerts(){
+    const parts = [];
+    const pending = DELIVERIES.filter(function(d){ return d.status === '未検品'; });
+    if(pending.length > 0){
+      const oldest = pending.map(function(d){ return String(d.date); }).sort()[0];
+      const noteCount = pending.reduce(function(sum, d){
+        return sum + d.details.filter(function(line){ return line.assignedNote; }).length;
+      }, 0);
+      parts.push(homeAlertHtml({
+        warn: true, onclick: "navigate('delivery')", icon: HISTORY_TYPE_ICON.delivery,
+        title: '未検品の納品が' + pending.length + '件あります',
+        sub: '最も古い納品日 ' + fmtYmdToMD(oldest) + (noteCount > 0 ? '・誰用かメモあり ' + noteCount + '件' : '')
+      }));
+    }
+    const entered = Object.keys(state.stocktakeCounts).length;
+    if(entered > 0){
+      parts.push(homeAlertHtml({
+        onclick: "navigate('stocktake')", icon: HISTORY_TYPE_ICON.stocktake,
+        title: 'Inventoryの入力が途中です（' + entered + '件・未確定）',
+        sub: 'この端末だけの入力で、再読み込みすると消えます'
+      }));
+    }
+    document.getElementById('homeAlerts').innerHTML = parts.length
+      ? parts.join('')
+      : '<p class="home-none">お知らせはありません</p>';
+  }
+
+  /* ---- 最近の更新（履歴APIは呼ばず、手元のデータをまとめて新しい順に5件） ---- */
+  function itemLabel(itemId, size){
+    const it = findItem(itemId);
+    return (it ? it.name : '（削除されたアイテム）') + (size ? '(' + size + ')' : '');
+  }
+  function stocktakeGroups(){
+    const groups = {};
+    STOCKTAKE_LOGS.forEach(function(log){
+      const key = String(log.createdAt);
+      if(!groups[key]) groups[key] = { ts: key, count: 0, diffCount: 0, performedBy: log.performedBy || '' };
+      groups[key].count++;
+      if(Number(log.diff) !== 0) groups[key].diffCount++;
+    });
+    return Object.keys(groups).map(function(k){ return groups[k]; })
+      .sort(function(a, b){ return b.ts.localeCompare(a.ts); });
+  }
+  function buildRecentEvents(){
+    const ev = [];
+    DELIVERIES.forEach(function(d){
+      if(d.createdAt){
+        const totalQty = d.details.reduce(function(s, line){ return s + line.plannedQty; }, 0);
+        ev.push({ type:'delivery', ts:String(d.createdAt), title:'納品登録 ' + d.details.length + '品目・計' + totalQty + '点', sub:fmtYmdToMD(d.date) + '納品分' });
+      }
+      if(d.inspections.length > 0){
+        const ts = d.inspections.map(function(x){ return String(x.inspectedAt || ''); }).sort().pop();
+        const diffCount = d.inspections.filter(function(x){ return x.diff !== 0; }).length;
+        const distQty = d.inspections.reduce(function(s, x){ return s + x.distributedQty; }, 0);
+        ev.push({
+          type:'inspection', ts:ts,
+          title: fmtYmdToMD(d.date) + '納品分の検品 ' + d.inspections.length + '品目' + (diffCount > 0 ? '（差異あり' + diffCount + '）' : '') + (distQty > 0 ? '・個別配布' + distQty + '点' : '')
+        });
+      }
+    });
+    CONSUMPTIONS.forEach(function(c){
+      ev.push({ type:'consumption', ts:String(c.createdAt), title:'使用 ' + itemLabel(c.itemId, c.size) + '×' + c.qty, sub:[c.condition, c.reason].filter(Boolean).join('・') });
+    });
+    RETURN_LOGS.forEach(function(r){
+      ev.push({ type:'return', ts:String(r.createdAt), title:'返却 ' + itemLabel(r.itemId, r.size) + '×' + r.qty });
+    });
+    stocktakeGroups().forEach(function(g){
+      ev.push({ type:'stocktake', ts:g.ts, title:'Inventory ' + g.count + '件更新（差異' + g.diffCount + '）' + (g.performedBy ? '・' + g.performedBy : '') });
+    });
+    return ev.filter(function(e){ return e.ts; }).sort(function(a, b){ return b.ts.localeCompare(a.ts); });
+  }
+  function renderHomeRecent(){
+    const last = stocktakeGroups()[0];
+    document.getElementById('homeLastStocktake').textContent = last
+      ? 'Inventory 最終実施: ' + fmtMD(new Date(last.ts)) + '（' + lastDoneAgoText(new Date(last.ts)) + '）' + (last.performedBy ? '・' + last.performedBy : '')
+      : 'Inventory: まだ実施されていません';
+    const recent = buildRecentEvents().slice(0, 5);
+    const listEl = document.getElementById('homeRecent');
+    if(recent.length === 0){ listEl.innerHTML = '<div class="empty-hint">まだ記録がありません</div>'; return; }
+    listEl.innerHTML = recent.map(function(e){
+      return '<div class="history-entry">' +
+        '<div class="history-icon type-' + e.type + '">' + HISTORY_TYPE_ICON[e.type] + '</div>' +
+        '<div class="history-body">' +
+          '<div class="history-title">' + escapeHtml(e.title) + '</div>' +
+          (e.sub ? '<div class="history-sub">' + escapeHtml(e.sub) + '</div>' : '') +
+        '</div>' +
+        '<span class="history-time">' + fmtRelative(e.ts) + '</span>' +
+      '</div>';
+    }).join('');
+  }
+  function lastDoneAgoText(d){
+    const n = daysBetween(d, new Date());
+    return n <= 0 ? '今日' : n + '日前';
+  }
+
+  /* ---- Inventoryの期限・実施状況（ベル・お知らせシート・サイドバーのバッジ・Inventory画面のカードで共用） ----
+   * 期限（SETTINGS.stocktakeDeadlineDay、毎月の日付で1〜28）に対する今月の状態を返す。
+   * 今月分の記録がSTOCKTAKE_LOGSに1件でもあれば done（毎月のリマインドなので、済んだら通知は消える）。
+   * status: done / upcoming（6日以上前）/ soon（5日前〜前日）/ today / overdue / unset（期限未設定） */
+  function computeStocktakeStatus(){
+    const now = new Date();
+    const today = startOfDay(now);
+    const day = SETTINGS.stocktakeDeadlineDay;
     const doneThisMonth = STOCKTAKE_LOGS.some(function(log){
       const d = new Date(log.createdAt);
       return !isNaN(d) && d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
     });
-    if(doneThisMonth) return null;
-    const deadline = new Date(now.getFullYear(), now.getMonth(), day);
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const daysUntil = Math.round((deadline - todayStart) / (24 * 60 * 60 * 1000));
-    if(daysUntil > 5) return null;
-    return { daysUntil: daysUntil, overdue: daysUntil < 0, deadline: deadline };
-  }
-  function updateStocktakeNotice(){
-    const st = computeStocktakeNoticeState();
-    const noticeEl = document.getElementById('stocktakeNotice');
-    const badgeEl = document.getElementById('sidebarStocktakeBadge');
-    if(!st){
-      noticeEl.style.display = 'none';
-      badgeEl.style.display = 'none';
-      updateNavDots();
-      return;
+    const lastGroup = stocktakeGroups()[0] || null;
+    const result = {
+      status: 'unset', month: now.getMonth() + 1, deadlineDay: day || null, deadline: null, days: null,
+      last: lastGroup ? { date: new Date(lastGroup.ts), count: lastGroup.count, performedBy: lastGroup.performedBy } : null,
+      enteredCount: Object.keys(state.stocktakeCounts).length
+    };
+    if(doneThisMonth){
+      result.status = 'done';
+      if(day) result.deadline = new Date(now.getFullYear(), now.getMonth() + 1, day);
+    } else if(day){
+      result.deadline = new Date(now.getFullYear(), now.getMonth(), day);
+      const until = Math.round((result.deadline - today) / DAY_MS);
+      result.days = Math.abs(until);
+      result.status = until < 0 ? 'overdue' : until === 0 ? 'today' : until <= 5 ? 'soon' : 'upcoming';
     }
-    const dateLabel = (st.deadline.getMonth() + 1) + '/' + st.deadline.getDate();
-    noticeEl.style.display = '';
-    noticeEl.classList.toggle('overdue', st.overdue);
-    if(st.overdue){
-      document.getElementById('stocktakeNoticeTitle').textContent = '棚卸しの期限を過ぎています';
-      document.getElementById('stocktakeNoticeDesc').textContent = '期限（' + dateLabel + '）から' + Math.abs(st.daysUntil) + '日経過しています。早めに実施してください。';
-    } else if(st.daysUntil === 0){
-      document.getElementById('stocktakeNoticeTitle').textContent = '棚卸しの期限は今日です';
-      document.getElementById('stocktakeNoticeDesc').textContent = '期限: ' + dateLabel;
+    result.alert = result.status === 'soon' || result.status === 'today' || result.status === 'overdue';
+    return result;
+  }
+  function stocktakeStatusLabel(st){
+    if(st.status === 'done') return '実施済み';
+    if(st.status === 'soon') return 'あと' + st.days + '日';
+    if(st.status === 'today') return '今日まで';
+    if(st.status === 'overdue') return st.days + '日超過';
+    return '未実施';
+  }
+  function stocktakeStatusCardHtml(st, editable){
+    let deadlineText;
+    if(st.status === 'done') deadlineText = st.deadline ? '次回 ' + fmtMD(st.deadline) : '未設定';
+    else if(st.status === 'unset') deadlineText = '未設定';
+    else deadlineText = '毎月' + st.deadlineDay + '日（' + fmtMD(st.deadline) + '）';
+    const lastText = st.last
+      ? fmtDateOnly(st.last.date) + '・' + st.last.count + '件' + (st.last.performedBy ? '・' + st.last.performedBy : '')
+      : 'まだ実施されていません';
+    const statusClass = st.status === 'unset' ? 'upcoming' : st.status;
+    return '<div class="st-card st-' + statusClass + '">' +
+      '<div class="st-card-head"><span class="st-card-title">' + st.month + '月のInventory</span><span class="st-label">' + stocktakeStatusLabel(st) + '</span></div>' +
+      '<div class="st-row"><span class="st-key">期限</span><span class="st-val">' + escapeHtml(deadlineText) + '</span>' +
+        (editable ? '<button type="button" class="st-edit-btn" onclick="openStocktakeDeadlineModal()">変更</button>' : '') + '</div>' +
+      '<div class="st-row"><span class="st-key">前回の実施</span><span class="st-val">' + escapeHtml(lastText) + '</span></div>' +
+      '<div class="st-row"><span class="st-key">今回の入力</span><span class="st-val">' + (st.enteredCount > 0 ? st.enteredCount + '件（未確定）' : 'なし') + '</span></div>' +
+    '</div>';
+  }
+
+  /* ---- ベルのお知らせシート ---- */
+  window.openNoticeModal = function(){
+    const st = computeStocktakeStatus();
+    let html;
+    if(st.alert){
+      html = stocktakeStatusCardHtml(st, false);
     } else {
-      document.getElementById('stocktakeNoticeTitle').textContent = '棚卸しの期限が近づいています';
-      document.getElementById('stocktakeNoticeDesc').textContent = '期限: ' + dateLabel + '（あと' + st.daysUntil + '日）';
+      const next = st.deadline ? fmtMD(st.deadline) + '（毎月' + st.deadlineDay + '日）' : '未設定';
+      html = '<p class="notice-empty">新しい通知はありません</p>' +
+        '<p class="hint" style="margin:0 0 12px;">Inventoryの次回の期限: ' + escapeHtml(next) + '</p>';
     }
-    badgeEl.style.display = '';
-    updateNavDots();
-  }
-  // フッターアイコンは数字を出さず、未完了タスク（未検品の納品）があることだけを点で示す。
-  // 2026-10-17: ホームアイコンへの点灯は「光らせる必要は多分ない」とのフィードバックを受けて削除し、
-  // 実際に対応すべき画面（納品）のアイコンだけに点を出すようにした。棚卸しの期限通知はホーム画面の
-  // 通知カード・サイドバーの棚卸しバッジ（#sidebarStocktakeBadge）で十分に気づけるため、
-  // フッターへの重複表示はしない。
-  function updateNavDots(){
-    const pendingDelivery = DELIVERIES.filter(function(d){ return d.status === '未検品'; }).length > 0;
+    document.getElementById('noticeModalBody').innerHTML = html;
+    document.getElementById('noticeModal').classList.add('active');
+  };
+  window.closeNoticeModal = function(){ document.getElementById('noticeModal').classList.remove('active'); };
+  window.openStocktakeFromNotice = function(){
+    closeNoticeModal();
+    navigate('stocktake');
+  };
+
+  // ベルの赤丸・サイドバー「Inventory」のバッジ・ボトムナビ「納品」の点をまとめて更新する。
+  // ボトムナビは数字を出さず、未検品の納品があることだけを点で示す。
+  function updateIndicators(){
+    const pendingDelivery = DELIVERIES.some(function(d){ return d.status === '未検品'; });
     document.getElementById('navDotDelivery').classList.toggle('show', pendingDelivery);
+    const st = computeStocktakeStatus();
+    document.getElementById('noticeDot').classList.toggle('show', st.alert);
+    const badge = document.getElementById('sidebarStocktakeBadge');
+    badge.hidden = !st.alert;
+    badge.textContent = st.alert ? stocktakeStatusLabel(st) : '';
+    badge.classList.toggle('critical', st.status === 'overdue');
   }
+
+  // 履歴画面・ホームの最近の更新で共用する種別アイコン
+  const HISTORY_TYPE_ICON = {
+    delivery: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>',
+    inspection: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 17"></polyline></svg>',
+    distribution: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+    consumption: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>',
+    stocktake: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M9 12l2 2 4-4"></path></svg>',
+    return: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>'
+  };
 
   /* ============================================================
    * 5. 在庫画面（アイテムマスタの追加・編集を含む）
@@ -1893,7 +2225,7 @@
     updateInventoryFilterBadge(gender, itemType);
     const listEl = document.getElementById('inventoryList');
     if(list.length === 0){
-      listEl.innerHTML = '<div class="empty-hint">条件に一致するアイテムがありません。<br>検索語やフィルタを変更するか、メニュー（≡）の「アイテム管理」から新しいアイテムを登録しましょう。</div>';
+      listEl.innerHTML = '<div class="empty-hint">条件に一致するアイテムがありません。<br>検索語やフィルタを変更するか、メニュー（≡）の「ユニフォームマスタ」から新しいアイテムを登録しましょう。</div>';
       return;
     }
     listEl.innerHTML = list.map(itemCardHtml).join('');
@@ -2246,7 +2578,7 @@
     }
 
     // サイズ管理の有無を変更する場合のみ、既存在庫がリセットされることを確認する
-    // （誤操作防止の軽量な確認。検品の即時上書き仕様とは別の個別の配慮）
+    // （誤操作防止の軽量な確認）
     if(state.editingItemId){
       const it = findItem(state.editingItemId);
       if(it.hasSize !== hasSize){
@@ -2310,12 +2642,14 @@
       'キャンセルする'
     );
   };
-  async function doCancelDelivery(deliveryId){
-    const res = await apiCall('delivery', 'cancel', { deliveryId: deliveryId });
-    if(!res.ok){ toast(apiErrorMessage(res)); return; }
-    await reloadDeliveries();
-    toast('納品登録をキャンセルしました');
-    refreshDeliveryList();
+  function doCancelDelivery(deliveryId){
+    return withLoading('キャンセル中…', async function(){
+      const res = await apiCall('delivery', 'cancel', { deliveryId: deliveryId });
+      if(!res.ok){ toast(apiErrorMessage(res)); return; }
+      await reloadDeliveries();
+      toast('納品登録をキャンセルしました');
+      refreshDeliveryList();
+    });
   }
 
   window.openDeliveryDetailModal = function(deliveryId){
@@ -2544,6 +2878,7 @@
     }, 0);
   }
   function updateDistSummary(idx){
+    updateInspectSubmitSummary();
     const summaryEl = document.getElementById('distSummary-' + idx);
     if(!summaryEl) return;
     const distTotal = distTotalForRow(idx);
@@ -2552,7 +2887,18 @@
     const raw = input ? input.value : '';
     const actual = (raw === '' || isNaN(raw)) ? null : Number(raw);
     const reflect = actual === null ? null : Math.max(0, actual - distTotal);
-    summaryEl.innerHTML = '個別配布 計' + distTotal + '点を切り出し → 在庫への反映は<strong>' + (reflect === null ? '―' : reflect + '点') + '</strong>（在庫には反映されません）';
+    summaryEl.innerHTML = '個別配布 計' + distTotal + '点を切り出し → 新品の在庫に足すのは<strong>' + (reflect === null ? '―' : reflect + '点') + '</strong>（個別配布分は在庫に入りません）';
+  }
+  function updateInspectSubmitSummary(){
+    const rows = state.inspectDist.length;
+    let filled = 0, distAll = 0;
+    for(let i = 0; i < rows; i++){
+      const input = document.getElementById('inspect-input-' + i);
+      if(input && input.value !== '') filled++;
+      distAll += distTotalForRow(i);
+    }
+    document.getElementById('inspectSubmitSummary').textContent =
+      '実数入力 ' + filled + '/' + rows + '行' + (distAll > 0 ? '・個別配布 計' + distAll + '点' : '');
   }
 
   window.submitInspection = function(){
@@ -2611,10 +2957,9 @@
     }
     errEl.textContent = '';
 
-    // 誤操作防止の軽量な確認（差異があっても確認ステップなしで即時上書きする業務仕様自体は変更しない。
-    // ここで挟むのは「このボタンを押すと在庫が上書きされる」ことを一度確認させるだけのダイアログ）
+    // 誤操作防止の軽量な確認（確定すると新品の在庫に足されることを一度確認させるだけのダイアログ）
     showConfirm(
-      '検品を確定しますか？ 入力した実数（個別配布分を除く）がそのまま在庫数として上書きされます（今の在庫への加算ではありません）。',
+      '入力した数（個別配布分を除く）を、新品の在庫に足します。よろしいですか？',
       function(){
         withButtonBusy(document.getElementById('submitInspectionBtn'), '確定中…', async function(){
           let totalDist = 0;
@@ -2627,9 +2972,19 @@
             };
           });
           const res = await apiCall('inspection', 'submitInspection', { deliveryId: d.id, lines: lines });
-          if(!res.ok){ errEl.textContent = apiErrorMessage(res); toast(apiErrorMessage(res)); return; }
+          if(!res.ok){
+            // 通信タイムアウト後の再送や別端末で、サーバー側では既に確定済みのことがある。
+            // その場合は最新の状態を読み直して納品一覧へ戻す（画面だけ「未検品」のまま残らないようにする）。
+            if(/既に検品済み/.test(String(res.error || ''))){
+              await Promise.all([reloadDeliveries(), reloadInventory()]);
+              toast('この納品は既に検品済みです（在庫には反映済み）');
+              navigate('delivery');
+              return;
+            }
+            errEl.textContent = apiErrorMessage(res); toast(apiErrorMessage(res)); return;
+          }
           await Promise.all([reloadDeliveries(), reloadInventory()]);
-          toast(totalDist > 0 ? ('検品を確定しました（個別配布 計' + totalDist + '点を除いて在庫を更新）') : '検品を確定し、在庫を更新しました');
+          toast(totalDist > 0 ? ('検品を確定しました（個別配布 計' + totalDist + '点を除いて新品の在庫に追加）') : '検品を確定し、新品の在庫に追加しました');
           navigate('delivery');
         });
       },
@@ -2763,7 +3118,7 @@
   }
 
   /* ============================================================
-   * 9. 棚卸し（2026-10新設。全アイテム×サイズをまとめて1画面でカウントする、月1運用想定）
+   * 9. Inventory（棚卸し。内部名stocktake。全アイテム×サイズをまとめて1画面でカウントする、月1運用想定）
    * ------------------------------------------------------------
    * 2026-10-17の見直し: (1) 対象サイズは「基本4サイズを無条件表示」ではなく、既にInventoryに
    *   行がある（＝在庫として記録済みの）サイズだけを表示し、無いサイズは「＋サイズを追加」から
@@ -2809,17 +3164,23 @@
   function refreshStocktakeScreen(){
     document.getElementById('stocktakeList').innerHTML = ITEM_MASTER.map(stocktakeItemHtml).join('');
     document.getElementById('stocktakeError').textContent = '';
-    const last = STOCKTAKE_LOGS.length
-      ? STOCKTAKE_LOGS.slice().sort(function(a,b){ return String(b.createdAt).localeCompare(String(a.createdAt)); })[0]
-      : null;
-    document.getElementById('stocktakeLastDate').textContent = last ? fmtDateOnly(last.createdAt) : 'まだ実施されていません';
-    refreshStocktakeDeadlineRow();
+    refreshStocktakeStatusViews();
   }
-  // ---- 棚卸し：期限設定（2026-10-17新設。店舗共通の設定のためPropertiesServiceに保存） ----
-  function refreshStocktakeDeadlineRow(){
-    const day = SETTINGS.stocktakeDeadlineDay;
-    document.getElementById('stocktakeDeadlineText').textContent = day ? ('毎月' + day + '日') : '未設定';
+  // ステータスカード・入力件数（ジャンプボタン・確定パネル）と、ベル／サイドバーの表示をまとめて更新する
+  function refreshStocktakeStatusViews(){
+    const st = computeStocktakeStatus();
+    document.getElementById('stocktakeStatusCard').innerHTML = stocktakeStatusCardHtml(st, true);
+    const n = st.enteredCount;
+    document.getElementById('stocktakeJumpBtn').hidden = n === 0;
+    document.getElementById('stocktakeJumpCount').textContent = n;
+    document.getElementById('stocktakeSubmitSummary').textContent = '入力済み ' + n + '件';
+    document.getElementById('submitStocktakeBtn').disabled = n === 0;
+    updateIndicators();
   }
+  window.scrollToStocktakeSubmit = function(){
+    document.getElementById('stocktakeSubmitPanel').scrollIntoView({ behavior:'smooth', block:'end' });
+  };
+  // ---- Inventory：期限設定（店舗共通の設定のためPropertiesServiceに保存） ----
   window.openStocktakeDeadlineModal = function(){
     document.getElementById('stocktakeDeadlineInput').value = SETTINGS.stocktakeDeadlineDay || '';
     document.getElementById('stocktakeDeadlineModalError').textContent = '';
@@ -2840,9 +3201,8 @@
       if(!res.ok){ errEl.textContent = apiErrorMessage(res); toast(apiErrorMessage(res)); return; }
       SETTINGS = res.data;
       closeStocktakeDeadlineModal();
-      toast('棚卸しの期限を設定しました');
-      refreshStocktakeDeadlineRow();
-      updateStocktakeNotice();
+      toast('Inventoryの期限を設定しました');
+      refreshStocktakeStatusViews();
     });
   };
   window.clearStocktakeDeadline = function(){
@@ -2851,12 +3211,11 @@
       if(!res.ok){ toast(apiErrorMessage(res)); return; }
       SETTINGS = res.data;
       closeStocktakeDeadlineModal();
-      toast('棚卸しの期限設定を解除しました');
-      refreshStocktakeDeadlineRow();
-      updateStocktakeNotice();
+      toast('Inventoryの期限設定を解除しました');
+      refreshStocktakeStatusViews();
     });
   };
-  // ---- 棚卸し：実数入力モーダル（テンキー。確定するまでAPIは呼ばない） ----
+  // ---- Inventory：実数入力モーダル（テンキー。確定するまでAPIは呼ばない） ----
   window.openStocktakeQtyModal = function(itemId, size){
     state.editingStocktakeQty = { itemId: itemId, size: size, condition: '新品' };
     const it = findItem(itemId);
@@ -2912,7 +3271,7 @@
     closeStocktakeQtyModal();
     refreshStocktakeScreen();
   };
-  // ---- 棚卸し：確定（実施者入力モーダルを経由） ----
+  // ---- Inventory：確定（実施者入力モーダルを経由） ----
   window.submitStocktake = function(){
     const errEl = document.getElementById('stocktakeError');
     const lines = [];
@@ -2943,7 +3302,7 @@
       state.stocktakeCounts = {};
       state.pendingStocktakeLines = null;
       closeStocktakeConfirmModal();
-      toast('棚卸しを確定しました（' + lines.length + '件を反映）');
+      toast('Inventoryを確定しました（' + lines.length + '件を反映）');
       navigate('home');
     });
   };
@@ -2978,8 +3337,8 @@
   };
   function updateReturnNoteUi(){
     const exception = document.getElementById('retException').checked;
-    document.getElementById('retExceptionNote').style.display = exception ? '' : 'none';
     document.getElementById('retNoteReq').style.display = exception ? '' : 'none';
+    document.getElementById('retNote').placeholder = exception ? '例外の理由（必須）' : '例）クリーニング未了、本人了承済み';
   }
   function refreshReturnScreen(){
     document.getElementById('retItem').innerHTML = itemSelectOptionsHtml();
@@ -3093,7 +3452,7 @@
         const diffText = (e.diff > 0 ? '+' : '') + e.diff;
         return {
           type: 'stocktake', ts: e.ts,
-          title: '棚卸し：' + (it ? it.name : '') + (e.size ? '（' + e.size + '）' : '') + '　前回' + e.previousQty + '→実数' + e.actualQty,
+          title: 'Inventory：' + (it ? it.name : '') + (e.size ? '（' + e.size + '）' : '') + '　前回' + e.previousQty + '→実数' + e.actualQty,
           sub: fmtDateTime(e.ts) + (e.condition ? '　・　' + e.condition : '') + (e.performedBy ? '　・　実施者: ' + e.performedBy : ''), diff: e.diff, diffText: diffText
         };
       }
@@ -3116,9 +3475,14 @@
     });
   }
 
+  // 開くたびに通信するため、オーバーレイは出さず一覧の中に「読み込み中…」を表示する
+  let historyRequestSeq = 0;
   async function refreshHistory(){
     const listEl = document.getElementById('historyList');
-    const res = await apiCall('history', 'list');
+    listEl.innerHTML = '<div class="empty-hint">読み込み中…</div>';
+    const seq = ++historyRequestSeq;
+    const res = await apiCall('history', 'list', null, { background: true });
+    if(seq !== historyRequestSeq) return;
     if(!res.ok){
       toast(apiErrorMessage(res));
       listEl.innerHTML = '<div class="empty-hint">履歴を取得できませんでした。しばらくしてから再度お試しください。</div>';
@@ -3127,17 +3491,9 @@
     const all = buildHistoryEntries(res.data);
     const filtered = state.historyTab ? all.filter(function(e){ return e.type === state.historyTab; }) : all;
     if(filtered.length === 0){ listEl.innerHTML = '<div class="empty-hint">該当する履歴がありません。タブを切り替えて確認してください。</div>'; return; }
-    const typeLabel = { delivery:'納品', inspection:'検品', distribution:'個別配布', consumption:'使用', stocktake:'棚卸し', return:'返却' };
-    const typeIcon = {
-      delivery: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>',
-      inspection: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 17"></polyline></svg>',
-      distribution: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
-      consumption: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>',
-      stocktake: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M9 12l2 2 4-4"></path></svg>',
-      return: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>'
-    };
+    const typeLabel = { delivery:'納品', inspection:'検品', distribution:'個別配布', consumption:'使用', stocktake:'Inventory', return:'返却' };
     listEl.innerHTML = filtered.map(function(e){
-      const iconSvg = typeIcon[e.type];
+      const iconSvg = HISTORY_TYPE_ICON[e.type];
       const diffBadge = (e.type === 'inspection' || e.type === 'stocktake')
         ? '<span class="diff-badge ' + (e.diff === 0 ? 'zero' : 'nonzero') + '">' + e.diffText + '</span>' : '';
       const exceptionBadge = (e.type === 'return' && e.exception)
