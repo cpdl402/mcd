@@ -1502,29 +1502,43 @@
   /** 読み取り・書き込み共通のAPI呼び出し。pinは全リクエストに必ず付与し、サーバー側で毎回検証される。
    * 通信がまれに応答なしのまま固まる不具合の報告（2026-10-17）を受け、AbortControllerで25秒の
    * タイムアウトを設けた。サーバーが応答しない場合でも必ずエラーとして終わり、オーバーレイが外れる。
-   * opts.background=true のときはオーバーレイを出さない（履歴画面の読み込みなど、呼び出し側で表示する）。 */
+   * opts.background=true のときはオーバーレイを出さない（履歴画面の読み込みなど、呼び出し側で表示する）。
+   * 2026-11-13: GAS側の応答が数回に1回まったく返らない現象（スクリプトは正常終了しているのに通信だけ固まる）を受け、
+   * シートを変更しない呼び出し（list系・auth.login）に限り15秒で打ち切って1回だけ自動再試行する。
+   * 書き込み系は二重登録を避けるため従来どおり25秒・再試行なし。 */
   async function apiCall(resource, action, payload, opts){
     const background = !!(opts && opts.background);
+    const readOnly = action === 'list' || (resource === 'auth' && action === 'login') || (resource === 'settings' && action === 'get');
+    const attempts = readOnly ? 2 : 1;
+    const timeoutMs = readOnly ? 15000 : 25000;
     if(!background) beginLoading();
-    const controller = new AbortController();
-    const timeoutId = setTimeout(function(){ controller.abort(); }, 25000);
     try{
       const body = Object.assign({ resource: resource, action: action, pin: getStoredPin() }, payload || {});
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(body),
-        signal: controller.signal
-      });
-      return await res.json();
-    }catch(e){
-      console.error(e);
-      const msg = (e && e.name === 'AbortError')
+      let lastError = null;
+      for(let i = 0; i < attempts; i++){
+        const controller = new AbortController();
+        const timeoutId = setTimeout(function(){ controller.abort(); }, timeoutMs);
+        try{
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(body),
+            signal: controller.signal,
+            cache: 'no-store'
+          });
+          return await res.json();
+        }catch(e){
+          console.error(e);
+          lastError = e;
+        }finally{
+          clearTimeout(timeoutId);
+        }
+      }
+      const msg = (lastError && lastError.name === 'AbortError')
         ? '通信がタイムアウトしました。電波の良い場所でもう一度お試しください'
         : '通信に失敗しました。ネットワーク環境を確認してください';
       return { ok:false, error: msg };
     }finally{
-      clearTimeout(timeoutId);
       if(!background) endLoading();
     }
   }
