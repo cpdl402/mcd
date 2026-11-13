@@ -636,9 +636,10 @@
     #inventoryList .item-card, #stocktakeList .item-card, #itemManageList .item-manage-row{margin-bottom:0;}
   }
   @media (min-width:1024px){
-    .app-shell{max-width:960px;}
-    .fab{right:calc(50% - 480px + 18px);}
-    .bottom-nav{max-width:960px;}
+    /* 2026-11-13: PC帯は左右の背景の帯をなくし、画面幅いっぱいに広げる（以前は最大960px） */
+    .app-shell{max-width:none;}
+    .fab{right:18px;}
+    .bottom-nav{max-width:none;}
     /* PC帯では在庫・棚卸しの各アイテムを横長の1行（名称｜サイズチップ｜サイズ追加）で並べる。
        タブレット帯のgrid指定（display/align-items）がそのまま効かないよう明示的に上書きする */
     #inventoryList, #stocktakeList{display:flex; flex-direction:column; align-items:stretch; gap:10px;}
