@@ -648,6 +648,37 @@
       max-width:640px; margin:0 auto;
     }
   }
+
+  /* ---- 在庫一覧の印刷（A4縦。2026-11-13新設） ----
+     印刷専用の表は配色テーマに関係なく白地・黒文字で固定する */
+  #printArea{display:none;}
+  #printArea.measuring{display:block; position:absolute; left:-10000px; top:0; width:733px; visibility:hidden;}
+  #printArea{color:#000; background:#fff; font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif; font-size:11px; line-height:1.3;}
+  #printArea .pr-head{display:flex; justify-content:space-between; align-items:flex-end; gap:12px; margin-bottom:6px; border-bottom:2px solid #000; padding-bottom:4px;}
+  #printArea h1{font-size:17px; margin:0;}
+  #printArea .pr-meta{font-size:10px; text-align:right;}
+  #printArea .pr-table{width:100%; border-collapse:collapse; table-layout:auto;}
+  #printArea th, #printArea td{border:1px solid #888; padding:2px 3px; text-align:center; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  #printArea thead th{background:#e6e6e6; font-weight:700;}
+  #printArea thead th.sub{font-size:9px; font-weight:400; background:#f2f2f2;}
+  #printArea td.cat{font-size:9px;}
+  #printArea td.name{text-align:left; white-space:normal; min-width:90px;}
+  #printArea .sep{border-right:1.5px solid #000;}
+  #printArea td.zero{color:#999;}
+  #printArea td.na{color:#bbb; background:#f7f7f7;}
+  #printArea td.tot{font-weight:700; background:#f5f5f5;}
+  #printArea td.tot.all{background:#e6e6e6;}
+  #printArea td.tot-label{text-align:right; font-weight:700;}
+  #printArea tbody tr:nth-child(even) td:not(.tot):not(.na){background:#fbfbfb;}
+  #printArea tr{page-break-inside:avoid; break-inside:avoid;}
+  #printArea thead{display:table-header-group;}
+  #printArea .pr-note{font-size:9px; margin:4px 0 0;}
+  @media print{
+    @page{size:A4 portrait; margin:8mm;}
+    html, body{background:#fff !important;}
+    body > *:not(#printArea){display:none !important;}
+    #printArea{display:block !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
 </style>
 </head>
 <body>
@@ -716,7 +747,10 @@
         </button>
         <div><h1>在庫</h1><div class="sub">どの服が何着あるか確認・修正</div></div>
       </div>
-      <button type="button" class="icon-btn help-btn" aria-label="この画面の使い方" onclick="openGuideModal('inventory')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
+      <div class="header-right">
+        <button type="button" class="icon-btn" aria-label="在庫一覧を印刷" title="在庫一覧を印刷（A4）" onclick="printInventory()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg></button>
+        <button type="button" class="icon-btn help-btn" aria-label="この画面の使い方" onclick="openGuideModal('inventory')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></button>
+      </div>
     </div>
     <div style="padding:14px 16px 0;">
       <div class="search-filter-row">
@@ -1087,7 +1121,8 @@
         <p>どの服が、どのサイズで何着あるかを確認する画面です。</p>
         <ul>
           <li>サイズのボタンには合計数が表示され、その下に内訳（例: 新8・中3）が出ます。</li>
-          <li>ボタンをタップし、新品か中古かを選んでから数を入力すると、その数で在庫が<strong>上書き</strong>されます。数え間違いを直すための機能です。ふだんの増減は、納品（検品）・使用記録・返却で記録してください。</li>
+          <li>ボタンをタップし、新品・中古を切り替えながら数を入力して「保存」すると、両方まとめて在庫が<strong>上書き</strong>されます（変えた方だけ保存されます）。数え間違いを直すための機能です。ふだんの増減は、納品（検品）・使用記録・返却で記録してください。</li>
+          <li>右上のプリンターのボタンで、在庫一覧をA4用紙1枚に収まる表で印刷できます。検索・フィルターで絞り込んだ内容がそのまま印刷されます。</li>
           <li>S/M/L/LLは常に表示されます。3S・SS・3L・6Lなどは「＋ サイズを追加」から、必要なアイテムにだけ追加します。</li>
           <li>名前で検索できます。フィルターでカテゴリ・性別・種類を絞り込めます。</li>
           <li>新しい服の種類を増やすときは、メニューの「ユニフォームマスタ」から登録します。</li>
@@ -1133,7 +1168,7 @@
       <div class="guide-body">
         <p>月に1回、すべての在庫を数え直す作業（棚卸し）です。</p>
         <ul>
-          <li>サイズのボタンをタップし、新品/中古を選んで、数えた数を入力します。入力済みのものには✓が付きます。</li>
+          <li>サイズのボタンをタップし、新品・中古を切り替えながら数えた数を入力し、「入力する」で両方まとめて記録します。入力済みのものには✓が付きます。</li>
           <li>確定すると、<strong>入力した行だけ</strong>その数で上書きされます。入力しなかった行の在庫は変わりません。</li>
           <li>一覧の最後にある確定パネルから確定します。実施者の名前は任意です。</li>
           <li>毎月の期限日を設定すると、5日前からホーム右上のベルでお知らせします。</li>
@@ -1451,6 +1486,9 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- 在庫一覧の印刷専用領域（画面には出さず、印刷時だけこれ以外を隠して表示する。中身はbuildPrintArea()が作る） -->
+<div id="printArea" aria-hidden="true"></div>
+
 <script>
   /* ============================================================
    * 0. GASバックエンド接続設定・通信ヘルパー
@@ -1505,15 +1543,21 @@
    * opts.background=true のときはオーバーレイを出さない（履歴画面の読み込みなど、呼び出し側で表示する）。
    * 2026-11-13: GAS側の応答が数回に1回まったく返らない現象（スクリプトは正常終了しているのに通信だけ固まる）を受け、
    * シートを変更しない呼び出し（list系・auth.login）に限り15秒で打ち切って1回だけ自動再試行する。
-   * 書き込み系は二重登録を避けるため従来どおり25秒・再試行なし。 */
+   * 書き込み系は二重登録を避けるため従来どおり25秒・再試行なし。
+   * 2026-11-13追記: 書き込みが反映済みなのに応答だけ届かずエラー表示になる件を受け、書き込みにも操作ごとのrequestIdを付け、
+   * サーバーが重複防止に対応している（ログイン応答のidempotent）場合に限り、同じrequestIdで1回再送する。
+   * それでも応答が無いときは「反映済みかもしれない」と伝え、二重登録を促さない。 */
+  let serverIdempotent = false;
+  function newRequestId(){ return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10); }
   async function apiCall(resource, action, payload, opts){
     const background = !!(opts && opts.background);
     const readOnly = action === 'list' || (resource === 'auth' && action === 'login') || (resource === 'settings' && action === 'get');
-    const attempts = readOnly ? 2 : 1;
-    const timeoutMs = readOnly ? 15000 : 25000;
+    const attempts = (readOnly || serverIdempotent) ? 2 : 1;
+    const timeoutMs = readOnly ? 15000 : 20000;
     if(!background) beginLoading();
     try{
       const body = Object.assign({ resource: resource, action: action, pin: getStoredPin() }, payload || {});
+      if(!readOnly) body.requestId = newRequestId();
       let lastError = null;
       for(let i = 0; i < attempts; i++){
         const controller = new AbortController();
@@ -1533,6 +1577,9 @@
         }finally{
           clearTimeout(timeoutId);
         }
+      }
+      if(!readOnly){
+        return { ok:false, uncertain:true, error: '応答を受け取れませんでした。登録できている可能性があるため、履歴を確認してから操作してください' };
       }
       const msg = (lastError && lastError.name === 'AbortError')
         ? '通信がタイムアウトしました。電波の良い場所でもう一度お試しください'
@@ -1570,6 +1617,7 @@
         return;
       }
       currentPin = pin;
+      serverIdempotent = !!(res.data && res.data.idempotent);
       rememberPin(pin);
       await loadAllData();
       navigate('home');
@@ -2223,19 +2271,25 @@
     sel.value = current;
   }
 
-  function refreshInventory(){
-    buildCategoryChips();
-    buildTypeFilterOptions();
+  // 在庫画面の検索・フィルタ条件で絞り込んだアイテム一覧（画面表示と印刷で共用）
+  function filteredInventoryItems(){
     const gender = document.getElementById('genderFilter').value;
     const itemType = document.getElementById('typeFilter').value;
     const keyword = document.getElementById('invSearchInput').value.trim();
-    const list = ITEM_MASTER.filter(function(it){
+    return ITEM_MASTER.filter(function(it){
       if(state.invCategory && it.category !== state.invCategory) return false;
       if(gender && it.gender !== gender) return false;
       if(itemType && it.itemType !== itemType) return false;
       if(keyword && it.name.indexOf(keyword) === -1) return false;
       return true;
     });
+  }
+  function refreshInventory(){
+    buildCategoryChips();
+    buildTypeFilterOptions();
+    const gender = document.getElementById('genderFilter').value;
+    const itemType = document.getElementById('typeFilter').value;
+    const list = filteredInventoryItems();
     updateInventoryFilterBadge(gender, itemType);
     const listEl = document.getElementById('inventoryList');
     if(list.length === 0){
@@ -2251,6 +2305,79 @@
     badge.hidden = count === 0;
     badge.textContent = count || '';
   }
+  // ---- 在庫一覧の印刷（2026-11-13新設） ----
+  // 印刷専用の表（行＝アイテム、列＝サイズ×新品/中古）を#printAreaに作り、A4縦1枚に収まるよう縮小してから印刷する。
+  // 在庫画面の検索・フィルタ条件をそのまま反映する。ブラウザのメニューから印刷した場合もbeforeprintで同じ表を作る。
+  const PRINT_W_PX = 733;   // A4縦(210mm)−左右余白8mm×2 ≒ 194mm（96dpi換算）
+  const PRINT_H_PX = 1058;  // A4縦(297mm)−上下余白8mm×2 ≒ 280mm（96dpi換算）
+  function buildPrintArea(){
+    const area = document.getElementById('printArea');
+    if(!area) return;
+    const list = filteredInventoryItems();
+    const sizeSet = {};
+    let hasNoSize = false;
+    list.forEach(function(it){
+      if(it.hasSize) displaySizesForItem(it.id).forEach(function(s){ sizeSet[s] = true; });
+      else hasNoSize = true;
+    });
+    const sizes = Object.keys(sizeSet).sort(sizeCompare_);
+    const cols = sizes.slice();
+    if(hasNoSize) cols.push('');
+    const now = new Date();
+    const stamp = now.getFullYear() + '/' + String(now.getMonth()+1).padStart(2,'0') + '/' + String(now.getDate()).padStart(2,'0') + ' ' +
+      String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    const conds = [];
+    if(state.invCategory) conds.push('カテゴリ: ' + state.invCategory);
+    const g = document.getElementById('genderFilter').value; if(g) conds.push('性別: ' + g);
+    const t = document.getElementById('typeFilter').value; if(t) conds.push('種類: ' + t);
+    const kw = document.getElementById('invSearchInput').value.trim(); if(kw) conds.push('検索: ' + kw);
+
+    let sumNew = 0, sumUsed = 0;
+    const rows = list.map(function(it){
+      const tracked = it.hasSize ? displaySizesForItem(it.id) : [''];
+      let rowNew = 0, rowUsed = 0;
+      const cells = cols.map(function(s){
+        if(tracked.indexOf(s) === -1) return '<td class="na">–</td><td class="na sep">–</td>';
+        const nw = getQty(it.id, s, '新品'), used = getQty(it.id, s, '中古');
+        rowNew += nw; rowUsed += used;
+        return '<td' + (nw === 0 ? ' class="zero"' : '') + '>' + nw + '</td>' +
+               '<td class="sep' + (used === 0 ? ' zero' : '') + '">' + used + '</td>';
+      }).join('');
+      sumNew += rowNew; sumUsed += rowUsed;
+      return '<tr><td class="cat">' + escapeHtml(it.category) + (it.gender && it.gender !== '共通' ? '<br>' + escapeHtml(it.gender) : '') + '</td>' +
+        '<td class="name">' + escapeHtml(it.name) + '</td>' + cells +
+        '<td class="tot">' + rowNew + '</td><td class="tot">' + rowUsed + '</td><td class="tot all">' + (rowNew + rowUsed) + '</td></tr>';
+    }).join('');
+
+    area.innerHTML =
+      '<div class="pr-head"><h1>MUNI 在庫一覧</h1><div class="pr-meta">印刷日時 ' + stamp + '　/　' + list.length + 'アイテム' +
+        (conds.length ? '<br>絞り込み: ' + escapeHtml(conds.join('、')) : '') + '</div></div>' +
+      '<table class="pr-table"><thead>' +
+        '<tr><th rowspan="2">区分</th><th rowspan="2">アイテム名</th>' +
+          cols.map(function(s){ return '<th colspan="2" class="sep">' + (s === '' ? 'サイズなし' : escapeHtml(s)) + '</th>'; }).join('') +
+          '<th colspan="3">合計</th></tr>' +
+        '<tr>' + cols.map(function(){ return '<th class="sub">新</th><th class="sub sep">中</th>'; }).join('') +
+          '<th class="sub">新</th><th class="sub">中</th><th class="sub">計</th></tr>' +
+      '</thead><tbody>' + (rows || '<tr><td colspan="' + (cols.length * 2 + 5) + '">該当するアイテムがありません</td></tr>') + '</tbody>' +
+      '<tfoot><tr><td colspan="' + (cols.length * 2 + 2) + '" class="tot-label">総合計</td><td class="tot">' + sumNew + '</td><td class="tot">' + sumUsed + '</td><td class="tot all">' + (sumNew + sumUsed) + '</td></tr></tfoot>' +
+      '</table>' +
+      '<p class="pr-note">新＝新品、中＝中古、「–」はそのアイテムで使っていないサイズ</p>';
+
+    // A4縦1枚に収まる倍率を求める（画面外で印刷時と同じ幅にして実寸を測る）
+    area.style.zoom = '';
+    area.classList.add('measuring');
+    const w = area.scrollWidth, h = area.scrollHeight;
+    area.classList.remove('measuring');
+    const scale = Math.min(1, PRINT_W_PX / w, PRINT_H_PX / h);
+    // 縮小しすぎると読めないため下限0.55。それを超える量は複数ページに分かれる（見出し行は各ページに繰り返す）
+    area.style.zoom = String(Math.max(scale, 0.55));
+  }
+  window.printInventory = function(){
+    buildPrintArea();
+    window.print();
+  };
+  window.addEventListener('beforeprint', buildPrintArea);
+
   window.openInventoryFilterModal = function(){ document.getElementById('inventoryFilterModal').classList.add('active'); };
   window.closeInventoryFilterModal = function(){ document.getElementById('inventoryFilterModal').classList.remove('active'); };
   window.clearInventoryFilters = function(){
@@ -2326,29 +2453,38 @@
   // テンキー入力中の文字列はここに保持し、qtyModalInputは表示専用（readonly）として同期する。
   // 最大4桁（9999）まで。先頭が「0」のときに数字を押すと置き換える（先頭ゼロの連続を防ぐ）。
   const QTY_MAX_DIGITS = 4;
+  // 2026-11-13: 新品・中古をまとめて保存できるよう、条件ごとの入力値をdraftsに保持する。
+  // セグメントで切り替えても入力値は消さず、「保存」で変更があった条件だけをまとめて送信する。
   window.openQtyModal = function(itemId, size){
-    state.editingQty = { itemId: itemId, size: size, condition: '新品' };
+    state.editingQty = {
+      itemId: itemId, size: size, condition: '新品',
+      drafts: { '新品': String(getQty(itemId, size, '新品')), '中古': String(getQty(itemId, size, '中古')) }
+    };
     const it = findItem(itemId);
     document.getElementById('qtyModalTitle').textContent =
       '数量を補正：' + it.name + (size ? '・' + size + 'サイズ' : '');
-    document.querySelectorAll('#qtyModalConditionSeg .segmented-btn').forEach(function(b){
-      b.querySelector('.num').textContent = getQty(itemId, size, b.dataset.condition);
-    });
     selectQtyModalCondition('新品');
     document.getElementById('qtyModal').classList.add('active');
   };
-  // 条件を切り替えたら入力途中の値は破棄し、その条件の現在値から入力し直す（新品/中古の取り違え防止）
+  // セグメントの数字は「入力中の値」を表示し、現在値から変わった条件には ✎ を付ける
+  function refreshQtyModalSeg(){
+    const e = state.editingQty;
+    document.querySelectorAll('#qtyModalConditionSeg .segmented-btn').forEach(function(b){
+      const c = b.dataset.condition;
+      const changed = Number(e.drafts[c]) !== getQty(e.itemId, e.size, c);
+      b.classList.toggle('on', c === e.condition);
+      b.querySelector('.num').textContent = e.drafts[c] + (changed ? ' ✎' : '');
+    });
+  }
   window.selectQtyModalCondition = function(condition){
     const e = state.editingQty;
     e.condition = condition;
-    document.querySelectorAll('#qtyModalConditionSeg .segmented-btn').forEach(function(b){
-      b.classList.toggle('on', b.dataset.condition === condition);
-    });
     const q = getQty(e.itemId, e.size, condition);
-    document.getElementById('qtyModalCurrent').textContent = '現在の在庫数量（' + condition + '）: ' + q;
-    state.qtyTenkeyValue = String(q);
+    document.getElementById('qtyModalCurrent').textContent = '現在の在庫数量（' + condition + '）: ' + q + '　※新品・中古を切り替えて両方入力し、まとめて保存できます';
+    state.qtyTenkeyValue = e.drafts[condition];
     document.getElementById('qtyModalInput').value = state.qtyTenkeyValue;
     document.getElementById('qtyModalError').textContent = '';
+    refreshQtyModalSeg();
   };
   window.closeQtyModal = function(){ document.getElementById('qtyModal').classList.remove('active'); };
   document.getElementById('qtyTenkey').addEventListener('click', function(ev){
@@ -2364,24 +2500,44 @@
       v = (v === '0') ? key : (v.length < QTY_MAX_DIGITS ? v + key : v);
     }
     state.qtyTenkeyValue = v;
+    state.editingQty.drafts[state.editingQty.condition] = v;
     document.getElementById('qtyModalInput').value = v;
     document.getElementById('qtyModalError').textContent = '';
+    refreshQtyModalSeg();
   });
   window.submitQtyModal = function(){
     const errEl = document.getElementById('qtyModalError');
-    const raw = document.getElementById('qtyModalInput').value;
-    if(raw === '' || isNaN(raw) || Number(raw) < 0 || Math.floor(Number(raw)) !== Number(raw)){
-      errEl.textContent = '0以上の整数を入力してください';
-      return;
+    const { itemId, size, drafts } = state.editingQty;
+    const conds = ['新品','中古'];
+    for(let i = 0; i < conds.length; i++){
+      const raw = drafts[conds[i]];
+      if(raw === '' || isNaN(raw) || Number(raw) < 0 || Math.floor(Number(raw)) !== Number(raw)){
+        errEl.textContent = conds[i] + 'の数量は0以上の整数を入力してください';
+        return;
+      }
     }
+    const changed = conds.filter(function(c){ return Number(drafts[c]) !== getQty(itemId, size, c); });
+    if(changed.length === 0){ closeQtyModal(); toast('変更はありません'); return; }
     errEl.textContent = '';
-    const { itemId, size, condition } = state.editingQty;
     withButtonBusy(document.getElementById('qtyModalSaveBtn'), '保存中…', async function(){
-      const res = await apiCall('inventory', 'update', { item: { itemId: itemId, size: size, condition: condition, quantity: Number(raw) } });
-      if(!res.ok){ errEl.textContent = apiErrorMessage(res); toast(apiErrorMessage(res)); return; }
+      // 書き込みはサーバー側でロック直列化されるため、順番に送る
+      const done = [];
+      for(let i = 0; i < changed.length; i++){
+        const c = changed[i];
+        const res = await apiCall('inventory', 'update', { item: { itemId: itemId, size: size, condition: c, quantity: Number(drafts[c]) } });
+        if(!res.ok){
+          await reloadInventory();
+          refreshInventory();
+          errEl.textContent = (done.length ? done.join('・') + 'は保存済み。' : '') + c + 'の保存に失敗: ' + apiErrorMessage(res);
+          toast(apiErrorMessage(res));
+          refreshQtyModalSeg();
+          return;
+        }
+        done.push(c);
+      }
       await reloadInventory();
       closeQtyModal();
-      toast('在庫数量を更新しました');
+      toast('在庫数量を更新しました（' + changed.join('・') + '）');
       refreshInventory();
     });
   };
@@ -3230,30 +3386,38 @@
     });
   };
   // ---- Inventory：実数入力モーダル（テンキー。確定するまでAPIは呼ばない） ----
+  // 2026-11-13: 新品・中古をまとめて入力できるよう、条件ごとの入力値(drafts)と「入力したか」(touched)を保持する。
+  // 切り替えても入力値は消さない。テンキーを押した条件（＋以前に入力済みの条件）だけを入力済みとして記録する。
   window.openStocktakeQtyModal = function(itemId, size){
-    state.editingStocktakeQty = { itemId: itemId, size: size, condition: '新品' };
+    const drafts = {}, touched = {};
+    ['新品','中古'].forEach(function(c){
+      const key = itemId + '|' + size + '|' + c;
+      const has = state.stocktakeCounts.hasOwnProperty(key);
+      drafts[c] = has ? String(state.stocktakeCounts[key]) : '0';
+      touched[c] = has;
+    });
+    state.editingStocktakeQty = { itemId: itemId, size: size, condition: '新品', drafts: drafts, touched: touched };
     const it = findItem(itemId);
     document.getElementById('stocktakeQtyModalTitle').textContent = '実数を入力：' + it.name + (size ? '・' + size + 'サイズ' : '');
-    document.querySelectorAll('#stocktakeQtyModalConditionSeg .segmented-btn').forEach(function(b){
-      const v = stocktakeCondView(itemId, size, b.dataset.condition);
-      b.querySelector('.num').textContent = v.value + (v.entered ? ' ✓' : '');
-    });
     selectStocktakeQtyModalCondition('新品');
     document.getElementById('stocktakeQtyModal').classList.add('active');
   };
-  // 条件を切り替えたら入力途中の値は破棄し、その条件の入力済み値（未入力なら0）から入力し直す
+  function refreshStocktakeQtyModalSeg(){
+    const e = state.editingStocktakeQty;
+    document.querySelectorAll('#stocktakeQtyModalConditionSeg .segmented-btn').forEach(function(b){
+      const c = b.dataset.condition;
+      b.classList.toggle('on', c === e.condition);
+      b.querySelector('.num').textContent = e.touched[c] ? e.drafts[c] + ' ✓' : '未';
+    });
+  }
   window.selectStocktakeQtyModalCondition = function(condition){
     const e = state.editingStocktakeQty;
     e.condition = condition;
-    document.querySelectorAll('#stocktakeQtyModalConditionSeg .segmented-btn').forEach(function(b){
-      b.classList.toggle('on', b.dataset.condition === condition);
-    });
-    const key = e.itemId + '|' + e.size + '|' + condition;
-    document.getElementById('stocktakeQtyModalCurrent').textContent = '現在の在庫数量（' + condition + '）: ' + getQty(e.itemId, e.size, condition);
-    const existing = state.stocktakeCounts.hasOwnProperty(key) ? String(state.stocktakeCounts[key]) : '0';
-    state.stocktakeTenkeyValue = existing;
-    document.getElementById('stocktakeQtyModalInput').value = existing;
+    document.getElementById('stocktakeQtyModalCurrent').textContent = '現在の在庫数量（' + condition + '）: ' + getQty(e.itemId, e.size, condition) + '　※新品・中古を切り替えて両方入力できます';
+    state.stocktakeTenkeyValue = e.drafts[condition];
+    document.getElementById('stocktakeQtyModalInput').value = state.stocktakeTenkeyValue;
     document.getElementById('stocktakeQtyModalError').textContent = '';
+    refreshStocktakeQtyModalSeg();
   };
   window.closeStocktakeQtyModal = function(){ document.getElementById('stocktakeQtyModal').classList.remove('active'); };
   document.getElementById('stocktakeTenkey').addEventListener('click', function(ev){
@@ -3269,19 +3433,30 @@
       v = (v === '0') ? key : (v.length < QTY_MAX_DIGITS ? v + key : v);
     }
     state.stocktakeTenkeyValue = v;
+    const e = state.editingStocktakeQty;
+    e.drafts[e.condition] = v;
+    e.touched[e.condition] = true;
     document.getElementById('stocktakeQtyModalInput').value = v;
     document.getElementById('stocktakeQtyModalError').textContent = '';
+    refreshStocktakeQtyModalSeg();
   });
   window.submitStocktakeQtyModal = function(){
     const errEl = document.getElementById('stocktakeQtyModalError');
-    const raw = document.getElementById('stocktakeQtyModalInput').value;
-    if(raw === '' || isNaN(raw) || Number(raw) < 0 || Math.floor(Number(raw)) !== Number(raw)){
-      errEl.textContent = '0以上の整数を入力してください';
-      return;
+    const e = state.editingStocktakeQty;
+    // どちらもテンキーに触れずに「入力する」を押した場合は、表示中の条件を「0と数えた」として記録する（従来の挙動）
+    if(!e.touched['新品'] && !e.touched['中古']) e.touched[e.condition] = true;
+    const conds = ['新品','中古'].filter(function(c){ return e.touched[c]; });
+    for(let i = 0; i < conds.length; i++){
+      const raw = e.drafts[conds[i]];
+      if(raw === '' || isNaN(raw) || Number(raw) < 0 || Math.floor(Number(raw)) !== Number(raw)){
+        errEl.textContent = conds[i] + 'の数量は0以上の整数を入力してください';
+        return;
+      }
     }
     errEl.textContent = '';
-    const { itemId, size, condition } = state.editingStocktakeQty;
-    state.stocktakeCounts[itemId + '|' + size + '|' + condition] = Number(raw);
+    conds.forEach(function(c){
+      state.stocktakeCounts[e.itemId + '|' + e.size + '|' + c] = Number(e.drafts[c]);
+    });
     closeStocktakeQtyModal();
     refreshStocktakeScreen();
   };
