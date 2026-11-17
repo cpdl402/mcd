@@ -2171,7 +2171,7 @@
         });
       }));
       row.appendChild(msBtn_('PIN再発行', null, function () {
-        msPrompt_('PINを再発行（' + m.name + '）', '新しいPIN（4〜8桁の数字）', '', true, function (v) {
+        msPrompt_('PINを再発行（' + m.name + '）', '新しいPIN（1〜8桁の数字）', '', true, function (v) {
           if (v) msCall_('adminMsManagerResetPin', { targetId: m.id, pin: v }, 'PINを再発行しました');
         });
       }));
@@ -2191,7 +2191,7 @@
     var idIn = document.createElement('input'); idIn.type = 'text'; idIn.autocapitalize = 'off';
     var nmIn = document.createElement('input'); nmIn.type = 'text';
     var pinIn = document.createElement('input'); pinIn.type = 'text'; pinIn.inputMode = 'numeric';
-    [['ID（半角英数字）', idIn], ['氏名', nmIn], ['PIN（4〜8桁の数字）', pinIn]].forEach(function (x) {
+    [['ID（半角英数字）', idIn], ['氏名', nmIn], ['PIN（1〜8桁の数字）', pinIn]].forEach(function (x) {
       var l = el('label', 'fld', x[0]); l.appendChild(x[1]); ag.appendChild(l);
     });
     af.appendChild(ag);
