@@ -315,6 +315,11 @@
   table.ms-table td.st-available { background:#dff3e8; color:#1f6f5c; font-weight:700; }
   table.ms-table td.st-off { background:#fde0e0; color:#c62828; font-weight:700; }
   table.ms-table td.st-none { color:#bbb; }
+  table.ms-all td:not(:first-child), table.ms-all th:not(:first-child) { padding:6px 4px; min-width:44px; font-size:11px; }
+  table.ms-all th.ms-sun { color:#c62828; }
+  table.ms-all th.ms-sat { color:#27508c; }
+  table.ms-all tr.ms-count-row td { background:#faf6e8; font-weight:700; }
+  table.ms-all tr.ms-count-row td.cov-zero { color:#c62828; }
   table.ms-cov td:not(:first-child) { padding:6px 0; min-width:26px; font-weight:700; }
   table.ms-cov td.cov-0 { background:#e53935; color:#fff; }
   table.ms-cov td.cov-ok { background:#dff3e8; color:#1f6f5c; }
@@ -325,6 +330,7 @@
   .ms-setting-row .grow { flex:1; min-width:140px; font-weight:700; }
   .ms-setting-row .sub { font-size:11px; color:var(--sub); font-weight:500; display:block; }
   button.ms-small-btn { font-size:12px; padding:6px 10px; }
+  .ms-row-actions { display:flex; gap:6px; flex-wrap:wrap; width:100%; }
   button.ms-danger { color:var(--warn); }
   .ms-edit-nav { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px; }
   .ms-nav-btn { background:#f5ecc9; color:var(--ink); width:44px; height:44px; padding:0; font-size:24px; line-height:1; flex:none; }
@@ -334,7 +340,8 @@
   .ms-status-btns button.on[data-st="available"] { background:#2e7d32; color:#fff; }
   .ms-status-btns button.on[data-st="off"] { background:#c62828; color:#fff; }
   .ms-status-btns button.on[data-st=""] { background:#777; color:#fff; }
-  .ms-time-row { display:flex; align-items:center; gap:8px; margin:0 0 12px; flex-wrap:wrap; font-size:13px; color:var(--sub); }
+  .ms-time-row { display:flex; align-items:center; gap:8px; margin:0 0 10px; flex-wrap:wrap; font-size:13px; color:var(--sub); }
+  .ms-time-row.dim { opacity:.35; }
 </style>
 </head>
 <body>
@@ -423,7 +430,7 @@
   </div>
 
   <div class="wrap" id="accountsView" hidden>
-    <button type="button" class="ghost" id="accountsBackBtn" style="margin-bottom:12px;">← 募集一覧へ戻る</button>
+    <button type="button" class="ghost" id="accountsBackBtn" style="margin-bottom:12px;">募集一覧へ戻る</button>
     <h2>アカウント管理</h2>
     <div id="accountsList"></div>
     <div class="accounts-add-form">
@@ -438,7 +445,7 @@
   </div>
 
   <div class="wrap" id="rosterView" hidden>
-    <button type="button" class="ghost" id="rosterBackBtn" style="margin-bottom:12px;">← 募集一覧へ戻る</button>
+    <button type="button" class="ghost" id="rosterBackBtn" style="margin-bottom:12px;">募集一覧へ戻る</button>
     <h2>交渉編集</h2>
     <p class="nego-view-head">交渉集計の「新規／延ばし」で選べる候補者を追加・削除します（スタッフ名簿シートと同じデータです）。</p>
     <div class="nego-date-card">
@@ -462,7 +469,7 @@
   </div>
 
   <div class="wrap ms-wrap" id="msView" hidden>
-    <button type="button" class="ghost" id="msBackBtn" style="margin-bottom:12px;">← 募集一覧へ戻る</button>
+    <button type="button" class="ghost" id="msBackBtn" style="margin-bottom:12px;">募集一覧へ戻る</button>
     <h2>マネスケ</h2>
     <div class="ms-head">
       <select id="msMonthSel" class="ms-month-sel" aria-label="対象月"></select>
@@ -494,13 +501,25 @@
       <button type="button" data-st="">未入力</button>
     </div>
     <div id="msEditTimeBox">
-      <label class="chk-row"><input type="checkbox" id="msEditUseTime" style="width:auto;"> 時間を指定する（指定しなければ終日）</label>
-      <div class="ms-time-row" id="msEditTimes" hidden></div>
+      <div class="ms-time-row" id="msEditTimes"></div>
+      <label class="chk-row"><input type="checkbox" id="msEditAllDay" style="width:auto;"> 終日</label>
     </div>
     <label class="fld">備考（任意）<input type="text" id="msEditNote" maxlength="200"></label>
     <div class="modal-actions">
       <button type="button" class="ghost" id="msEditCancel">閉じる</button>
       <button type="button" id="msEditSave">保存</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="msExtOverlay" hidden>
+  <div class="modal-box" style="max-width:380px;">
+    <h3 id="msExtTitle"></h3>
+    <p class="ms-note" id="msExtNote"></p>
+    <label class="fld">延長期限（この日まで入力・提出できます）<span id="msExtPicker"></span></label>
+    <div class="modal-actions" style="flex-wrap:wrap;">
+      <button type="button" class="ghost" id="msExtRemove" hidden>延長を取り消す</button>
+      <button type="button" class="ghost" id="msExtCancel">キャンセル</button>
+      <button type="button" id="msExtOk">延長する</button>
     </div>
   </div>
 </div>
@@ -1942,7 +1961,7 @@
     MS_EDIT.status = e ? e.status : '';
     $('msEditTitle').textContent = msDayLabel_(MS_EDIT.date);
     $('msEditWho').textContent = msNameOf_(MS_EDIT.id) + ' さんの希望を代理で修正';
-    $('msEditUseTime').checked = !!(e && e.start);
+    $('msEditAllDay').checked = !!(e && e.status === 'available' && !e.start);
     var box = $('msEditTimes');
     box.innerHTML = '';
     MS_EDIT.sp = msTimePicker_(e && e.start ? e.start : '09:00');
@@ -1955,14 +1974,16 @@
   function msSyncEdit_() {
     Array.prototype.forEach.call($('msEditStatus').children, function (b) { b.classList.toggle('on', b.getAttribute('data-st') === MS_EDIT.status); });
     $('msEditTimeBox').hidden = MS_EDIT.status !== 'available';
-    $('msEditTimes').hidden = !$('msEditUseTime').checked;
+    var allDay = $('msEditAllDay').checked;
+    $('msEditTimes').classList.toggle('dim', allDay);
+    Array.prototype.forEach.call($('msEditTimes').querySelectorAll('select'), function (s) { s.disabled = allDay; });
     $('msEditNote').disabled = !MS_EDIT.status;
     var dates = msDaysOf_(MS.month);
     $('msEditPrev').disabled = MS_EDIT.date === dates[0];
     $('msEditNext').disabled = MS_EDIT.date === dates[dates.length - 1];
   }
   function msEditValue_() {
-    var st = MS_EDIT.status, useTime = st === 'available' && $('msEditUseTime').checked;
+    var st = MS_EDIT.status, useTime = st === 'available' && !$('msEditAllDay').checked;
     return { date: MS_EDIT.date, status: st, start: useTime ? MS_EDIT.sp.getValue() : '', end: useTime ? MS_EDIT.ep.getValue() : '', note: st ? $('msEditNote').value.trim() : '' };
   }
   function msSaveEdit_(then) {
@@ -1982,7 +2003,7 @@
   Array.prototype.forEach.call($('msEditStatus').children, function (b) {
     b.onclick = function () { MS_EDIT.status = b.getAttribute('data-st'); msSyncEdit_(); };
   });
-  $('msEditUseTime').onchange = msSyncEdit_;
+  $('msEditAllDay').onchange = msSyncEdit_;
   $('msEditPrev').onclick = function () { msMoveEdit_(-1); };
   $('msEditNext').onclick = function () { msMoveEdit_(1); };
   $('msEditSave').onclick = function () { msSaveEdit_(function () { $('msEditOverlay').hidden = true; }); };
@@ -2000,26 +2021,31 @@
     bar.appendChild(csvBtn);
     box.appendChild(bar);
 
-    var wrap = el('div', 'ms-tablewrap'), table = el('table', 'ms-table');
+    // 縦=マネージャー、横=日付（日の数字のみ。土曜は青・日曜は赤）。最下行は日ごとの勤務可能人数（2026-11-17変更）
+    var wrap = el('div', 'ms-tablewrap'), table = el('table', 'ms-table ms-all');
     var thr = el('tr');
-    thr.appendChild(el('th', null, '日付'));
-    people.forEach(function (m) { thr.appendChild(el('th', null, m.name)); });
-    thr.appendChild(el('th', null, '勤務可能'));
+    thr.appendChild(el('th', null, '氏名'));
+    dates.forEach(function (ds) { thr.appendChild(el('th', msDowCls_(ds), String(Number(ds.slice(8))))); });
     var thead = el('thead'); thead.appendChild(thr); table.appendChild(thead);
     var tbody = el('tbody');
-    dates.forEach(function (ds) {
-      var tr = el('tr'), n = 0;
-      tr.appendChild(el('td', msDowCls_(ds), msDayLabel_(ds)));
-      people.forEach(function (m) {
+    people.forEach(function (m) {
+      var tr = el('tr');
+      tr.appendChild(el('td', null, m.name));
+      dates.forEach(function (ds) {
         var e = em[m.id] && em[m.id][ds];
-        if (e && e.status === 'available') n++;
         var td = el('td', e ? 'st-' + e.status : 'st-none', msShort_(e));
         if (e && e.note) td.title = e.note;
         tr.appendChild(td);
       });
-      tr.appendChild(el('td', null, n + '人'));
       tbody.appendChild(tr);
     });
+    var cr = el('tr', 'ms-count-row');
+    cr.appendChild(el('td', null, '勤務可能'));
+    dates.forEach(function (ds) {
+      var n = people.filter(function (m) { var e = em[m.id] && em[m.id][ds]; return e && e.status === 'available'; }).length;
+      cr.appendChild(el('td', n ? null : 'cov-zero', n + '人'));
+    });
+    tbody.appendChild(cr);
     table.appendChild(tbody); wrap.appendChild(table); box.appendChild(wrap);
 
     box.appendChild(el('div', 'ms-sec-title', '不足時間帯（' + MS_FROM + '〜' + MS_TO + '時）'));
@@ -2123,36 +2149,8 @@
     }));
     pc.appendChild(pr);
 
-    // 個別延長
-    var ec = msCard_(box, '個別延長（' + msMonthLabel_(MS.month) + '分）', '締切後でも、指定した人だけ延長期限まで入力・提出できるようにします。');
-    if (!MS.extensions.length) ec.appendChild(el('p', 'ms-note', '個別延長はありません。'));
-    MS.extensions.forEach(function (x) {
-      var row = el('div', 'ms-setting-row');
-      row.appendChild(el('span', 'grow', msNameOf_(x.id)));
-      row.appendChild(el('span', 'ms-badge ext', msMd_(x.until) + 'まで'));
-      row.appendChild(msBtn_('取り消す', 'sidebar-btn ms-small-btn ms-danger', function () {
-        msCall_('adminMsSetExtension', { targetId: x.id, until: '' }, '延長を取り消しました');
-      }));
-      ec.appendChild(row);
-    });
-    var actives = MS.managers.filter(function (m) { return m.active; });
-    if (actives.length) {
-      var eg = el('div', 'grid2'); eg.style.marginTop = '10px';
-      var who = document.createElement('select');
-      actives.forEach(function (m) { var o = el('option', null, m.name); o.value = m.id; who.appendChild(o); });
-      var untilP = makeDatePicker_('');
-      var l3 = el('label', 'fld', '対象'); l3.appendChild(who); eg.appendChild(l3);
-      var l4 = el('label', 'fld', '延長期限（この日まで）'); l4.appendChild(untilP); eg.appendChild(l4);
-      ec.appendChild(eg);
-      var eb = msBtn_('延長する', 'ms-small-btn', function () {
-        msCall_('adminMsSetExtension', { targetId: who.value, until: msPickerDate_(untilP) }, '延長しました');
-      });
-      eb.style.marginTop = '12px';
-      ec.appendChild(eb);
-    }
-
-    // マネージャー（ID/PIN）
-    var mc = msCard_(box, 'マネージャー', 'ID・PINはマネスケ提出画面のログインに使います。PINは暗号化して保存されるため、忘れた場合は再発行してください。');
+    // マネージャー（ID/PIN・個別延長。2026-11-17、個別延長を別カードからここへ統合し、延長はモーダルで設定）
+    var mc = msCard_(box, 'マネージャー', 'ID・PINはマネスケ提出画面のログインに使います。PINは暗号化して保存されるため、忘れた場合は再発行してください。「延長」は締切後でもその人だけ' + msMonthLabel_(MS.month) + '分を入力・提出できるようにします。');
     if (!MS.managers.length) mc.appendChild(el('p', 'ms-note', 'まだ登録されていません。'));
     MS.managers.forEach(function (m) {
       var row = el('div', 'ms-setting-row');
@@ -2160,6 +2158,13 @@
       nm.appendChild(el('span', 'sub', 'ID: ' + m.id));
       row.appendChild(nm);
       row.appendChild(el('span', 'ms-badge ' + (m.active ? 'sub' : ''), m.active ? '有効' : '無効'));
+      var ext = msExtOf_(m.id);
+      if (ext) row.appendChild(el('span', 'ms-badge ext', msMd_(ext.until) + 'まで延長'));
+      // ボタンは2行目にまとめる（行ごとに折り返し位置がばらつかないように）
+      var acts = el('div', 'ms-row-actions');
+      row.appendChild(acts);
+      row = acts;
+      if (m.active) row.appendChild(msBtn_('延長', null, function () { msOpenExt_(m); }));
       row.appendChild(msBtn_('氏名変更', null, function () {
         msPrompt_('氏名を変更', '新しい氏名', m.name, false, function (v) {
           if (v) msCall_('adminMsManagerUpdate', { targetId: m.id, manager: { name: v } }, '変更しました');
@@ -2178,7 +2183,7 @@
           msCall_('adminMsManagerDelete', { targetId: m.id }, '削除しました');
         }
       }));
-      mc.appendChild(row);
+      mc.appendChild(acts.parentNode);
     });
     var af = el('div', 'accounts-add-form');
     af.appendChild(el('div', 'fld-title', 'マネージャーを追加'));
@@ -2197,6 +2202,30 @@
     af.appendChild(addBtn);
     mc.appendChild(af);
   }
+
+  // 個別延長モーダル
+  var MS_EXT_TARGET = null, MS_EXT_PICKER = null;
+  function msOpenExt_(m) {
+    MS_EXT_TARGET = m.id;
+    var ext = msExtOf_(m.id);
+    $('msExtTitle').textContent = m.name + ' さんの個別延長';
+    $('msExtNote').textContent = msMonthLabel_(MS.month) + '分（全員の締切: ' + msMd_(MS.window.close) + '）。' +
+      (ext ? '現在 ' + msMd_(ext.until) + ' まで延長中です。' : '現在、延長はありません。');
+    var box = $('msExtPicker');
+    box.innerHTML = '';
+    MS_EXT_PICKER = makeDatePicker_(ext ? ext.until : '');
+    box.appendChild(MS_EXT_PICKER);
+    $('msExtRemove').hidden = !ext;
+    $('msExtOk').textContent = ext ? '変更する' : '延長する';
+    $('msExtOverlay').hidden = false;
+  }
+  $('msExtCancel').onclick = function () { $('msExtOverlay').hidden = true; };
+  $('msExtOk').onclick = function () {
+    msCall_('adminMsSetExtension', { targetId: MS_EXT_TARGET, until: msPickerDate_(MS_EXT_PICKER) }, '延長しました', function () { $('msExtOverlay').hidden = true; });
+  };
+  $('msExtRemove').onclick = function () {
+    msCall_('adminMsSetExtension', { targetId: MS_EXT_TARGET, until: '' }, '延長を取り消しました', function () { $('msExtOverlay').hidden = true; });
+  };
 
   Array.prototype.forEach.call($('msTabs').children, function (b) {
     b.onclick = function () { MS_TAB = b.getAttribute('data-tab'); renderMs_(); };

@@ -205,7 +205,14 @@
   .ms-status-btns button.on[data-st=""] { background:#777; color:#fff; }
   .ms-status-btns button:disabled { opacity:.5; }
   .ms-chk { white-space:normal; margin-bottom:10px; }
-  .ms-time-row { display:flex; align-items:center; gap:8px; margin:0 0 12px; flex-wrap:wrap; font-size:14px; color:var(--sub); }
+  .ms-time-row { display:flex; align-items:center; gap:8px; margin:0 0 10px; flex-wrap:wrap; font-size:14px; color:var(--sub); }
+  .ms-time-row.dim { opacity:.35; }
+  .ms-save-badge { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:45; display:flex; align-items:center; gap:10px;
+                   background:#2a2410; color:#fff; padding:9px 16px; border-radius:999px; font-size:13px; font-weight:700;
+                   box-shadow:0 6px 16px rgba(0,0,0,.25); white-space:nowrap; }
+  .ms-save-badge.ok { background:#1f6f5c; }
+  .ms-save-badge.ng { background:#c62828; }
+  .ms-save-badge button { background:#fff; color:#c62828; font-size:12px; padding:5px 12px; }
   .ms-fld { display:flex; flex-direction:column; gap:5px; font-size:13px; color:var(--sub); font-weight:600; }
   .ms-save-state { min-height:18px; margin:8px 0 0; font-size:12px; font-weight:700; color:var(--sub); text-align:center; }
   .ms-save-state.ok { color:#1f6f5c; } .ms-save-state.ng { color:#c62828; }
@@ -310,6 +317,7 @@
   <div class="ms-legend"><span><i style="background:#dff3e8"></i>勤務可能</span><span><i style="background:#fde0e0"></i>OFF</span><span><i style="background:#f4f4f4"></i>未入力</span></div>
   <div id="msActions"></div>
 </div>
+<div class="ms-save-badge" id="msSaveBadge" hidden><span id="msSaveText"></span><button type="button" id="msSaveRetry" hidden>再試行</button></div>
 <div class="modal-backdrop" id="msEditBackdrop" hidden>
   <div class="modal-card">
     <div class="ms-edit-nav">
@@ -323,13 +331,13 @@
       <button type="button" data-st="">未入力</button>
     </div>
     <div id="msEdTimeBox">
-      <label class="chk ms-chk"><input type="checkbox" id="msEdUseTime"> 時間を指定する（指定しなければ終日）</label>
-      <div class="ms-time-row" id="msEdTimes" hidden></div>
+      <div class="ms-time-row" id="msEdTimes"></div>
+      <label class="chk ms-chk"><input type="checkbox" id="msEdAllDay"> 終日</label>
     </div>
     <label class="ms-fld">備考（任意）<input type="text" id="msEdNote" maxlength="200" placeholder="例：19時以降なら可"></label>
     <p class="ms-save-state" id="msEdState"></p>
     <div class="modal-actions">
-      <button type="button" id="msEdClose">保存して閉じる</button>
+      <button type="button" id="msEdClose">閉じる</button>
     </div>
   </div>
 </div>
@@ -828,9 +836,12 @@
   // ============ マネスケ提出（マネージャー画面、2026-11-17追加。仕様は マネスケ仕様.md） ============
   var MS_ID = '', MS_PIN = '', MSD = null, MS_MONTH = '', MS_ED = null, MS_SAVING = false;
   var MS_WJ = ['日', '月', '火', '水', '木', '金', '土'];
-  function msPost_(action, payload, ok, fail) {
+  // opts.quiet: エラーをトーストで出さない（裏で保存するときは保存状態バッジで知らせるため）
+  // opts.keepalive: 画面を閉じる・裏に回すときでも送信を続けさせる
+  function msPost_(action, payload, ok, fail, opts) {
+    opts = opts || {};
     var body = Object.assign({ action: action, mgrId: MS_ID, pin: MS_PIN }, payload || {});
-    fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+    fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body), keepalive: !!opts.keepalive })
       .then(function (r) { return r.json(); })
       .then(function (res) {
         if (!res.ok) { var er = new Error(res.error); er.code = res.code; throw er; }
@@ -841,12 +852,13 @@
         if (/Failed to fetch|NetworkError|JSON/.test(t)) t = '通信できませんでした。電波の良い所でもう一度お試しください';
         if (e && e.code === 'SUSPENDED') { FEATURES.ms = false; msLogout_(); }
         else if (/IDまたはPIN|ログインの失敗/.test(t) && !$('msApp').hidden) { msLogout_(t); }
-        else toast(t);
+        else if (!opts.quiet) toast(t);
         if (fail) fail(t);
       });
   }
   function msLogout_(err) {
     MS_PIN = ''; MSD = null;
+    MS_PENDING = {}; MS_INFLIGHT = null; clearTimeout(MS_FLUSH_T); msResolveWaiters_(false); $('msSaveBadge').hidden = true;
     $('msEditBackdrop').hidden = true; $('msConfirmBackdrop').hidden = true;
     $('msApp').hidden = true; $('app').hidden = false; $('board').hidden = true; $('gate').hidden = false;
     gateShow_('ms');
@@ -1003,7 +1015,7 @@
     MS_ED.readOnly = !mv.window.editable;
     MS_ED.status = e ? e.status : '';
     $('msEdTitle').textContent = msDayLabel_(MS_ED.date);
-    $('msEdUseTime').checked = !!(e && e.start);
+    $('msEdAllDay').checked = !!(e && e.status === 'available' && !e.start);
     var box = $('msEdTimes');
     box.innerHTML = '';
     MS_ED.sp = msTimePicker_(e && e.start ? e.start : '09:00');
@@ -1019,54 +1031,125 @@
       b.classList.toggle('on', b.getAttribute('data-st') === MS_ED.status);
       b.disabled = ro;
     });
-    $('msEdTimeBox').hidden = MS_ED.status !== 'available' || (ro && !$('msEdUseTime').checked);
-    $('msEdTimes').hidden = !$('msEdUseTime').checked;
-    $('msEdUseTime').disabled = ro;
-    MS_ED.sp.setDisabled(ro); MS_ED.ep.setDisabled(ro);
+    // 時刻は常に表示し、「終日」にチェックしたときだけ薄くして選べなくする
+    var allDay = $('msEdAllDay').checked;
+    $('msEdTimeBox').hidden = MS_ED.status !== 'available';
+    $('msEdTimes').classList.toggle('dim', allDay);
+    $('msEdAllDay').disabled = ro;
+    MS_ED.sp.setDisabled(ro || allDay); MS_ED.ep.setDisabled(ro || allDay);
     $('msEdNote').disabled = ro || !MS_ED.status;
-    $('msEdClose').textContent = ro ? '閉じる' : '保存して閉じる';
     var days = msDays_(MS_MONTH);
     $('msEdPrev').disabled = MS_ED.date === days[0];
     $('msEdNext').disabled = MS_ED.date === days[days.length - 1];
   }
   function msEdValue_() {
-    var st = MS_ED.status, useTime = st === 'available' && $('msEdUseTime').checked;
+    var st = MS_ED.status, useTime = st === 'available' && !$('msEdAllDay').checked;
     return { date: MS_ED.date, status: st, start: useTime ? MS_ED.sp.getValue() : '', end: useTime ? MS_ED.ep.getValue() : '', note: st ? $('msEdNote').value.trim() : '' };
   }
   function msEdState_(t, cls) { $('msEdState').textContent = t; $('msEdState').className = 'ms-save-state ' + (cls || ''); }
-  // 変更があれば保存してから then を呼ぶ。失敗したらその日のまま留まる（入力内容は消えない）
-  function msSaveEdit_(then) {
-    if (MS_SAVING) return;
-    var v = msEdValue_();
-    if (MS_ED.readOnly || JSON.stringify(v) === MS_ED.orig) { then(); return; }
-    if (v.start && msMin_(v.start) >= msMin_(v.end)) { msEdState_('終了は開始より後の時刻にしてください', 'ng'); return; }
-    MS_SAVING = true;
-    msEdState_('保存中…');
-    msPost_('msSaveEntry', { month: MS_MONTH, entry: v }, function (mv) {
-      MS_SAVING = false;
-      msReplace_(mv); msRender_();
-      msEdState_('保存しました（' + msMd_(v.date) + '）', 'ok');
-      then();
+  // ---- 裏での保存（2026-11-17変更） ----
+  // 1日ごとに通信を待つと遅いため、入力を確定した時点で画面にはすぐ反映し（MS_PENDINGに溜める）、
+  // 最後の入力から1.5秒たったら溜まった分を msSaveEntries で1回にまとめて送る。
+  // 送信中に入力された分は次の送信に回す。失敗したら溜めたまま「再試行」を出す（入力は消えない）。
+  var MS_PENDING = {}, MS_INFLIGHT = null, MS_FLUSH_T = null, MS_WAITERS = [], MS_SAVE_ERR = false, MS_OK_T = null;
+  function msPendingCount_() {
+    var n = MS_INFLIGHT ? MS_INFLIGHT.entries.length : 0;
+    Object.keys(MS_PENDING).forEach(function (m) { n += Object.keys(MS_PENDING[m]).length; });
+    return n;
+  }
+  function msApplyLocal_(month, v) {
+    var mv = MSD && MSD.months.filter(function (m) { return m.month === month; })[0];
+    if (!mv) return;
+    mv.entries = mv.entries.filter(function (e) { return e.date !== v.date; });
+    if (v.status) mv.entries.push({ date: v.date, status: v.status, start: v.start, end: v.end, note: v.note });
+    mv.entries.sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+  }
+  function msSaveBadge_(justSaved) {
+    var b = $('msSaveBadge'), n = msPendingCount_();
+    clearTimeout(MS_OK_T);
+    $('msSaveRetry').hidden = !MS_SAVE_ERR;
+    if (MS_SAVE_ERR) { b.className = 'ms-save-badge ng'; $('msSaveText').textContent = '保存できていない入力があります'; b.hidden = false; }
+    else if (n) { b.className = 'ms-save-badge'; $('msSaveText').textContent = '保存中…'; b.hidden = false; }
+    else if (justSaved) {
+      b.className = 'ms-save-badge ok'; $('msSaveText').textContent = '✓ 保存しました'; b.hidden = false;
+      MS_OK_T = setTimeout(function () { b.hidden = true; }, 1500);
+    } else b.hidden = true;
+  }
+  function msQueue_(month, v) {
+    (MS_PENDING[month] = MS_PENDING[month] || {})[v.date] = v;
+    msApplyLocal_(month, v);
+    msSaveBadge_();
+    clearTimeout(MS_FLUSH_T);
+    MS_FLUSH_T = setTimeout(function () { msFlush_(); }, 1500);
+  }
+  function msResolveWaiters_(ok) { var w = MS_WAITERS; MS_WAITERS = []; w.forEach(function (f) { f(ok); }); }
+  function msFlush_(keepalive) {
+    clearTimeout(MS_FLUSH_T); MS_FLUSH_T = null;
+    if (MS_INFLIGHT) return; // 送信中の分が終わったら続きを送る
+    var month = Object.keys(MS_PENDING).filter(function (m) { return Object.keys(MS_PENDING[m]).length; })[0];
+    if (!month) { msResolveWaiters_(true); return; }
+    var batch = MS_PENDING[month];
+    delete MS_PENDING[month];
+    MS_INFLIGHT = { month: month, entries: Object.keys(batch).map(function (d) { return batch[d]; }) };
+    MS_SAVE_ERR = false;
+    msSaveBadge_();
+    msPost_('msSaveEntries', { month: month, entries: MS_INFLIGHT.entries }, function (mv) {
+      MS_INFLIGHT = null;
+      if (MSD) {
+        // サーバーの最新値に置き換えたうえで、送信中に入力された分を上に重ね直す
+        msReplace_(mv);
+        var p = MS_PENDING[month] || {};
+        Object.keys(p).forEach(function (d) { msApplyLocal_(month, p[d]); });
+        msRender_();
+      }
+      if (msPendingCount_()) msFlush_(); else { msSaveBadge_(true); msResolveWaiters_(true); }
     }, function () {
-      MS_SAVING = false;
-      msEdState_('保存できませんでした。もう一度お試しください', 'ng');
-    });
+      MS_INFLIGHT = null;
+      if (!MSD) return; // ログアウト済み
+      var p = MS_PENDING[month] = MS_PENDING[month] || {};
+      Object.keys(batch).forEach(function (d) { if (!p[d]) p[d] = batch[d]; }); // その間に入力し直した日は新しい方を優先
+      MS_SAVE_ERR = true;
+      msSaveBadge_();
+      msResolveWaiters_(false);
+    }, { quiet: true, keepalive: keepalive });
+  }
+  // 未送信の分を送り切ってから cb(true)。送れなければ cb(false)
+  function msWhenSaved_(cb) {
+    if (!msPendingCount_()) { cb(true); return; }
+    MS_WAITERS.push(cb);
+    msFlush_();
+  }
+  $('msSaveRetry').onclick = function () { MS_SAVE_ERR = false; msFlush_(); };
+  // アプリを裏に回したときは待たずにすぐ送る。未送信のまま閉じようとしたら警告する
+  document.addEventListener('visibilitychange', function () { if (document.hidden && msPendingCount_()) msFlush_(true); });
+  window.addEventListener('beforeunload', function (e) { if (msPendingCount_()) { e.preventDefault(); e.returnValue = ''; } });
+
+  // 入力を確定する（画面にすぐ反映し、保存は裏で行う）。時刻の誤りがあればfalse
+  function msCommitEdit_() {
+    if (MS_ED.readOnly) return true;
+    var v = msEdValue_();
+    if (JSON.stringify(v) === MS_ED.orig) return true;
+    if (v.start && msMin_(v.start) >= msMin_(v.end)) { msEdState_('終了は開始より後の時刻にしてください', 'ng'); return false; }
+    msQueue_(MS_MONTH, v);
+    MS_ED.orig = JSON.stringify(v);
+    msRender_();
+    return true;
   }
   function msMoveEdit_(k) {
-    msSaveEdit_(function () {
-      var days = msDays_(MS_MONTH), i = days.indexOf(MS_ED.date) + k;
-      if (i < 0 || i >= days.length) return;
-      MS_ED.date = days[i];
-      msFillEdit_();
-    });
+    if (!msCommitEdit_()) return;
+    var days = msDays_(MS_MONTH), i = days.indexOf(MS_ED.date) + k;
+    if (i < 0 || i >= days.length) return;
+    MS_ED.date = days[i];
+    msEdState_('');
+    msFillEdit_();
   }
   Array.prototype.forEach.call($('msEdStatus').children, function (b) {
     b.onclick = function () { MS_ED.status = b.getAttribute('data-st'); msSyncEdit_(); };
   });
-  $('msEdUseTime').onchange = msSyncEdit_;
+  $('msEdAllDay').onchange = msSyncEdit_;
   $('msEdPrev').onclick = function () { msMoveEdit_(-1); };
   $('msEdNext').onclick = function () { msMoveEdit_(1); };
-  $('msEdClose').onclick = function () { msSaveEdit_(function () { $('msEditBackdrop').hidden = true; }); };
+  $('msEdClose').onclick = function () { if (msCommitEdit_()) $('msEditBackdrop').hidden = true; };
   $('msEditBackdrop').onclick = function (e) { if (e.target === $('msEditBackdrop')) $('msEdClose').onclick(); };
 
   // ---- 提出確認 ----
@@ -1104,17 +1187,27 @@
   $('msCfClose').onclick = msCloseConfirm_;
   $('msCfBack').onclick = msCloseConfirm_;
   $('msCfSubmit').onclick = function () {
-    var btn = $('msCfSubmit');
+    var btn = $('msCfSubmit'), label = btn.textContent;
     btn.disabled = true;
-    msPost_('msSubmit', { month: MS_MONTH }, function (mv) {
-      msReplace_(mv); msRender_(); msCloseConfirm_();
-      toast('提出しました');
-    }, function () { btn.disabled = false; });
+    btn.textContent = '送信中…';
+    var restore = function () { btn.disabled = false; btn.textContent = label; };
+    // 裏で保存待ちの入力を送り切ってから提出する
+    msWhenSaved_(function (ok) {
+      if (!ok) { restore(); toast('保存できていない入力があります。電波の良い所で再試行してください'); return; }
+      msPost_('msSubmit', { month: MS_MONTH }, function (mv) {
+        msReplace_(mv); msRender_(); msCloseConfirm_(); restore();
+        toast('提出しました');
+      }, restore);
+    });
   };
 
   $('msEnter').onclick = msEnter_;
   $('msPin').onkeydown = function (e) { if (e.key === 'Enter') msEnter_(); };
-  $('msLogout').onclick = function () { msLogout_(); };
+  $('msLogout').onclick = function () {
+    msWhenSaved_(function (ok) {
+      if (ok || confirm('保存できていない入力があります。ログアウトすると失われますが、よろしいですか？')) msLogout_();
+    });
+  };
   $('msId').value = store('ms_id') || '';
   (function () { // 募集ボードと同じロゴをマネスケ画面の見出しにも使う
     var lg = document.querySelector('#board .appbar-logo');
