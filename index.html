@@ -244,14 +244,14 @@
       </div>
       <div class="gate-suspended" id="gateSuspended" hidden>ただいま利用できません<small>しばらくしてから、もう一度お試しください。</small></div>
       <div id="gateMs" hidden>
-        <p class="notice">マネージャー用のIDとPINを入力してください。</p>
+        <p class="notice">管理画面と同じ管理者IDとパスワードを入力してください。</p>
         <div class="gate-field">
-          <label for="msId">ID</label>
-          <input type="text" id="msId" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="IDを入力">
+          <label for="msId">管理者ID</label>
+          <input type="text" id="msId" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="管理者IDを入力">
         </div>
         <div class="gate-field">
-          <label for="msPin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>PIN</label>
-          <input type="password" id="msPin" inputmode="numeric" autocomplete="current-password" placeholder="PINを入力">
+          <label for="msPin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>パスワード</label>
+          <input type="password" id="msPin" autocomplete="current-password" placeholder="パスワードを入力">
         </div>
         <p class="gate-error" id="msGateError" hidden></p>
         <button id="msEnter" class="gate-btn">ログイン</button>
@@ -851,7 +851,7 @@
         var t = (e && e.message) || 'エラーが発生しました';
         if (/Failed to fetch|NetworkError|JSON/.test(t)) t = '通信できませんでした。電波の良い所でもう一度お試しください';
         if (e && e.code === 'SUSPENDED') { FEATURES.ms = false; msLogout_(); }
-        else if (/IDまたはPIN|ログインの失敗/.test(t) && !$('msApp').hidden) { msLogout_(t); }
+        else if (/IDまたはパスワード|ログインの失敗/.test(t) && !$('msApp').hidden) { msLogout_(t); }
         else if (!opts.quiet) toast(t);
         if (fail) fail(t);
       });
@@ -865,10 +865,10 @@
     $('msGateError').hidden = !err; $('msGateError').textContent = err || '';
   }
   function msEnter_() {
-    MS_ID = $('msId').value.trim(); MS_PIN = $('msPin').value.trim();
+    MS_ID = $('msId').value.trim(); MS_PIN = $('msPin').value; // 中身は管理者パスワード（管理画面と同じく前後の空白も削らずに照合する）
     var btn = $('msEnter');
     if (btn.disabled) return;
-    if (!MS_ID || !MS_PIN) { $('msGateError').textContent = 'IDとPINを入力してください'; $('msGateError').hidden = false; return; }
+    if (!MS_ID || !MS_PIN) { $('msGateError').textContent = '管理者IDとパスワードを入力してください'; $('msGateError').hidden = false; return; }
     $('msGateError').hidden = true;
     btn.disabled = true; btn.innerHTML = '';
     btn.appendChild(el('span', 'spinner')); btn.appendChild(document.createTextNode('ログイン中…'));

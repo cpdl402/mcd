@@ -123,6 +123,7 @@
   .account-row:last-child { border-bottom:none; }
   .account-id { font-weight:800; font-size:14px; min-width:90px; word-break:break-all; }
   .account-meta { font-size:11px; color:var(--sub); }
+  .account-sub-id { display:block; font-weight:500; }
   .account-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:#eee7d6; color:#6b6248; }
   .account-badge.on { background:#e4f6ef; color:#1f6f5c; }
   .account-actions { display:flex; gap:6px; flex-wrap:wrap; margin-left:auto; }
@@ -130,6 +131,7 @@
   .accounts-add-form { margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
   .fld-title { font-size:13px; font-weight:800; color:var(--ink); margin-bottom:8px; }
   .chk-row { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--sub); font-weight:600; margin-bottom:10px; }
+  .chk-row input[type=checkbox] { width:auto; flex:none; }
   .weekbar { position:fixed; left:0; right:0; bottom:0; background:#fffdf6; border-top:1px solid var(--line);
              display:flex; gap:6px; padding:8px 10px; overflow-x:auto; z-index:4;
              box-shadow:0 -2px 8px rgba(0,0,0,.05); }
@@ -438,6 +440,7 @@
       <div class="grid2">
         <label class="fld">管理者ID<input type="text" id="acctNewId"></label>
         <label class="fld">パスワード<input type="text" id="acctNewPass"></label>
+        <label class="fld">氏名（マネスケで表示）<input type="text" id="acctNewName"></label>
       </div>
       <label class="chk-row"><input type="checkbox" id="acctNewCanManage"> アカウント管理権限を付与する</label>
       <button type="button" id="acctAddBtn" style="width:100%; margin-top:4px;">追加する</button>
@@ -1567,12 +1570,27 @@
   function renderAccountsList_(accounts) {
     var box = $('accountsList');
     box.innerHTML = '';
+    MS = null; // アカウント（＝マネスケの提出対象）が変わり得るので、マネスケ画面は次に開いたとき読み直す
     accounts.forEach(function (a) {
       var row = el('div', 'account-row');
-      row.appendChild(el('span', 'account-id', a.id));
+      var idEl = el('span', 'account-id', a.name || '（氏名未設定）');
+      idEl.appendChild(el('span', 'account-meta account-sub-id', 'ID: ' + a.id));
+      row.appendChild(idEl);
       row.appendChild(el('span', 'account-meta', a.createdAt));
       row.appendChild(el('span', 'account-badge' + (a.canManage ? ' on' : ''), a.canManage ? '管理権限あり' : '管理権限なし'));
       var actions = el('div', 'account-actions');
+      // 氏名（マネスケで表示する名前。2026-11-17、マネスケのアカウントを管理者アカウントに統一したため追加）
+      var nameBtn = el('button', 'ghost', '氏名変更');
+      nameBtn.onclick = function () {
+        msPrompt_('氏名を変更（' + a.id + '）', '氏名（マネスケで表示されます）', a.name, false, function (v) {
+          if (!v) return;
+          call('adminAccountsSetName', { targetId: a.id, name: v }, function (data) {
+            renderAccountsList_(data.accounts);
+            toast('氏名を変更しました');
+          });
+        });
+      };
+      actions.appendChild(nameBtn);
       var resetBtn = el('button', 'ghost', 'パスワードリセット');
       resetBtn.onclick = function () { openAcctReset_(a.id); };
       actions.appendChild(resetBtn);
@@ -1608,11 +1626,12 @@
   $('accountsBackBtn').onclick = function () { switchView('lines'); };
   $('acctAddBtn').onclick = function () {
     var newId = $('acctNewId').value.trim(), newPass = $('acctNewPass').value.trim();
-    var canManage = $('acctNewCanManage').checked;
+    var canManage = $('acctNewCanManage').checked, newName = $('acctNewName').value.trim();
     if (!newId || !newPass) { toast('管理者IDとパスワードを入力してください'); return; }
-    call('adminAccountsAdd', { newId: newId, newPass: newPass, canManage: canManage }, function (data) {
+    if (!newName) { toast('氏名を入力してください'); return; }
+    call('adminAccountsAdd', { newId: newId, newPass: newPass, canManage: canManage, newName: newName }, function (data) {
       renderAccountsList_(data.accounts);
-      $('acctNewId').value = ''; $('acctNewPass').value = ''; $('acctNewCanManage').checked = false;
+      $('acctNewId').value = ''; $('acctNewPass').value = ''; $('acctNewName').value = ''; $('acctNewCanManage').checked = false;
       toast('追加しました');
     });
   };
@@ -1838,7 +1857,7 @@
   // ---- 提出状況 ----
   function msRenderStatus_(box) {
     var people = msPeople_().filter(function (m) { return m.active; });
-    if (!people.length) { box.appendChild(el('p', 'empty', '「設定」タブからマネージャーを追加してください。')); return; }
+    if (!people.length) { box.appendChild(el('p', 'empty', 'アカウント管理からアカウントを追加してください。')); return; }
     var em = msEntryMap_();
     var isSub = function (m) { var s = msSubOf_(m.id); return s && s.status === 'submitted' ? 1 : 0; };
     var subCount = people.filter(isSub).length, unsub = people.length - subCount;
@@ -1873,7 +1892,7 @@
   function msWeekStart_() { return msLs_('ms_admin_week_start') === '1' ? 1 : 0; }
   function msRenderPerson_(box) {
     var people = msPeople_();
-    if (!people.length) { box.appendChild(el('p', 'empty', 'マネージャーが登録されていません。')); return; }
+    if (!people.length) { box.appendChild(el('p', 'empty', 'アカウントがありません。')); return; }
     if (!people.some(function (m) { return m.id === MS_PERSON; })) MS_PERSON = people[0].id;
     var bar = el('div', 'ms-toolbar');
     var sel = document.createElement('select');
@@ -2012,7 +2031,7 @@
   // ---- 全体一覧（日付×マネージャー、不足時間帯、CSV） ----
   function msRenderAll_(box) {
     var people = msPeople_();
-    if (!people.length) { box.appendChild(el('p', 'empty', 'マネージャーが登録されていません。')); return; }
+    if (!people.length) { box.appendChild(el('p', 'empty', 'アカウントがありません。')); return; }
     var em = msEntryMap_(), dates = msDaysOf_(MS.month);
     var bar = el('div', 'ms-toolbar');
     var csvBtn = el('button', 'sidebar-btn ms-small-btn', 'CSVで保存');
@@ -2149,58 +2168,20 @@
     }));
     pc.appendChild(pr);
 
-    // マネージャー（ID/PIN・個別延長。2026-11-17、個別延長を別カードからここへ統合し、延長はモーダルで設定）
-    var mc = msCard_(box, 'マネージャー', 'ID・PINはマネスケ提出画面のログインに使います。PINは暗号化して保存されるため、忘れた場合は再発行してください。「延長」は締切後でもその人だけ' + msMonthLabel_(MS.month) + '分を入力・提出できるようにします。');
-    if (!MS.managers.length) mc.appendChild(el('p', 'ms-note', 'まだ登録されていません。'));
+    // 個別延長（2026-11-17、マネスケのアカウントを管理者アカウントに統一。アカウントの追加・氏名・パスワードは
+    // アカウント管理で行うため、ここでは個別延長だけを設定する）
+    var mc = msCard_(box, '個別延長（' + msMonthLabel_(MS.month) + '分）', '締切後でも、その人だけ延長期限まで入力・提出できるようにします。対象は管理者アカウント全員です（追加・氏名・パスワードはアカウント管理で設定します）。');
+    if (!MS.managers.length) mc.appendChild(el('p', 'ms-note', 'アカウントがありません。'));
     MS.managers.forEach(function (m) {
       var row = el('div', 'ms-setting-row');
       var nm = el('span', 'grow', m.name);
       nm.appendChild(el('span', 'sub', 'ID: ' + m.id));
       row.appendChild(nm);
-      row.appendChild(el('span', 'ms-badge ' + (m.active ? 'sub' : ''), m.active ? '有効' : '無効'));
       var ext = msExtOf_(m.id);
       if (ext) row.appendChild(el('span', 'ms-badge ext', msMd_(ext.until) + 'まで延長'));
-      // ボタンは2行目にまとめる（行ごとに折り返し位置がばらつかないように）
-      var acts = el('div', 'ms-row-actions');
-      row.appendChild(acts);
-      row = acts;
-      if (m.active) row.appendChild(msBtn_('延長', null, function () { msOpenExt_(m); }));
-      row.appendChild(msBtn_('氏名変更', null, function () {
-        msPrompt_('氏名を変更', '新しい氏名', m.name, false, function (v) {
-          if (v) msCall_('adminMsManagerUpdate', { targetId: m.id, manager: { name: v } }, '変更しました');
-        });
-      }));
-      row.appendChild(msBtn_('PIN再発行', null, function () {
-        msPrompt_('PINを再発行（' + m.name + '）', '新しいPIN（1〜8桁の数字）', '', true, function (v) {
-          if (v) msCall_('adminMsManagerResetPin', { targetId: m.id, pin: v }, 'PINを再発行しました');
-        });
-      }));
-      row.appendChild(msBtn_(m.active ? '無効にする' : '有効にする', null, function () {
-        msCall_('adminMsManagerUpdate', { targetId: m.id, manager: { active: !m.active } }, m.active ? '無効にしました' : '有効にしました');
-      }));
-      row.appendChild(msBtn_('削除', 'sidebar-btn ms-small-btn ms-danger', function () {
-        if (confirm(m.name + ' さんのアカウントを削除しますか？（提出済みの希望データは残ります。一時的に止めるだけなら「無効にする」を使ってください）')) {
-          msCall_('adminMsManagerDelete', { targetId: m.id }, '削除しました');
-        }
-      }));
-      mc.appendChild(acts.parentNode);
+      row.appendChild(msBtn_('延長', null, function () { msOpenExt_(m); }));
+      mc.appendChild(row);
     });
-    var af = el('div', 'accounts-add-form');
-    af.appendChild(el('div', 'fld-title', 'マネージャーを追加'));
-    var ag = el('div', 'grid2');
-    var idIn = document.createElement('input'); idIn.type = 'text'; idIn.autocapitalize = 'off';
-    var nmIn = document.createElement('input'); nmIn.type = 'text';
-    var pinIn = document.createElement('input'); pinIn.type = 'text'; pinIn.inputMode = 'numeric';
-    [['ID（半角英数字）', idIn], ['氏名', nmIn], ['PIN（1〜8桁の数字）', pinIn]].forEach(function (x) {
-      var l = el('label', 'fld', x[0]); l.appendChild(x[1]); ag.appendChild(l);
-    });
-    af.appendChild(ag);
-    var addBtn = msBtn_('追加する', null, function () {
-      msCall_('adminMsManagerAdd', { manager: { id: idIn.value.trim(), name: nmIn.value.trim(), pin: pinIn.value.trim() } }, '追加しました');
-    });
-    addBtn.className = ''; addBtn.style.width = '100%'; addBtn.style.marginTop = '12px';
-    af.appendChild(addBtn);
-    mc.appendChild(af);
   }
 
   // 個別延長モーダル
