@@ -64,6 +64,10 @@
                background:var(--card); -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
   .bulk-item { padding:8px 10px; border-bottom:1px solid var(--line); font-size:12px; line-height:1.45; min-width:0; }
   .bulk-item:last-child { border-bottom:0; }
+  .bulk-item-head { display:flex; align-items:flex-start; gap:8px; }
+  .bulk-item-head .bulk-item-main { flex:1; min-width:0; }
+  button.bulk-item-del { flex:none; font-size:12px; padding:6px 10px; min-height:32px; border-radius:8px; background:transparent;
+                         color:#c0262d; border:1px solid #e9b3b6; font-weight:700; }
   .bulk-item-main { display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; font-weight:700; color:var(--ink); }
   .bulk-item-cat { font-size:11px; padding:1px 7px; border-radius:999px; font-weight:700; }
   .bulk-item-sub { color:var(--sub); word-break:break-word; overflow-wrap:anywhere; }
@@ -410,9 +414,9 @@
       <span class="sidebar-title">Menu</span>
       <button type="button" class="sidebar-close" id="sidebarClose" aria-label="閉じる">×</button>
     </div>
-    <button class="sidebar-btn" id="openAddLineBtn" style="width:100%; margin-bottom:10px;">募集ラインを追加</button>
+    <button class="sidebar-btn" id="openAddLineBtn" style="width:100%; margin-bottom:10px;" hidden>募集ラインを追加</button>
 
-    <details class="panel" id="bulkImportPanel">
+    <details class="panel" id="bulkImportPanel" hidden>
       <summary>まとめて挿入（ファイルから）</summary>
       <div class="newline-form" style="margin-top:12px;">
         <label class="fld">JSONファイル（shift-importスキルで生成したもの）
@@ -428,7 +432,7 @@
     <button class="sidebar-btn" id="openRosterBtn" style="width:100%; margin-top:8px;">交渉編集</button>
     <button class="sidebar-btn" id="openMsBtn" style="width:100%; margin-top:8px;" hidden>マネスケ</button>
     <button class="sidebar-btn" id="exportImageBtn" style="width:100%; margin-top:8px;">この週を画像で保存</button>
-    <button class="sidebar-btn" id="exportPrintBtn" style="width:100%; margin-top:8px;">この週を印刷用PDFで出力（A4・記入欄付き）</button>
+    <button class="sidebar-btn" id="exportPrintBtn" style="width:100%; margin-top:8px;">PDF出力</button>
     <button class="ghost" id="logoutBtn" style="width:100%; margin-top:8px;">ログアウト</button>
   </div>
 
@@ -1081,8 +1085,11 @@
     var list = $('list');
     list.innerHTML = '';
     if (!DATA) return;
+    // 管理権限（「管理者」シートD列）がある人だけに出す機能。サーバー側（Code.gs）でも同じ権限を確認している
     $('openAccountsBtn').hidden = !DATA.canManageAccounts;
     $('openMsBtn').hidden = !DATA.canManageAccounts;
+    $('openAddLineBtn').hidden = !DATA.canManageAccounts;   // 募集ラインの個別追加（2026-11-20〜）
+    $('bulkImportPanel').hidden = !DATA.canManageAccounts;  // まとめて挿入（2026-11-20〜）
 
     var weeks = buildWeeks(DATA.lines);
     if (!WEEK_KEY || !weeks.some(function (w) { return w.key === WEEK_KEY; })) {
@@ -1881,10 +1888,18 @@
     reader.readAsText(f, 'utf-8');
   };
 
+  // 読み込んだファイルを取り消す（サーバーには何も送っていないので、画面上の読み込み結果を捨てるだけ）
+  function clearBulkImport_() {
+    BULK_LINES = null; $('bulkPreview').innerHTML = ''; $('bulkFile').value = '';
+  }
+
   function renderBulkPreview(lines) {
     var box = $('bulkPreview');
+    var prevList = box.querySelector('.bulk-list');
+    var keepScroll = prevList ? prevList.scrollTop : 0;
     box.innerHTML = '';
-    box.appendChild(el('p', 'notice', lines.length + '件を読み込みました。内容を確認して追加してください。'));
+    if (!lines || !lines.length) { clearBulkImport_(); toast('すべての行を削除したため、読み込みを取り消しました'); return; }
+    box.appendChild(el('p', 'notice', lines.length + '件を読み込みました。内容を確認し、不要な行は「削除」してから追加してください。'));
 
     // サイドバー（幅300px）に6列の表を入れると横にはみ出して見切れるため、縦並びのリストにする。
     // 件数が多くても「追加する」ボタンが埋もれないよう、ボタンをリストの上に置き、リストは内側だけスクロールさせる
@@ -1895,16 +1910,21 @@
       call('adminBulkAddLines', { lines: BULK_LINES }, function (data) {
         DATA = Object.assign({}, DATA, data); render();
         toast(BULK_LINES.length + '件のラインを追加しました');
-        BULK_LINES = null; box.innerHTML = ''; $('bulkFile').value = '';
+        clearBulkImport_();
         closeSidebar();
       }, function () { goBtn.disabled = false; });
     };
     actions.appendChild(goBtn);
+    var cancelBtn = el('button', 'ghost', 'ファイルを取り消す');
+    cancelBtn.type = 'button';
+    cancelBtn.onclick = function () { clearBulkImport_(); toast('読み込みを取り消しました'); };
+    actions.appendChild(cancelBtn);
     box.appendChild(actions);
 
     var list = el('div', 'bulk-list');
-    lines.forEach(function (l) {
+    lines.forEach(function (l, idx) {
       var item = el('div', 'bulk-item');
+      var head = el('div', 'bulk-item-head');
       var main = el('div', 'bulk-item-main');
       var dateText = l.date || '';
       var dow = dateText ? new Date(String(dateText).replace(/\//g, '-') + 'T00:00:00').getDay() : NaN;
@@ -1916,13 +1936,24 @@
       var catEl = el('span', 'bulk-item-cat', cat);
       catEl.style.background = c.bg; catEl.style.color = c.ink;
       main.appendChild(catEl);
-      main.appendChild(el('span', null, '×' + (l.need || 1)));
-      item.appendChild(main);
+      main.appendChild(el('span', null, (l.need || 1) + '人'));
+      head.appendChild(main);
+      // 個別削除（取り込み前に不要な行だけ除外する。サーバーには送らないのでその場で消える）
+      var delBtn = el('button', 'bulk-item-del', '削除');
+      delBtn.type = 'button';
+      delBtn.setAttribute('aria-label', (l.date || '') + ' ' + (l.start || '') + '〜' + (l.end || '') + ' を削除');
+      delBtn.onclick = function () {
+        BULK_LINES.splice(idx, 1);
+        renderBulkPreview(BULK_LINES);
+      };
+      head.appendChild(delBtn);
+      item.appendChild(head);
       var sub = [l.what, l.note].filter(function (s) { return s; }).join(' ／ ');
       if (sub) item.appendChild(el('div', 'bulk-item-sub', sub));
       list.appendChild(item);
     });
     box.appendChild(list);
+    list.scrollTop = keepScroll;
   }
 
   // ============ マネスケ（2026-11-17追加。仕様は マネスケ仕様.md） ============
