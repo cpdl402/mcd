@@ -60,6 +60,13 @@
   .day-jump button span { display:block; }
   .day-jump button:disabled { background:#fff; color:var(--sub); opacity:.4; cursor:default; }
   .day-jump button.today { border-color:var(--accent); color:var(--accent); }
+  .day-jump .dj-sat { color:#1f5fbf; }
+  .day-jump .dj-sun { color:#d1242f; }
+  .day-jump .dj-rest { width:fit-content; margin:3px auto 0; padding:1px 4px; border-radius:999px; font-size:10px; line-height:1.4;
+                       background:#e3001b; color:#fff; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis; }
+  .day-jump .dj-none { background:transparent; color:var(--sub); }
+  .day-jump .dj-done { background:#eceae3; color:#8a8574; }
+  .day-jump .dj-mine { background:#e4f6ef; color:#1f6f5c; }
   .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:40; display:flex;
                      align-items:center; justify-content:center; padding:16px; }
   .modal-card { background:var(--card); border-radius:14px; padding:18px; width:100%; max-width:360px;
@@ -584,7 +591,7 @@
     if (VIEW !== 'mine') {
       order.forEach(function (d) { groups[d].items = mergeLines_(groups[d].items); });
     }
-    renderDayJump(order, WEEK_KEY);
+    renderDayJump(order, WEEK_KEY, groups);
     if (!order.length) {
       var emptyMsg = VIEW === 'mine'
         ? (me ? 'この週に参加予定の募集ラインはありません' : '名前を入力すると、あなたが参加予定の募集ラインが表示されます')
@@ -631,7 +638,38 @@
     });
   }
 
-  function renderDayJump(order, monKey) {
+  // 日本の祝日判定（外部取得なし。春分・秋分は1980〜2099年の近似式。振替休日・国民の休日に対応。管理画面と同じ実装）
+  function jpBaseHoliday_(y, m, d) {
+    var dow = new Date(y, m - 1, d).getDay();
+    var nth = Math.floor((d - 1) / 7) + 1;
+    var base = y - 1980, leap = Math.floor(base / 4);
+    if (m === 1 && (d === 1 || (dow === 1 && nth === 2))) return true;
+    if (m === 2 && (d === 11 || d === 23)) return true;
+    if (m === 3 && d === Math.floor(20.8431 + 0.242194 * base - leap)) return true;
+    if (m === 4 && d === 29) return true;
+    if (m === 5 && (d === 3 || d === 4 || d === 5)) return true;
+    if (m === 7 && dow === 1 && nth === 3) return true;
+    if (m === 8 && d === 11) return true;
+    if (m === 9 && ((dow === 1 && nth === 3) || d === Math.floor(23.2488 + 0.242194 * base - leap))) return true;
+    if (m === 10 && dow === 1 && nth === 2) return true;
+    if (m === 11 && (d === 3 || d === 23)) return true;
+    return false;
+  }
+  function isJpHoliday_(dt) {
+    var y = dt.getFullYear(), m = dt.getMonth() + 1, d = dt.getDate();
+    if (jpBaseHoliday_(y, m, d)) return true;
+    var p = new Date(y, m - 1, d - 1);
+    while (jpBaseHoliday_(p.getFullYear(), p.getMonth() + 1, p.getDate())) {
+      if (p.getDay() === 0) return true;
+      p = new Date(p.getFullYear(), p.getMonth(), p.getDate() - 1);
+    }
+    var b = new Date(y, m - 1, d - 1), a = new Date(y, m - 1, d + 1);
+    return dt.getDay() !== 0 && jpBaseHoliday_(b.getFullYear(), b.getMonth() + 1, b.getDate()) &&
+      jpBaseHoliday_(a.getFullYear(), a.getMonth() + 1, a.getDate());
+  }
+
+  // 週の日付ジャンプ（曜日／日付／残り人数の3段。2026-11-20に残り人数の段を追加）
+  function renderDayJump(order, monKey, groups) {
     var box = $('dayJump'); box.innerHTML = '';
     if (!monKey) return;
     var mon = new Date(monKey.replace(/\//g, '-') + 'T00:00:00');
@@ -643,8 +681,19 @@
       var b = document.createElement('button');
       b.type = 'button';
       if (key === TODAY_STR) b.className = 'today';
-      b.appendChild(el('span', null, labels[i]));
+      var dowCls = (d.getDay() === 0 || isJpHoliday_(d)) ? 'dj-sun' : (d.getDay() === 6 ? 'dj-sat' : '');
+      b.appendChild(el('span', dowCls, labels[i]));
       b.appendChild(el('span', null, (d.getMonth() + 1) + '/' + d.getDate()));
+      // 3段目: 募集一覧ではフィルター適用後の未充足人数の合計（カードの「あと◯人」の合計と一致）、マイシフトでは参加予定の有無
+      var items = (has && groups && groups[key]) ? groups[key].items : [];
+      var rest = 0;
+      items.forEach(function (l) { rest += Math.max(0, l.need - l.filled); });
+      var third;
+      if (!has) third = el('span', 'dj-rest dj-none', '─');
+      else if (VIEW === 'mine') third = el('span', 'dj-rest dj-mine', '参加');
+      else if (rest > 0) third = el('span', 'dj-rest', 'あと' + rest);
+      else third = el('span', 'dj-rest dj-done', '充足');
+      b.appendChild(third);
       if (has) {
         b.onclick = function (k) {
           return function () {

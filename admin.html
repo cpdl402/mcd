@@ -53,8 +53,20 @@
   }
   .sidebar-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:29; }
   .sidebar { position:fixed; top:0; left:0; bottom:0; width:300px; max-width:85vw; background:var(--card);
-             z-index:30; box-shadow:4px 0 20px rgba(0,0,0,.2); padding:16px; overflow-y:auto; overflow-x:hidden;
+             height:100vh; height:100dvh; box-sizing:border-box;
+             z-index:30; box-shadow:4px 0 20px rgba(0,0,0,.2); padding:16px 16px calc(32px + env(safe-area-inset-bottom)); overflow-y:auto; overflow-x:hidden;
+             -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
              transform:translateX(-100%); transition:transform .25s ease; }
+  /* まとめて挿入のプレビュー（サイドバー幅に収まる縦並びリスト。件数が多いときはリスト内だけスクロール） */
+  .bulk-actions { display:grid; gap:8px; margin:8px 0; }
+  .bulk-actions button { width:100%; }
+  .bulk-list { max-height:45vh; max-height:45dvh; overflow-y:auto; border:1px solid var(--line); border-radius:10px;
+               background:var(--card); -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+  .bulk-item { padding:8px 10px; border-bottom:1px solid var(--line); font-size:12px; line-height:1.45; min-width:0; }
+  .bulk-item:last-child { border-bottom:0; }
+  .bulk-item-main { display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; font-weight:700; color:var(--ink); }
+  .bulk-item-cat { font-size:11px; padding:1px 7px; border-radius:999px; font-weight:700; }
+  .bulk-item-sub { color:var(--sub); word-break:break-word; overflow-wrap:anywhere; }
   .sidebar.open { transform:translateX(0); }
   .sidebar-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
   .sidebar-title { font-size:16px; font-weight:800; color:var(--ink); }
@@ -416,6 +428,7 @@
     <button class="sidebar-btn" id="openRosterBtn" style="width:100%; margin-top:8px;">交渉編集</button>
     <button class="sidebar-btn" id="openMsBtn" style="width:100%; margin-top:8px;" hidden>マネスケ</button>
     <button class="sidebar-btn" id="exportImageBtn" style="width:100%; margin-top:8px;">この週を画像で保存</button>
+    <button class="sidebar-btn" id="exportPrintBtn" style="width:100%; margin-top:8px;">この週を印刷用PDFで出力（A4・記入欄付き）</button>
     <button class="ghost" id="logoutBtn" style="width:100%; margin-top:8px;">ログアウト</button>
   </div>
 
@@ -1201,6 +1214,53 @@
     return lines.length ? lines : [''];
   }
 
+  // 日本の祝日判定（外部取得なし。1980〜2099年の春分・秋分の近似式＋振替休日・国民の休日に対応）
+  function jpBaseHoliday_(y, m, d) {
+    var dow = new Date(y, m - 1, d).getDay();
+    var nth = Math.floor((d - 1) / 7) + 1;
+    var base = y - 1980, leap = Math.floor(base / 4);
+    if (m === 1 && (d === 1 || (dow === 1 && nth === 2))) return true;           // 元日・成人の日
+    if (m === 2 && (d === 11 || d === 23)) return true;                          // 建国記念の日・天皇誕生日
+    if (m === 3 && d === Math.floor(20.8431 + 0.242194 * base - leap)) return true; // 春分の日
+    if (m === 4 && d === 29) return true;                                        // 昭和の日
+    if (m === 5 && (d === 3 || d === 4 || d === 5)) return true;                 // 憲法記念日・みどりの日・こどもの日
+    if (m === 7 && dow === 1 && nth === 3) return true;                          // 海の日
+    if (m === 8 && d === 11) return true;                                        // 山の日
+    if (m === 9 && ((dow === 1 && nth === 3) || d === Math.floor(23.2488 + 0.242194 * base - leap))) return true; // 敬老の日・秋分の日
+    if (m === 10 && dow === 1 && nth === 2) return true;                         // スポーツの日
+    if (m === 11 && (d === 3 || d === 23)) return true;                          // 文化の日・勤労感謝の日
+    return false;
+  }
+  function isJpHoliday_(dt) {
+    var y = dt.getFullYear(), m = dt.getMonth() + 1, d = dt.getDate();
+    if (jpBaseHoliday_(y, m, d)) return true;
+    var p = new Date(y, m - 1, d - 1);
+    // 振替休日: 直前に続く祝日のどれかが日曜なら、その後の最初の平日が休日
+    while (jpBaseHoliday_(p.getFullYear(), p.getMonth() + 1, p.getDate())) {
+      if (p.getDay() === 0) return true;
+      p = new Date(p.getFullYear(), p.getMonth(), p.getDate() - 1);
+    }
+    // 国民の休日: 前日と翌日が祝日に挟まれた平日
+    var b = new Date(y, m - 1, d - 1), a = new Date(y, m - 1, d + 1);
+    return dt.getDay() !== 0 && jpBaseHoliday_(b.getFullYear(), b.getMonth() + 1, b.getDate()) &&
+      jpBaseHoliday_(a.getFullYear(), a.getMonth() + 1, a.getDate());
+  }
+  // 画像の日付文字色: 土=青、日・祝=赤、それ以外は通常色
+  function dateInk_(ds) {
+    var dt = new Date(String(ds).replace(/\//g, '-') + 'T00:00:00');
+    if (isNaN(dt.getTime())) return null;
+    if (dt.getDay() === 0 || isJpHoliday_(dt)) return '#d1242f';
+    if (dt.getDay() === 6) return '#1f5fbf';
+    return null;
+  }
+  function roundRectPath_(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+  }
+
   function exportWeekImage() {
     if (!DATA) return;
     var weeks = buildWeeks(DATA.lines);
@@ -1237,6 +1297,7 @@
         cells: [l.label, l.start + '〜' + l.end, cat, what],
         crewLines: crewLines,
         color: filled ? FILLED_COLOR : (CAT_COLORS[cat] || CAT_COLORS['その他']),
+        dateInk: dateInk_(l.date),
         filled: filled,
         h: Math.max(lineH + rowPad, crewLines.length * lineH + rowPad)
       };
@@ -1249,7 +1310,7 @@
     var ctx = canvas.getContext('2d');
     ctx.scale(scale, scale);
 
-    ctx.fillStyle = '#fffaf0';
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = '#2a2410';
     ctx.font = 'bold 18px sans-serif';
@@ -1268,18 +1329,32 @@
     y += headH;
 
     rows.forEach(function (r, i) {
-      // 種別（FC/OP/デリバリー等）の配色で行全体を塗り、画像だけでも一目で種別が分かるようにする（2026-10-14）
-      ctx.fillStyle = r.color.bg;
+      // 行の背景は白（満員は薄いグレー）にし、種別は色付きバッジで示す（2026-11-20、体裁を整えるため行全体の塗りから変更）
+      ctx.fillStyle = r.filled ? '#f6f5f1' : '#ffffff';
       ctx.fillRect(padX, y, tableW, r.h);
-      ctx.strokeStyle = '#f0e4b8';
+      ctx.strokeStyle = '#e6e1d3';
       ctx.strokeRect(padX + 0.5, y + 0.5, tableW - 1, r.h - 1);
 
-      ctx.font = '13px sans-serif';
       var cx = padX;
       r.cells.forEach(function (text, ci) {
-        if (ci === 2) { ctx.font = 'bold 13px sans-serif'; ctx.fillStyle = r.color.ink; }
-        else { ctx.font = '13px sans-serif'; ctx.fillStyle = r.filled ? FILLED_TEXT : '#2a2410'; }
-        ctx.fillText(text, cx + 8, y + r.h / 2 + 4);
+        if (ci === 2) {
+          ctx.font = 'bold 12px sans-serif';
+          var bw = ctx.measureText(text).width + 16, bh = 20;
+          var by = y + (r.h - bh) / 2;
+          ctx.fillStyle = r.color.bg;
+          roundRectPath_(ctx, cx + 6, by, bw, bh, 10);
+          ctx.fill();
+          ctx.fillStyle = r.color.ink;
+          ctx.fillText(text, cx + 14, by + 14);
+        } else {
+          // 日付は土=青・日祝=赤（満員行は半透明にして薄く見せる）
+          var ink = (ci === 0 && r.dateInk) ? r.dateInk : (r.filled ? FILLED_TEXT : '#2a2410');
+          ctx.font = (ci === 0 && r.dateInk) ? 'bold 13px sans-serif' : '13px sans-serif';
+          ctx.fillStyle = ink;
+          if (ci === 0 && r.dateInk && r.filled) ctx.globalAlpha = 0.5;
+          ctx.fillText(text, cx + 8, y + r.h / 2 + 4);
+          ctx.globalAlpha = 1;
+        }
         cx += cols[ci].w;
       });
       ctx.font = '13px sans-serif';
@@ -1318,6 +1393,95 @@
       document.body.removeChild(a);
       setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
     });
+  }
+
+  // A4印刷用ページ（2026-11-20追加）。募集中の枠を空欄の「氏名記入欄」にして、印刷した紙に手書きで名前を書けるようにする。
+  // 1枚に詰め込まず、書きやすい行の高さを優先する（複数ページになってよい。見出し行は各ページで繰り返す）。
+  // PDF化はブラウザの印刷ダイアログの「PDFとして保存」で行う（外部ライブラリ不使用）。
+  function exportWeekPrint() {
+    if (!DATA) return;
+    var weeks = buildWeeks(DATA.lines);
+    var curWeek = weeks.filter(function (w) { return w.key === WEEK_KEY; })[0];
+    var weekLabel = curWeek ? curWeek.label : '';
+    var lines = DATA.lines.filter(function (l) { return !WEEK_KEY || ymd(mondayOf(l.date)) === WEEK_KEY; });
+    if (!lines.length) { toast('この週の募集ラインがありません'); return; }
+    var w = window.open('', '_blank');
+    if (!w) { toast('ポップアップがブロックされました。許可してからもう一度お試しください'); return; }
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    var body = '', prevDate = null;
+    lines.forEach(function (l) {
+      var full = l.applicants.filter(function (a) { return a.full; });
+      var partial = l.applicants.filter(function (a) { return !a.full; });
+      var cat = l.category || 'その他';
+      var c = CAT_COLORS[cat] || CAT_COLORS['その他'];
+      var ink = dateInk_(l.date) || '#222';
+      var what = (l.what && l.what.indexOf('搬入') >= 0) ? l.what : '';
+      var slots = '';
+      for (var si = 0; si < l.need; si++) {
+        slots += si < full.length
+          ? '<div class="slot done">' + esc(full[si].name) + '</div>'
+          : '<div class="slot blank"></div>';
+      }
+      if (partial.length) {
+        slots += '<div class="partial">' + partial.map(function (a) {
+          return '一部: ' + esc(a.name) + '（' + esc(a.start) + '〜' + esc(a.end) + '）';
+        }).join('　') + '</div>';
+      }
+      var newDay = l.date !== prevDate;
+      prevDate = l.date;
+      body += '<tr class="' + (newDay ? 'newday' : '') + (full.length >= l.need ? ' filled' : '') + '">' +
+        '<td class="date" style="color:' + ink + '">' + (newDay ? esc(l.label) : '') + '</td>' +
+        '<td class="time">' + esc(l.start) + '〜' + esc(l.end) + '</td>' +
+        '<td><span class="cat" style="background:' + c.bg + ';color:' + c.ink + '">' + esc(cat) + '</span>' +
+        (what ? '<div class="what">' + esc(what) + '</div>' : '') + '</td>' +
+        '<td class="names">' + slots + '</td></tr>';
+    });
+
+    var html = '<!doctype html><html lang="ja"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<title>募集ライン_' + esc(weekLabel.replace(/\s/g, '')) + '</title><style>' +
+      '@page{size:A4 portrait;margin:12mm 10mm;}' +
+      '*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
+      'body{margin:0;padding:16px;background:#fff;color:#222;font-family:"Hiragino Sans","Yu Gothic","Meiryo",sans-serif;}' +
+      '.bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}' +
+      '.bar button{font-size:15px;padding:10px 18px;border-radius:10px;border:0;background:#e3001b;color:#fff;font-weight:700;}' +
+      '.bar span{font-size:12px;color:#666;}' +
+      'h1{font-size:18pt;margin:0 0 4mm;}' +
+      '.legend{font-size:9pt;color:#555;margin:0 0 4mm;}' +
+      'table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11pt;}' +
+      'thead{display:table-header-group;}' +
+      'th{background:#e3001b;color:#fff;text-align:left;padding:2.5mm 3mm;font-size:10pt;}' +
+      'td{border-bottom:0.3mm solid #bbb;padding:2.5mm 3mm;vertical-align:middle;}' +
+      'tr{break-inside:avoid;page-break-inside:avoid;}' +
+      'tr.newday td{border-top:0.6mm solid #555;}' +
+      'td.date{font-weight:700;font-size:12pt;white-space:nowrap;}' +
+      'td.time{white-space:nowrap;font-weight:600;}' +
+      '.cat{display:inline-block;padding:0.6mm 3mm;border-radius:999px;font-weight:700;font-size:10pt;}' +
+      '.what{font-size:8.5pt;color:#555;margin-top:1mm;}' +
+      '.slot{height:12mm;border:0.35mm solid #888;border-radius:1.5mm;margin:1.2mm 0;display:flex;align-items:center;padding:0 3mm;font-size:12pt;}' +
+      '.slot.blank{background:#fff;}' +
+      '.slot.done{border-color:#ccc;background:#f3f2ee;color:#777;}' +
+      '.partial{font-size:8.5pt;color:#27508c;margin-top:0.5mm;}' +
+      'tr.filled td{color:#999;}' +
+      '@media print{body{padding:0;}.bar{display:none;}}' +
+      '</style></head><body>' +
+      '<div class="bar"><button type="button" onclick="window.print()">印刷 / PDFで保存</button>' +
+      '<span>印刷画面で「PDFとして保存」を選ぶとPDFになります（用紙: A4 縦）</span></div>' +
+      '<h1>募集ライン（' + esc(weekLabel) + '）</h1>' +
+      '<p class="legend">空欄の枠に、入れる人の名前を記入してください。グレーの枠は記入済みの人です。日付の色: 土＝青、日・祝＝赤</p>' +
+      '<table><colgroup><col style="width:17%"><col style="width:19%"><col style="width:17%"><col style="width:47%"></colgroup>' +
+      '<thead><tr><th>日付</th><th>時間</th><th>種別</th><th>氏名（記入欄）</th></tr></thead><tbody>' +
+      body + '</tbody></table>' +
+      '<script>window.onload=function(){setTimeout(function(){try{window.print();}catch(e){}},300);};<\/script>' +
+      '</body></html>';
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
   }
 
   function showImagePreview_(dataUrl) {
@@ -1422,6 +1586,10 @@
   $('exportImageBtn').onclick = function () {
     closeSidebar();
     exportWeekImage();
+  };
+  $('exportPrintBtn').onclick = function () {
+    closeSidebar();
+    exportWeekPrint();
   };
   $('logoutBtn').onclick = function () {
     store('sb_admin_id', ''); store('sb_admin_pass', '');
@@ -1718,29 +1886,10 @@
     box.innerHTML = '';
     box.appendChild(el('p', 'notice', lines.length + '件を読み込みました。内容を確認して追加してください。'));
 
-    var wrap = el('div', 'tablewrap');
-    var table = document.createElement('table');
-    table.className = 'lines';
-    var thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th>日付</th><th>時間</th><th>種別</th><th>内容</th><th>人数</th><th>備考</th></tr>';
-    table.appendChild(thead);
-    var tbody = document.createElement('tbody');
-    lines.forEach(function (l) {
-      var tr = document.createElement('tr');
-      tr.appendChild(td_(l.date || ''));
-      tr.appendChild(td_((l.start || '') + '〜' + (l.end || '')));
-      tr.appendChild(td_(l.category || ''));
-      tr.appendChild(td_(l.what || ''));
-      tr.appendChild(td_(String(l.need || 1)));
-      tr.appendChild(td_(l.note || ''));
-      tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
-    wrap.appendChild(table);
-    box.appendChild(wrap);
-
+    // サイドバー（幅300px）に6列の表を入れると横にはみ出して見切れるため、縦並びのリストにする。
+    // 件数が多くても「追加する」ボタンが埋もれないよう、ボタンをリストの上に置き、リストは内側だけスクロールさせる
+    var actions = el('div', 'bulk-actions');
     var goBtn = el('button', null, 'この内容で追加する（' + lines.length + '件）');
-    goBtn.style.marginTop = '10px';
     goBtn.onclick = function () {
       goBtn.disabled = true;
       call('adminBulkAddLines', { lines: BULK_LINES }, function (data) {
@@ -1748,9 +1897,32 @@
         toast(BULK_LINES.length + '件のラインを追加しました');
         BULK_LINES = null; box.innerHTML = ''; $('bulkFile').value = '';
         closeSidebar();
-      });
+      }, function () { goBtn.disabled = false; });
     };
-    box.appendChild(goBtn);
+    actions.appendChild(goBtn);
+    box.appendChild(actions);
+
+    var list = el('div', 'bulk-list');
+    lines.forEach(function (l) {
+      var item = el('div', 'bulk-item');
+      var main = el('div', 'bulk-item-main');
+      var dateText = l.date || '';
+      var dow = dateText ? new Date(String(dateText).replace(/\//g, '-') + 'T00:00:00').getDay() : NaN;
+      if (!isNaN(dow)) dateText += '（' + WEEK_JA[dow] + '）';
+      main.appendChild(el('span', null, dateText));
+      main.appendChild(el('span', null, (l.start || '') + '〜' + (l.end || '')));
+      var cat = l.category || 'その他';
+      var c = CAT_COLORS[cat] || CAT_COLORS['その他'];
+      var catEl = el('span', 'bulk-item-cat', cat);
+      catEl.style.background = c.bg; catEl.style.color = c.ink;
+      main.appendChild(catEl);
+      main.appendChild(el('span', null, '×' + (l.need || 1)));
+      item.appendChild(main);
+      var sub = [l.what, l.note].filter(function (s) { return s; }).join(' ／ ');
+      if (sub) item.appendChild(el('div', 'bulk-item-sub', sub));
+      list.appendChild(item);
+    });
+    box.appendChild(list);
   }
 
   // ============ マネスケ（2026-11-17追加。仕様は マネスケ仕様.md） ============
