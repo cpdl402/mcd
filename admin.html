@@ -144,6 +144,12 @@
   .account-badge.on { background:#e4f6ef; color:#1f6f5c; }
   .account-actions { display:flex; gap:6px; flex-wrap:wrap; margin-left:auto; }
   .account-actions button { font-size:11px; padding:5px 10px; }
+  .notify-note { font-size:12px; color:var(--sub); margin:6px 0 0; line-height:1.5; }
+  .notify-warn { font-size:12px; color:#c0262d; font-weight:700; margin:8px 0 0; line-height:1.5; }
+  .notify-info { font-size:13px; color:var(--ink); padding:3px 0; }
+  .notify-email { font-size:14px; font-weight:700; word-break:break-all; flex:1; min-width:0; }
+  .notify-add { display:grid; grid-template-columns:80px 1fr auto; gap:8px; margin-top:12px; align-items:center; }
+  .notify-add button { min-height:42px; }
   .accounts-add-form { margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
   .fld-title { font-size:13px; font-weight:800; color:var(--ink); margin-bottom:8px; }
   .chk-row { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--sub); font-weight:600; margin-bottom:10px; }
@@ -436,6 +442,7 @@
     <button class="sidebar-btn" id="openAccountsBtn" style="width:100%; margin-top:8px;" hidden>アカウント管理</button>
     <button class="sidebar-btn" id="openRosterBtn" style="width:100%; margin-top:8px;">交渉編集</button>
     <button class="sidebar-btn" id="openMsBtn" style="width:100%; margin-top:8px;" hidden>マネスケ</button>
+    <button class="sidebar-btn" id="openNotifyBtn" style="width:100%; margin-top:8px;" hidden>メール通知</button>
     <button class="sidebar-btn" id="exportImageBtn" style="width:100%; margin-top:8px;">この週を画像で保存</button>
     <button class="sidebar-btn" id="exportPrintBtn" style="width:100%; margin-top:8px;">PDF出力</button>
     <button class="ghost" id="logoutBtn" style="width:100%; margin-top:8px;">ログアウト</button>
@@ -491,6 +498,13 @@
     </div>
     <div class="fld-title" style="margin-top:18px;">候補者一覧</div>
     <div id="rosterList"></div>
+  </div>
+
+  <div class="wrap" id="notifyView" hidden>
+    <button type="button" class="ghost" id="notifyBackBtn" style="margin-bottom:12px;">募集一覧へ戻る</button>
+    <h2>メール通知</h2>
+    <p class="nego-view-head">定員に達しているのにスケジュール未反映の募集ライン（一覧で黄色くなる行）を、毎日指定した時刻にメールで送ります。対象が0件の日は送りません。</p>
+    <div id="notifyBox"></div>
   </div>
 
   <div class="wrap ms-wrap" id="msView" hidden>
@@ -727,7 +741,13 @@
     $('accountsView').hidden = v !== 'accounts';
     $('rosterView').hidden = v !== 'roster';
     $('msView').hidden = v !== 'ms';
+    $('notifyView').hidden = v !== 'notify';
     if (v === 'ms') { $('weekbar').hidden = true; if (!MS) msLoad_(); else renderMs_(); }
+    else if (v === 'notify') {
+      $('weekbar').hidden = true;
+      $('notifyBox').innerHTML = '<p class="empty">読み込み中…</p>';
+      call('adminNotifyLoad', null, renderNotify_);
+    }
     else if (v === 'lines') { render(); }
     else if (v === 'nego') { if (!NEGO) loadNego(); else renderNego(); }
     else if (v === 'accounts') {
@@ -1142,6 +1162,7 @@
     // 管理権限（「管理者」シートD列）がある人だけに出す機能。サーバー側（Code.gs）でも同じ権限を確認している
     $('openAccountsBtn').hidden = !DATA.canManageAccounts;
     $('openMsBtn').hidden = !DATA.canManageAccounts;
+    $('openNotifyBtn').hidden = !DATA.canManageAccounts;   // 未反映通知メールの設定（2026-11-20〜）
     $('openAddLineBtn').hidden = !DATA.canManageAccounts;   // 募集ラインの個別追加（2026-11-20〜）
     $('bulkImportPanel').hidden = !DATA.canManageAccounts;  // まとめて挿入（2026-11-20〜）
 
@@ -2470,6 +2491,103 @@
   });
   $('msMonthSel').onchange = function () { msLoad_($('msMonthSel').value); };
   $('openMsBtn').onclick = function () { closeSidebar(); switchView('ms'); };
+
+  // ============ 未反映通知メール（2026-11-20追加。管理権限者のみ） ============
+  function renderNotify_(st) {
+    var box = $('notifyBox');
+    box.innerHTML = '';
+
+    // 送信設定
+    var p1 = el('div', 'panel');
+    p1.appendChild(el('div', 'fld-title', '自動送信'));
+    var row = el('label', 'chk-row');
+    var chk = document.createElement('input'); chk.type = 'checkbox'; chk.checked = !!st.enabled;
+    row.appendChild(chk); row.appendChild(el('span', null, '毎日自動で送る'));
+    p1.appendChild(row);
+    var hl = el('label', 'fld', '送信時刻');
+    var hs = document.createElement('select');
+    for (var h = 0; h < 24; h++) {
+      var o = document.createElement('option'); o.value = h; o.textContent = h + '時台';
+      if (h === st.hour) o.selected = true;
+      hs.appendChild(o);
+    }
+    hl.appendChild(hs);
+    p1.appendChild(hl);
+    p1.appendChild(el('p', 'notify-note', 'Googleの仕組み上、分までは指定できず、選んだ時刻の1時間のうちのどこかで送られます。'));
+    var save = el('button', null, '設定を保存');
+    save.style.marginTop = '10px';
+    save.onclick = function () {
+      save.disabled = true;
+      call('adminNotifySave', { enabled: chk.checked, hour: Number(hs.value) }, function (d) {
+        renderNotify_(d); toast('保存しました');
+      }, function () { save.disabled = false; });
+    };
+    p1.appendChild(save);
+    box.appendChild(p1);
+
+    // 宛先
+    var p2 = el('div', 'panel');
+    p2.appendChild(el('div', 'fld-title', '宛先（' + st.recipients.length + '件）'));
+    if (!st.recipients.length) p2.appendChild(el('p', 'notify-note', 'まだ宛先がありません。下のフォームから追加してください（Toが1件以上必要です）。'));
+    ['To', 'CC', 'BCC'].forEach(function (type) {
+      st.recipients.filter(function (r) { return r.type === type; }).forEach(function (r) {
+        var rr = el('div', 'account-row');
+        rr.appendChild(el('span', 'account-badge on', type));
+        rr.appendChild(el('span', 'notify-email', r.email));
+        var acts = el('div', 'account-actions');
+        var del = el('button', 'ghost', '削除');
+        del.onclick = function () {
+          if (!confirm(r.email + ' を宛先から削除しますか？')) return;
+          call('adminNotifyRemoveRecipient', { type: r.type, email: r.email }, function (d) { renderNotify_(d); toast('削除しました'); });
+        };
+        acts.appendChild(del);
+        rr.appendChild(acts);
+        p2.appendChild(rr);
+      });
+    });
+    var form = el('div', 'notify-add');
+    var ts = document.createElement('select');
+    ['To', 'CC', 'BCC'].forEach(function (t) { var o = document.createElement('option'); o.value = t; o.textContent = t; ts.appendChild(o); });
+    var em = document.createElement('input'); em.type = 'email'; em.placeholder = 'メールアドレス'; em.autocomplete = 'off';
+    em.setAttribute('inputmode', 'email');
+    var add = el('button', null, '追加');
+    add.onclick = function () {
+      var v = em.value.trim();
+      if (!v) { toast('メールアドレスを入力してください'); return; }
+      add.disabled = true;
+      call('adminNotifyAddRecipient', { type: ts.value, email: v }, function (d) { renderNotify_(d); toast('追加しました'); },
+        function () { add.disabled = false; });
+    };
+    form.appendChild(ts); form.appendChild(em); form.appendChild(add);
+    p2.appendChild(form);
+    box.appendChild(p2);
+
+    // 状況・テスト送信
+    var p3 = el('div', 'panel');
+    p3.appendChild(el('div', 'fld-title', '状況'));
+    var info = [
+      '現在の対象: ' + st.targetCount + '件',
+      '前回の送信: ' + (st.lastSent || 'まだありません'),
+      '本日あと送れる数: ' + (st.quota == null ? '不明（初期設定が未完了の可能性があります）' : st.quota + '通（To/CC/BCCの1人＝1通）')
+    ];
+    info.forEach(function (t) { p3.appendChild(el('div', 'notify-info', t)); });
+    if (!st.triggerReady) {
+      p3.appendChild(el('p', 'notify-warn', '自動送信のトリガーが未設定です。Apps Scriptエディタで setupNotifyTrigger を1回実行してください。'));
+    }
+    var test = el('button', 'ghost', 'テスト送信（今の内容をすぐ送る）');
+    test.style.marginTop = '10px'; test.style.width = '100%';
+    test.onclick = function () {
+      if (!st.recipients.some(function (r) { return r.type === 'To'; })) { toast('宛先（To）を追加してください'); return; }
+      if (!confirm('登録している宛先すべてにテストメールを送ります。よろしいですか？')) return;
+      test.disabled = true;
+      call('adminNotifyTest', null, function (d) { renderNotify_(d); toast('テストメールを送りました（' + d.sentCount + '件）'); },
+        function () { test.disabled = false; });
+    };
+    p3.appendChild(test);
+    box.appendChild(p3);
+  }
+  $('openNotifyBtn').onclick = function () { closeSidebar(); switchView('notify'); };
+  $('notifyBackBtn').onclick = function () { switchView('lines'); };
   $('msBackBtn').onclick = function () { switchView('lines'); };
 
   var sId = store('sb_admin_id'), sPass = store('sb_admin_pass');
